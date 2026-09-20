@@ -1,0 +1,57 @@
+{
+  "context-injector": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python .agents/hooks/context.py",
+        "timeout": 10
+      }
+    ]
+  },
+  "privacy-guard": {
+    "enabled": false,
+    "PreToolUse": [
+      {
+        "matcher": "run_command|write_to_file|replace_file_content|multi_replace_file_content|view_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .agents/hooks/privacy_guard.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "tool-counter": {
+    "enabled": true,
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "python .agents/hooks/tool_counter.py",
+        "timeout": 5
+      }
+    ]
+  },
+  "quality-checker": {
+    "enabled": true,
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "python .agents/hooks/quality_check.py",
+        "timeout": 10
+      }
+    ]
+  },
+  "lifecycle-state": {
+    "enabled": true,
+    "Lifecycle": [
+      {
+        "type": "command",
+        "command": "python .agents/hooks/lifecycle_state.py",
+        "timeout": 5
+      }
+    ]
+  }
+}

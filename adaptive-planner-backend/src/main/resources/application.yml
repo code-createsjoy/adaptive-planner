@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: adaptive-planner-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/adaptive_planner}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:12345}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
+  jpa:
+    database-platform: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  groq:
+    api-key: ${GROQ_API_KEY:}
+    model: ${GROQ_MODEL:qwen/qwen3.8-27b}
+    base-url: https://api.groq.com
+
+cors:
+  allowed-origins: "http://localhost:8081,http://localhost:5173,http://localhost:3000,http://127.0.0.1:8081,http://127.0.0.1:5173,http://localhost:8080"
