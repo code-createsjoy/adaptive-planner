@@ -13,7 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApplyAdaptationRequest {
+    private Long conversationId;
     private LocalDate date;
     private String reason;
+    private String selectedScenarioId;
+    private String scenarioTitle;
+    private String explanationJson;
     private List<TimeBlockDto> newBlocks;
 }

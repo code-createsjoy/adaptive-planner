@@ -51,9 +51,10 @@ interface PlannerState {
   addBlock: (block: Omit<TimeBlock, 'id'>) => void;
   updateBlock: (id: string, updates: Partial<TimeBlock>) => void;
   deleteBlock: (id: string) => void;
-  toggleComplete: (id: string) => void;
+  setScenarios: (scenarios: ScenarioOption[]) => void;
   toggleMicroStep: (blockId: string, stepId: string) => void;
   addMicroStep: (blockId: string, text: string) => void;
+  updateMicroSteps: (blockId: string, microSteps: Array<{ id: string; text: string; done: boolean }>) => void;
   applyScenario: (scenarioIndex: number) => void;
   resetDisruption: () => void;
 }
@@ -73,6 +74,7 @@ export const usePlannerStore = create<PlannerState>((set) => ({
   setSelectedBlockId: (id) => set({ selectedBlockId: id }),
   setDisruptionState: (state) => set({ disruptionState: state }),
   setSelectedScenarioIndex: (index) => set({ selectedScenarioIndex: index }),
+  setScenarios: (scenarios) => set({ scenarios }),
   setSelectedDate: (date) => set({ selectedDate: date }),
   setActiveView: (view) => set({ activeView: view }),
   setIsRoutineModalOpen: (open) => set({ isRoutineModalOpen: open }),
@@ -85,7 +87,7 @@ export const usePlannerStore = create<PlannerState>((set) => ({
       ].sort((a, b) => a.startTime.localeCompare(b.startTime)),
     })),
 
-  updateBlock: (id, updates) =>
+  updateBlock: (id: string, updates: Partial<TimeBlock>) =>
     set((state) => ({
       timeBlocks: state.timeBlocks.map((b) => (b.id === id ? { ...b, ...updates } : b)),
     })),
@@ -94,13 +96,6 @@ export const usePlannerStore = create<PlannerState>((set) => ({
     set((state) => ({
       timeBlocks: state.timeBlocks.filter((b) => b.id !== id),
       selectedBlockId: state.selectedBlockId === id ? null : state.selectedBlockId,
-    })),
-
-  toggleComplete: (id) =>
-    set((state) => ({
-      timeBlocks: state.timeBlocks.map((b) =>
-        b.id === id ? { ...b, isCompleted: !b.isCompleted } : b
-      ),
     })),
 
   toggleMicroStep: (blockId, stepId) =>
@@ -126,6 +121,13 @@ export const usePlannerStore = create<PlannerState>((set) => ({
           microSteps: [...(b.microSteps || []), newStep],
         };
       }),
+    })),
+
+  updateMicroSteps: (blockId, microSteps) =>
+    set((state) => ({
+      timeBlocks: state.timeBlocks.map((b) =>
+        b.id === blockId ? { ...b, microSteps } : b
+      ),
     })),
 
   applyScenario: (scenarioIndex) =>

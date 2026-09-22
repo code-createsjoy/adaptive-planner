@@ -1,0 +1,41 @@
+{
+  "skill_name": "project-context-scan",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Quét nhanh repo hiện tại và cho tôi biết project này làm gì, kiến trúc chính, cách chạy/test, phần nào đang được làm dở. Chỉ đọc, đừng sửa file hay chạy app.",
+      "expected_output": "A concise, evidence-backed overview that identifies components, runtime flow, verified commands, dirty worktree state, risks, and next reads without exposing secrets or mutating the repo.",
+      "files": [],
+      "expectations": [
+        "Report distinguishes verified facts from inferences or unknowns.",
+        "Report identifies actual entrypoints and traces at least one representative runtime/data flow.",
+        "Report includes repository instructions, verified developer commands, and current Git working state.",
+        "No files are modified and no dependencies, builds, tests, migrations, or services are run."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I need to add OAuth login to this unfamiliar codebase. First scan only the relevant project context and tell me the likely impact map, existing auth boundaries, tests to inspect, and unknowns. Do not implement anything yet.",
+      "expected_output": "A task-focused scan that briefly maps the repo, follows authentication-adjacent paths using evidence, highlights impacted files/tests and uncertainties, and remains read-only.",
+      "files": [],
+      "expectations": [
+        "Report uses a task-focused impact map instead of exhaustively summarizing unrelated directories.",
+        "Claims about authentication are supported by inspected code/config or explicitly marked as unknown/inferred.",
+        "Report names relevant tests and boundaries and recommends a small set of next reads.",
+        "No implementation changes are made."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Repo changed a lot since yesterday. Refresh your context from the current working tree and summarize what areas are in progress and what prior assumptions may now be stale. Don't touch my uncommitted changes.",
+      "expected_output": "A refresh scan led by Git state and changed files, updating affected architecture/context while preserving and not attributing user changes.",
+      "files": [],
+      "expectations": [
+        "Scan starts from branch/status and changed paths, then narrows inspection to affected areas.",
+        "Report does not attribute authorship or completion status merely from file presence.",
+        "Potentially stale assumptions and remaining unknowns are clearly identified.",
+        "Existing uncommitted work is preserved without cleanup or edits."
+      ]
+    }
+  ]
+}

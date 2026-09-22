@@ -5,8 +5,11 @@ import com.adaptive.planner.dto.HolidayDto;
 import com.adaptive.planner.dto.TimeBlockDto;
 import com.adaptive.planner.dto.WeeklyRoutineDto;
 import com.adaptive.planner.entity.TimeBlockEntity;
+import com.adaptive.planner.entity.WeeklyRoutineEntity;
+import com.adaptive.planner.exception.ConflictException;
 import com.adaptive.planner.exception.ResourceNotFoundException;
 import com.adaptive.planner.repository.TimeBlockRepository;
+import com.adaptive.planner.repository.WeeklyRoutineRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.Clock;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,8 +30,10 @@ public class TimeBlockService {
 
     private final TimeBlockRepository repository;
     private final WeeklyRoutineService weeklyRoutineService;
+    private final WeeklyRoutineRepository weeklyRoutineRepository;
     private final HolidayService holidayService;
     private final ObjectMapper objectMapper;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     public List<TimeBlockDto> getAllBlocks() {
@@ -39,7 +45,7 @@ public class TimeBlockService {
     @Transactional(readOnly = true)
     public List<TimeBlockDto> getBlocksForDate(LocalDate date) {
         if (date == null) {
-            date = LocalDate.now();
+            date = LocalDate.now(clock);
         }
 
         // 1. Lấy tất cả WeeklyRoutine đang bật cho thứ này
@@ -114,7 +120,11 @@ public class TimeBlockService {
 
     @Transactional
     public TimeBlockDto createBlock(CreateTimeBlockRequest request) {
-        LocalDate blockDate = request.getDate() != null ? request.getDate() : LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
+        LocalDate blockDate = request.getDate() != null ? request.getDate() : today;
+        if (blockDate.isBefore(today)) {
+            throw new IllegalArgumentException("Không thể thêm lịch cho những ngày trong quá khứ (" + blockDate + "). Vui lòng chọn ngày hôm nay hoặc tương lai.");
+        }
 
         TimeBlockDto dto = TimeBlockDto.builder()
                 .title(request.getTitle())
@@ -149,6 +159,10 @@ public class TimeBlockService {
         TimeBlockEntity existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TimeBlock not found with id: " + id));
 
+        if (updates.getDate() != null && updates.getDate().isBefore(LocalDate.now(clock))) {
+            throw new IllegalArgumentException("Không thể chuyển lịch sang ngày trong quá khứ (" + updates.getDate() + ").");
+        }
+
         if (updates.getTitle() != null) existing.setTitle(updates.getTitle());
         if (updates.getDetail() != null) existing.setDetail(updates.getDetail());
         if (updates.getStartTime() != null) existing.setStartTime(updates.getStartTime());
@@ -182,6 +196,64 @@ public class TimeBlockService {
     }
 
     @Transactional
+    public TimeBlockDto updateCompletion(Long id, boolean completed) {
+        TimeBlockEntity existing = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("TimeBlock not found with id: " + id));
+        if ("CANCELLED".equalsIgnoreCase(existing.getOverrideType())) {
+            throw new ConflictException("A cancelled occurrence cannot be completed");
+        }
+        existing.setIsCompleted(completed);
+        return toDto(repository.save(existing));
+    }
+
+    @Transactional
+    public TimeBlockDto updateRoutineOccurrenceCompletion(Long routineId, LocalDate date, boolean completed) {
+        if (date == null) {
+            throw new IllegalArgumentException("Occurrence date is required");
+        }
+
+        WeeklyRoutineEntity routine = weeklyRoutineRepository.findByIdForUpdate(routineId)
+                .orElseThrow(() -> new ResourceNotFoundException("WeeklyRoutine not found with id: " + routineId));
+        if (!Boolean.TRUE.equals(routine.getEnabled()) || routine.getDayOfWeek() != date.getDayOfWeek()) {
+            throw new ConflictException("The routine is not active on " + date);
+        }
+
+        TimeBlockEntity occurrence = repository.findFirstBySourceRoutineIdAndDate(routineId, date)
+                .orElseGet(() -> materializeRoutineOccurrence(routine, date));
+        if ("CANCELLED".equalsIgnoreCase(occurrence.getOverrideType())) {
+            throw new ConflictException("A cancelled occurrence cannot be completed");
+        }
+
+        occurrence.setIsCompleted(completed);
+        occurrence.setSourceType("ROUTINE");
+        occurrence.setSourceRoutineId(routineId);
+        occurrence.setOverrideType("MODIFIED");
+        return toDto(repository.saveAndFlush(occurrence));
+    }
+
+    private TimeBlockEntity materializeRoutineOccurrence(WeeklyRoutineEntity routine, LocalDate date) {
+        return TimeBlockEntity.builder()
+                .title(routine.getTitle())
+                .detail(routine.getDetail())
+                .startTime(routine.getStartTime())
+                .endTime(routine.getEndTime())
+                .category(routine.getCategory())
+                .energyLevel(routine.getEnergyLevel())
+                .priority(routine.getPriority())
+                .reminderMinutes(routine.getReminderMinutes())
+                .isMovable(true)
+                .status("ACTIVE")
+                .isCompleted(false)
+                .isBufferBlock(false)
+                .microStepsJson("[]")
+                .date(date)
+                .sourceType("ROUTINE")
+                .sourceRoutineId(routine.getId())
+                .overrideType("MODIFIED")
+                .build();
+    }
+
+    @Transactional
     public void deleteBlock(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("TimeBlock not found with id: " + id);
@@ -194,9 +266,11 @@ public class TimeBlockService {
      */
     @Transactional
     public void cancelRoutineForDate(Long routineId, LocalDate date) {
-        List<TimeBlockEntity> existing = repository.findByDateAndSourceRoutineId(date, routineId);
-        if (!existing.isEmpty()) {
-            TimeBlockEntity entity = existing.get(0);
+        weeklyRoutineRepository.findByIdForUpdate(routineId)
+                .orElseThrow(() -> new ResourceNotFoundException("WeeklyRoutine not found with id: " + routineId));
+        Optional<TimeBlockEntity> existing = repository.findFirstBySourceRoutineIdAndDate(routineId, date);
+        if (existing.isPresent()) {
+            TimeBlockEntity entity = existing.get();
             entity.setOverrideType("CANCELLED");
             repository.save(entity);
         } else {
@@ -404,7 +478,7 @@ public class TimeBlockService {
                 .isCompleted(dto.isCompleted())
                 .isBufferBlock(dto.isBufferBlock())
                 .microStepsJson(microStepsJson)
-                .date(dto.getDate() != null ? dto.getDate() : LocalDate.now())
+                .date(dto.getDate() != null ? dto.getDate() : LocalDate.now(clock))
                 .sourceType(dto.getSourceType() != null ? dto.getSourceType() : "CUSTOM")
                 .sourceRoutineId(dto.getSourceRoutineId())
                 .overrideType(dto.getOverrideType() != null ? dto.getOverrideType() : "NONE")

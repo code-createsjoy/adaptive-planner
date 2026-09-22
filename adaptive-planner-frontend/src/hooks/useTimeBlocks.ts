@@ -304,6 +304,46 @@ export function useUpdateTimeBlockMutation() {
   });
 }
 
+export function useToggleTimeBlockCompletionMutation() {
+  const queryClient = useQueryClient();
+  const updateBlock = usePlannerStore((state) => state.updateBlock);
+
+  return useMutation({
+    mutationFn: async ({ block, date, completed }: { block: TimeBlock; date: string; completed: boolean }) => {
+      // Optimistic update for instant UI feedback
+      updateBlock(block.id, { isCompleted: completed });
+
+      let routineId = block.sourceRoutineId;
+      if (typeof routineId !== 'number' && typeof block.id === 'string' && block.id.startsWith('routine-')) {
+        const parsed = Number.parseInt(block.id.split('-')[1], 10);
+        if (Number.isFinite(parsed)) {
+          routineId = parsed;
+        }
+      }
+
+      if (typeof routineId === 'number' && Number.isFinite(routineId)) {
+        return await api.updateRoutineOccurrenceCompletion(routineId, block.date ?? date, completed);
+      }
+
+      if (block.id && !block.id.startsWith('routine-')) {
+        return await api.updateTimeBlockCompletion(block.id, completed);
+      }
+
+      throw new Error('Không xác định được routine cần cập nhật.');
+    },
+    onError: (_err, variables) => {
+      // Rollback on error
+      updateBlock(variables.block.id, { isCompleted: variables.block.isCompleted });
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: TIMEBLOCKS_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: MONTHLY_SUMMARY_KEY }),
+      ]);
+    },
+  });
+}
+
 export function useBatchApplyScenarioMutation() {
   const queryClient = useQueryClient();
   const setTimeBlocks = usePlannerStore((state) => state.setTimeBlocks);

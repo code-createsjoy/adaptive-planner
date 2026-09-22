@@ -1,5 +1,6 @@
 package com.adaptive.planner.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class TimeBlockDto {
     private String energyLevel;
     private String priority;
     private String deadline;
+    @JsonProperty("isMovable")
     @Builder.Default
     private Boolean isMovable = true;
     @Builder.Default
@@ -29,7 +31,9 @@ public class TimeBlockDto {
     private java.time.LocalDate inboxDate;
     private String preferredTimeRange;
     private List<Integer> reminderMinutesBefore;
+    @JsonProperty("isCompleted")
     private boolean isCompleted;
+    @JsonProperty("isBufferBlock")
     private boolean isBufferBlock;
     private List<MicroStepDto> microSteps;
     private java.time.LocalDate date;
