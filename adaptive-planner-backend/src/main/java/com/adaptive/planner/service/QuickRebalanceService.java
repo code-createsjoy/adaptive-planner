@@ -87,8 +87,8 @@ public class QuickRebalanceService {
         return RebalanceOptionDto.builder()
                 .id("option-add-buffer")
                 .type("ADD_BUFFER")
-                .title("☕ Chèn khoảng đệm phục hồi (Breathing Room)")
-                .description("Tự động chèn 15 phút đệm nghỉ sau khối công việc trọng tâm để giải tỏa áp lực chuyển tiếp.")
+                .title("☕ Insert Breathing Room (Buffer Recovery)")
+                .description("Automatically insert 15-minute recovery buffers after high-focus blocks to relieve transition fatigue.")
                 .estimatedLoadReduction(18)
                 .diff(OptionDiffDto.builder()
                         .movedBlockCount(movedCount)
@@ -102,7 +102,7 @@ public class QuickRebalanceService {
     private RebalanceOptionDto createMoveFlexibleTaskOption(List<TimeBlockEntity> original, LocalDate date) {
         List<TimeBlockDto> proposed = new ArrayList<>();
         int deferredCount = 0;
-        String movedTitle = "công việc linh hoạt";
+        String movedTitle = "flexible task";
 
         // Look for the lowest priority / flexible / non-urgent block
         TimeBlockEntity candidate = null;
@@ -133,8 +133,8 @@ public class QuickRebalanceService {
         return RebalanceOptionDto.builder()
                 .id("option-move-flexible")
                 .type("MOVE_FLEXIBLE_TASK")
-                .title("→ Dời công việc linh hoạt sang sáng mai")
-                .description(String.format("Chuyển '%s' sang sáng mai lúc 09:00 để hạ tải áp lực cho buổi chiều hôm nay.", movedTitle))
+                .title("→ Defer flexible task to tomorrow morning")
+                .description(String.format("Move '%s' to tomorrow at 09:00 to reduce afternoon workload pressure.", movedTitle))
                 .estimatedLoadReduction(24)
                 .diff(OptionDiffDto.builder()
                         .movedBlockCount(0)
@@ -182,8 +182,8 @@ public class QuickRebalanceService {
         return RebalanceOptionDto.builder()
                 .id("option-reduce-context-switch")
                 .type("REDUCE_CONTEXT_SWITCH")
-                .title("🔄 Gom nhóm công việc cùng tính chất (Batching)")
-                .description("Sắp xếp các task cùng chuyên môn liền kề nhau để giảm thiểu số lần chuyển đổi ngữ cảnh gây phân mảnh tâm trí.")
+                .title("🔄 Batch similar tasks (Task Batching)")
+                .description("Group related activities together to minimize mental context switching.")
                 .estimatedLoadReduction(16)
                 .diff(OptionDiffDto.builder()
                         .movedBlockCount(movedCount)

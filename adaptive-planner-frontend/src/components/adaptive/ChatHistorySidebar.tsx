@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
   Plus,
   MessageSquare,
@@ -114,7 +114,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                   />
                   <div className="flex flex-col overflow-hidden">
                     <span className="truncate leading-tight font-medium">
-                      {conv.title || "Cuộc trò chuyện"}
+                      {conv.title || "Conversation"}
                     </span>
                     {conv.lastMessagePreview && !isActive && (
                       <span className="truncate text-[10px] text-muted-foreground/80 mt-0.5">
@@ -129,7 +129,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (window.confirm("Bạn có chắc muốn xoá phiên chat này?")) {
+                    if (window.confirm("Are you sure you want to delete this chat session?")) {
                       onDeleteConversation(conv.id);
                     }
                   }}
@@ -138,7 +138,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
                       ? "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/20"
                       : "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                   } ${hoveredId === conv.id ? "opacity-100" : "opacity-0"}`}
-                  title="Xoá cuộc trò chuyện"
+                  title="Delete conversation"
                 >
                   <Trash2 className="h-3 w-3" />
                 </button>
@@ -159,7 +159,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
           className="w-full justify-start gap-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary font-medium border border-primary/20 shadow-none transition-all"
         >
           <Plus className="h-4 w-4" />
-          <span>Cuộc trò chuyện mới</span>
+          <span>New Chat</span>
         </Button>
 
         {/* Quick Search */}
@@ -167,7 +167,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Tìm kiếm phiên chat..."
+            placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-lg bg-background/80 pl-8 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 border border-border/60 focus:outline-none focus:ring-1 focus:ring-primary"
@@ -180,17 +180,17 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
         {filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground">
             <MessageSquare className="h-8 w-8 mb-2 opacity-30 stroke-1" />
-            <p className="text-xs">Chưa có cuộc trò chuyện nào</p>
+            <p className="text-xs">No conversations yet</p>
             <p className="text-[10px] text-muted-foreground/70 mt-1">
-              Nhập yêu cầu vào khung chat để bắt đầu phiên mới
+              Type a prompt in the chat box to begin a new session
             </p>
           </div>
         ) : (
           <>
-            {renderGroup("Hôm nay", groupedConversations.today)}
-            {renderGroup("Hôm qua", groupedConversations.yesterday)}
-            {renderGroup("Tháng này", groupedConversations.thisMonth)}
-            {renderGroup("Cũ hơn", groupedConversations.older)}
+            {renderGroup("Today", groupedConversations.today)}
+            {renderGroup("Yesterday", groupedConversations.yesterday)}
+            {renderGroup("This Month", groupedConversations.thisMonth)}
+            {renderGroup("Older", groupedConversations.older)}
           </>
         )}
       </div>
@@ -203,7 +203,7 @@ export const ChatHistorySidebar: React.FC<ChatHistorySidebarProps> = ({
           className="w-full justify-start gap-2 rounded-xl text-xs font-normal border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/60"
         >
           <History className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-          <span className="truncate">Lịch sử quyết định & Undo</span>
+          <span className="truncate">Decision History & Undo</span>
           <ChevronRight className="h-3 w-3 ml-auto opacity-50" />
         </Button>
       </div>

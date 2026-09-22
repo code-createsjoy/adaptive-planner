@@ -64,13 +64,13 @@ public class GoalScheduleService {
         String feasibilityRationale;
         if (availableHours >= requiredHours + (bufferDays * 4)) {
             feasibilityStatus = FeasibilityStatus.FEASIBLE;
-            feasibilityRationale = String.format("Quỹ thời gian khả dụng (%dh) dư giả so với khối lượng công việc (%dh). Kế hoạch hoàn thành trước hạn chót an toàn.", availableHours, requiredHours);
+            feasibilityRationale = String.format("Available free time (%dh) is plenty compared to required effort (%dh). Safe completion well ahead of deadline.", availableHours, requiredHours);
         } else if (availableHours >= requiredHours) {
             feasibilityStatus = FeasibilityStatus.TIGHT;
-            feasibilityRationale = String.format("Quỹ thời gian khả dụng (%dh) vừa vặn với khối lượng công việc (%dh). Cần tập trung cao độ vì thời gian đệm dự phòng hạn chế.", availableHours, requiredHours);
+            feasibilityRationale = String.format("Available free time (%dh) fits the required workload (%dh). Requires consistent focus due to narrow buffer margins.", availableHours, requiredHours);
         } else {
             feasibilityStatus = FeasibilityStatus.NOT_FEASIBLE;
-            feasibilityRationale = String.format("Quỹ thời gian khả dụng (%dh) không đủ cho khối lượng công việc (%dh). Cần bổ sung thêm thời gian làm việc hoặc dời hạn chót.", availableHours, requiredHours);
+            feasibilityRationale = String.format("Available free time (%dh) is insufficient for total effort (%dh). Consider allocating more hours or extending the deadline.", availableHours, requiredHours);
         }
 
         // 5. Generate 3 Scenarios
@@ -80,7 +80,7 @@ public class GoalScheduleService {
         scenarios.add(buildFlexibleScenario(startDate, internalTargetDate, officialDeadline, milestones, totalRequiredMinutes));
 
         String summaryMessage = String.format(
-                "Dựa trên lịch hiện tại của bạn, tôi đã phân rã mục tiêu thành %d giai đoạn (~%dh%dp) và tìm được phương án xếp lịch hoàn thành trước deadline %s mà không chạm vào giờ ăn uống hay nghỉ ngơi.",
+                "Based on your current schedule, I broke down your goal into %d milestones (~%dh%dm) and found a schedule roadmap completing before deadline %s while keeping your meals and rest hours intact.",
                 milestones.size(),
                 totalRequiredMinutes / 60,
                 totalRequiredMinutes % 60,
@@ -108,10 +108,10 @@ public class GoalScheduleService {
         LocalDate currentDate = (request.getCurrentDate() != null) ? request.getCurrentDate() : LocalDate.now();
 
         ProjectGoalEntity goal = (projectId != null) ? projectGoalRepository.findById(projectId).orElse(null) : null;
-        String goalTitle = (goal != null) ? goal.getTitle() : "Dự án";
+        String goalTitle = (goal != null) ? goal.getTitle() : "Project";
 
         String companionMessage = String.format(
-                "Bạn chưa hoàn thành hết các task hôm nay. Không sao cả — deadline vẫn an toàn! Tôi có thể tái phân bổ ~%d phút còn lại mà không đụng đến giờ ăn hay nghỉ ngơi của bạn.",
+                "You haven't finished all scheduled tasks today. No worries — your deadline is still safe! I can rebalance the remaining ~%d minutes without touching your rest hours.",
                 overdueMinutes
         );
 
@@ -123,10 +123,10 @@ public class GoalScheduleService {
         LocalDate d2 = currentDate.plusDays(2);
         options.add(GoalRebalanceResponse.RebalanceOptionDto.builder()
                 .id("smart_rebalance")
-                .title("Smart Rebalance (Tái cân bằng thông minh)")
+                .title("Smart Rebalance (Recommended)")
                 .badge("RECOMMENDED")
-                .description("Phân bổ đều thời lượng còn lại vào các block làm việc của 2 ngày tới.")
-                .impactSummary(String.format("+%dp %s, +%dp %s · Giữ nguyên deadline", splitMin, getDayOfWeekName(d1), splitMin, getDayOfWeekName(d2)))
+                .description("Evenly distribute remaining minutes into existing work blocks over the next 2 days.")
+                .impactSummary(String.format("+%dm on %s, +%dm on %s · Keeps original deadline", splitMin, getDayOfWeekName(d1), splitMin, getDayOfWeekName(d2)))
                 .deadlineSafe(true)
                 .modifiedDays(List.of(
                         GoalScenarioOption.DailyRoadmapDayDto.builder()
@@ -139,7 +139,7 @@ public class GoalScheduleService {
                                         .endTime("16:40")
                                         .durationMinutes(160)
                                         .blockType("EXISTING_WORK_FIT")
-                                        .note(String.format("Kéo dài thêm %dp vào block buổi chiều", splitMin))
+                                        .note(String.format("Extend by +%dm into afternoon work block", splitMin))
                                         .build()))
                                 .build(),
                         GoalScenarioOption.DailyRoadmapDayDto.builder()
@@ -152,7 +152,7 @@ public class GoalScheduleService {
                                         .endTime("11:40")
                                         .durationMinutes(160)
                                         .blockType("EXISTING_WORK_FIT")
-                                        .note(String.format("Kéo dài thêm %dp vào block buổi sáng", splitMin))
+                                        .note(String.format("Extend by +%dm into morning work block", splitMin))
                                         .build()))
                                 .build()
                 ))
@@ -161,10 +161,10 @@ public class GoalScheduleService {
         // Option 2: Catch Up Tomorrow
         options.add(GoalRebalanceResponse.RebalanceOptionDto.builder()
                 .id("catch_up_tomorrow")
-                .title("Catch Up Tomorrow (Bù vào ngày mai)")
+                .title("Catch Up Tomorrow (Dedicated Sprint)")
                 .badge("FASTER")
-                .description("Tập trung giải quyết dứt điểm toàn bộ thời lượng trễ ngay trong ngày mai.")
-                .impactSummary(String.format("+%dp vào ngày mai (%s) · Giữ nguyên deadline", overdueMinutes, getDayOfWeekName(d1)))
+                .description("Focus and complete all overdue tasks in a single dedicated session tomorrow.")
+                .impactSummary(String.format("+%dm tomorrow (%s) · Keeps original deadline", overdueMinutes, getDayOfWeekName(d1)))
                 .deadlineSafe(true)
                 .modifiedDays(List.of(
                         GoalScenarioOption.DailyRoadmapDayDto.builder()
@@ -177,7 +177,7 @@ public class GoalScheduleService {
                                         .endTime("17:20")
                                         .durationMinutes(200)
                                         .blockType("DEDICATED_DEEP_WORK")
-                                        .note(String.format("Thêm một Deep Work session bù %dp", overdueMinutes))
+                                        .note(String.format("Add dedicated Deep Work session (+%dm)", overdueMinutes))
                                         .build()))
                                 .build()
                 ))
@@ -186,10 +186,10 @@ public class GoalScheduleService {
         // Option 3: Use Project Buffer
         options.add(GoalRebalanceResponse.RebalanceOptionDto.builder()
                 .id("use_buffer")
-                .title("Use Project Buffer (Dùng ngày dự phòng)")
+                .title("Use Project Buffer (Protected Day)")
                 .badge("BUFFER")
-                .description("Giữ nguyên lịch các ngày tới, chuyển phần việc dư vào ngày đệm cuối dự án.")
-                .impactSummary(String.format("Sử dụng %dh%dp từ Protected Buffer · Không thay đổi lịch tuần này", overdueMinutes / 60, overdueMinutes % 60))
+                .description("Leave upcoming weekdays intact and absorb remaining tasks into the pre-planned buffer day.")
+                .impactSummary(String.format("Uses %dh%dm from Protected Buffer · No schedule changes this week", overdueMinutes / 60, overdueMinutes % 60))
                 .deadlineSafe(true)
                 .modifiedDays(List.of(
                         GoalScenarioOption.DailyRoadmapDayDto.builder()
@@ -203,7 +203,7 @@ public class GoalScheduleService {
                                         .endTime("10:20")
                                         .durationMinutes(overdueMinutes)
                                         .blockType("BUFFER")
-                                        .note("Hoàn thiện task dở dang từ buffer")
+                                        .note("Finish pending milestone tasks from buffer")
                                         .build()))
                                 .build()
                 ))
@@ -215,8 +215,8 @@ public class GoalScheduleService {
                 notificationService.createNotification(CreateNotificationRequest.builder()
                         .type("REBALANCE_AVAILABLE")
                         .priority("HIGH")
-                        .title("Phương án cân đối lịch trình đã sẵn sàng")
-                        .message("AI đã phát hiện ~" + overdueMinutes + " phút dở dang trong dự án \"" + goalTitle + "\" và lập 3 kịch bản bù giờ không ảnh hưởng giấc ngủ.")
+                        .title("Schedule Rebalance Options Ready")
+                        .message("AI detected ~" + overdueMinutes + " minutes unfinished in \"" + goalTitle + "\" and generated 3 recovery scenarios without affecting sleep.")
                         .relatedEntityType("PROJECT")
                         .relatedEntityId(projectId)
                         .actionType("OPEN_AI_REBALANCE")
@@ -239,29 +239,29 @@ public class GoalScheduleService {
     private String extractGoalTitle(String prompt) {
         String pLower = prompt.toLowerCase();
         if (pLower.contains("website") || pLower.contains("web bán hàng")) {
-            return "Website Bán Hàng Mini";
+            return "Mini E-commerce Website";
         }
         if (pLower.contains("landing page") || pLower.contains("cuộc thi")) {
-            return "Landing Page Cuộc Thi";
+            return "Competition Landing Page";
         }
         if (pLower.contains("mobile app") || pLower.contains("ứng dụng")) {
             return "Mobile App Prototype";
         }
         if (pLower.contains("bài báo") || pLower.contains("bài viết") || pLower.contains("viết bài") || pLower.contains("article") || pLower.contains("harness")) {
-            Pattern p = Pattern.compile("(?:viết|soạn|làm)\\s+([^.,;\\n]+?)(?:\\s+trong vòng|\\s+trước|\\s+deadline|$)", Pattern.CASE_INSENSITIVE);
+            Pattern p = Pattern.compile("(?:viết|soạn|làm|write)\\s+([^.,;\\n]+?)(?:\\s+trong vòng|\\s+trước|\\s+deadline|$)", Pattern.CASE_INSENSITIVE);
             Matcher m = p.matcher(prompt);
             if (m.find()) {
                 return capitalizeWords(m.group(1).trim());
             }
-            return "Bài Báo Chuyên Đề";
+            return "Specialized Research Article";
         }
         // General extraction
-        Pattern p = Pattern.compile("(?:làm|xây dựng|hoàn thành|phát triển|viết|chuẩn bị)\\s+([^.,;\\n]+?)(?:\\s+trong vòng|\\s+trước|\\s+deadline|$)", Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile("(?:làm|xây dựng|hoàn thành|phát triển|viết|chuẩn bị|build|create|finish)\\s+([^.,;\\n]+?)(?:\\s+trong vòng|\\s+trước|\\s+deadline|$)", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(prompt);
         if (m.find()) {
             return capitalizeWords(m.group(1).trim());
         }
-        return "Dự Án Trọng Tâm";
+        return "Core Focus Project";
     }
 
     private LocalDate extractDeadline(String prompt, LocalDate startDate, LocalDate explicitDeadline) {
@@ -269,16 +269,16 @@ public class GoalScheduleService {
             return explicitDeadline;
         }
         String pLower = prompt.toLowerCase();
-        if (pLower.contains("2 tuần") || pLower.contains("hai tuần")) {
+        if (pLower.contains("2 tuần") || pLower.contains("hai tuần") || pLower.contains("2 weeks")) {
             return startDate.plusWeeks(2);
         }
-        if (pLower.contains("1 tuần") || pLower.contains("một tuần") || pLower.contains("tuần sau") || pLower.contains("trong vòng 1 tuần")) {
+        if (pLower.contains("1 tuần") || pLower.contains("một tuần") || pLower.contains("tuần sau") || pLower.contains("trong vòng 1 tuần") || pLower.contains("1 week")) {
             return startDate.plusWeeks(1);
         }
-        if (pLower.contains("3 tuần")) {
+        if (pLower.contains("3 tuần") || pLower.contains("3 weeks")) {
             return startDate.plusWeeks(3);
         }
-        if (pLower.contains("1 tháng") || pLower.contains("một tháng")) {
+        if (pLower.contains("1 tháng") || pLower.contains("một tháng") || pLower.contains("1 month")) {
             return startDate.plusMonths(1);
         }
 
@@ -308,13 +308,13 @@ public class GoalScheduleService {
         String pLower = prompt.toLowerCase();
 
         // 1. Article / Writing / Research domain
-        if (pLower.contains("bài báo") || pLower.contains("bài viết") || pLower.contains("viết") || pLower.contains("báo cáo") || pLower.contains("harness") || pLower.contains("content")) {
+        if (pLower.contains("bài báo") || pLower.contains("bài viết") || pLower.contains("viết") || pLower.contains("báo cáo") || pLower.contains("harness") || pLower.contains("content") || pLower.contains("article") || pLower.contains("paper")) {
             milestones.add(GoalMilestoneDto.builder()
                     .name("Research & Outline")
                     .totalMinutes(90)
                     .subtasks(List.of(
-                            ProjectSubtaskDto.builder().title("Nghiên cứu tài liệu & thu thập nguồn thông tin").estimatedMinutes(45).orderIndex(0).build(),
-                            ProjectSubtaskDto.builder().title("Lập dàn ý chi tiết bài viết").estimatedMinutes(45).orderIndex(1).build()
+                            ProjectSubtaskDto.builder().title("Review literature & gather source references").estimatedMinutes(45).orderIndex(0).build(),
+                            ProjectSubtaskDto.builder().title("Draft detailed article outline & structure").estimatedMinutes(45).orderIndex(1).build()
                     ))
                     .build());
 
@@ -322,8 +322,8 @@ public class GoalScheduleService {
                     .name("Drafting Content")
                     .totalMinutes(180)
                     .subtasks(List.of(
-                            ProjectSubtaskDto.builder().title("Viết phần mở đầu & luận điểm chính").estimatedMinutes(90).orderIndex(2).build(),
-                            ProjectSubtaskDto.builder().title("Viết phân tích chuyên sâu & case study").estimatedMinutes(90).orderIndex(3).build()
+                            ProjectSubtaskDto.builder().title("Draft introduction & core thesis points").estimatedMinutes(90).orderIndex(2).build(),
+                            ProjectSubtaskDto.builder().title("Draft in-depth analysis & case studies").estimatedMinutes(90).orderIndex(3).build()
                     ))
                     .build());
 
@@ -331,8 +331,8 @@ public class GoalScheduleService {
                     .name("Review & Refine")
                     .totalMinutes(90)
                     .subtasks(List.of(
-                            ProjectSubtaskDto.builder().title("Fact-check & soát lỗi chính tả, câu từ").estimatedMinutes(45).orderIndex(4).build(),
-                            ProjectSubtaskDto.builder().title("Hoàn thiện hình ảnh & bố cục bài báo").estimatedMinutes(45).orderIndex(5).build()
+                            ProjectSubtaskDto.builder().title("Fact-check & polish phrasing and grammar").estimatedMinutes(45).orderIndex(4).build(),
+                            ProjectSubtaskDto.builder().title("Format visuals, diagrams & typography").estimatedMinutes(45).orderIndex(5).build()
                     ))
                     .build());
 
@@ -340,8 +340,8 @@ public class GoalScheduleService {
                     .name("Final Polish & Submission")
                     .totalMinutes(60)
                     .subtasks(List.of(
-                            ProjectSubtaskDto.builder().title("Đọc duyệt tổng thể lần cuối").estimatedMinutes(30).orderIndex(6).build(),
-                            ProjectSubtaskDto.builder().title("Xuất bản / Nộp bài báo").estimatedMinutes(30).orderIndex(7).build()
+                            ProjectSubtaskDto.builder().title("Final comprehensive proofreading").estimatedMinutes(30).orderIndex(6).build(),
+                            ProjectSubtaskDto.builder().title("Publish / Submit final deliverable").estimatedMinutes(30).orderIndex(7).build()
                     ))
                     .build());
 
@@ -353,8 +353,8 @@ public class GoalScheduleService {
                 .name("Research & Wireframe")
                 .totalMinutes(105)
                 .subtasks(List.of(
-                        ProjectSubtaskDto.builder().title("Phân tích yêu cầu & đối thủ").estimatedMinutes(45).orderIndex(0).build(),
-                        ProjectSubtaskDto.builder().title("Phác thảo Wireframe các luồng chính").estimatedMinutes(60).orderIndex(1).build()
+                        ProjectSubtaskDto.builder().title("Requirement analysis & user story mapping").estimatedMinutes(45).orderIndex(0).build(),
+                        ProjectSubtaskDto.builder().title("Draft wireframes for core user journeys").estimatedMinutes(60).orderIndex(1).build()
                 ))
                 .build());
 
@@ -362,8 +362,8 @@ public class GoalScheduleService {
                 .name("UI & Visual Design")
                 .totalMinutes(180)
                 .subtasks(List.of(
-                        ProjectSubtaskDto.builder().title("Thiết kế Header, Hero & Navbar").estimatedMinutes(60).orderIndex(2).build(),
-                        ProjectSubtaskDto.builder().title("Thiết kế Catalog sản phẩm & Giỏ hàng").estimatedMinutes(120).orderIndex(3).build()
+                        ProjectSubtaskDto.builder().title("Design Hero section, Header & Navigation").estimatedMinutes(60).orderIndex(2).build(),
+                        ProjectSubtaskDto.builder().title("Design Product Catalog & Cart drawer").estimatedMinutes(120).orderIndex(3).build()
                 ))
                 .build());
 
@@ -371,8 +371,8 @@ public class GoalScheduleService {
                 .name("Frontend Development")
                 .totalMinutes(240)
                 .subtasks(List.of(
-                        ProjectSubtaskDto.builder().title("Xây dựng layout & Responsive UI").estimatedMinutes(90).orderIndex(4).build(),
-                        ProjectSubtaskDto.builder().title("Tích hợp state giỏ hàng & Checkout").estimatedMinutes(150).orderIndex(5).build()
+                        ProjectSubtaskDto.builder().title("Build responsive layout & core components").estimatedMinutes(90).orderIndex(4).build(),
+                        ProjectSubtaskDto.builder().title("Integrate cart state & checkout flow").estimatedMinutes(150).orderIndex(5).build()
                 ))
                 .build());
 
@@ -380,8 +380,8 @@ public class GoalScheduleService {
                 .name("Integration & API")
                 .totalMinutes(180)
                 .subtasks(List.of(
-                        ProjectSubtaskDto.builder().title("Kết nối API sản phẩm & đơn hàng").estimatedMinutes(120).orderIndex(6).build(),
-                        ProjectSubtaskDto.builder().title("Xử lý xác thực & thông báo đặt hàng").estimatedMinutes(60).orderIndex(7).build()
+                        ProjectSubtaskDto.builder().title("Connect product catalog & order API").estimatedMinutes(120).orderIndex(6).build(),
+                        ProjectSubtaskDto.builder().title("Handle auth state & order notifications").estimatedMinutes(60).orderIndex(7).build()
                 ))
                 .build());
 
@@ -389,8 +389,8 @@ public class GoalScheduleService {
                 .name("Testing, Polish & Deploy")
                 .totalMinutes(120)
                 .subtasks(List.of(
-                        ProjectSubtaskDto.builder().title("Kiểm thử End-to-End & Fix bugs").estimatedMinutes(80).orderIndex(8).build(),
-                        ProjectSubtaskDto.builder().title("Triển khai Production & Review").estimatedMinutes(40).orderIndex(9).build()
+                        ProjectSubtaskDto.builder().title("End-to-End QA testing & bug fixing").estimatedMinutes(80).orderIndex(8).build(),
+                        ProjectSubtaskDto.builder().title("Deploy to production & post-launch check").estimatedMinutes(40).orderIndex(9).build()
                 ))
                 .build());
 
@@ -440,10 +440,10 @@ public class GoalScheduleService {
                                     .startTime("14:00")
                                     .endTime(calculateEndTime("14:00", dayMinutes))
                                     .milestoneName(getMilestoneForSubtask(todayTaskTitles.get(0), milestones))
-                                    .title("Dự án: " + todayTaskTitles.get(0))
+                                    .title("Project: " + todayTaskTitles.get(0))
                                     .durationMinutes(dayMinutes)
                                     .blockType("EXISTING_WORK_FIT")
-                                    .note("Tận dụng khung giờ Work chiều có sẵn")
+                                    .note("Fit seamlessly into existing afternoon work session")
                                     .subtaskTitles(todayTaskTitles)
                                     .build()))
                             .build());
@@ -468,7 +468,7 @@ public class GoalScheduleService {
                             .title("🛡️ Protected Project Buffer")
                             .durationMinutes(120)
                             .blockType("BUFFER")
-                            .note("Khoảng đệm an toàn đề phòng phát sinh hoặc nghỉ ngơi")
+                            .note("Protected safe buffer window for unforeseen delays or rest")
                             .build()))
                     .build());
             bufDate = bufDate.plusDays(1);
@@ -476,14 +476,14 @@ public class GoalScheduleService {
 
         return GoalScenarioOption.builder()
                 .id("recommended")
-                .title("Fit into Current Schedule (Khuyên dùng)")
+                .title("Fit into Current Schedule (Recommended)")
                 .badge("RECOMMENDED")
-                .description("Tận dụng tối đa các block Work hiện có mà không làm xáo trộn thói quen sinh hoạt. Hoàn thành sớm 2 ngày kèm ngày đệm an toàn.")
+                .description("Maximizes existing work slots without disrupting daily rhythm. Finishes 2 days early with protected buffer days.")
                 .internalTargetDate(internalTargetDate)
                 .bufferDays(bufferDays)
                 .daysCount(roadmap.size())
                 .totalPlannedMinutes(plannedMinutes)
-                .strategySummary(String.format("Tận dụng %d block Work hiện có · %d ngày đệm an toàn trước deadline", roadmap.size() - bufferDays, bufferDays))
+                .strategySummary(String.format("Fits into %d existing work blocks · %d safe buffer days before deadline", roadmap.size() - bufferDays, bufferDays))
                 .roadmapDays(roadmap)
                 .build();
     }
@@ -538,7 +538,7 @@ public class GoalScheduleService {
                                 .title("⚡ Deep Work: " + todayTaskTitles.get(0) + " (High Energy)")
                                 .durationMinutes(dayMinutes)
                                 .blockType("DEDICATED_DEEP_WORK")
-                                .note("Phiên làm việc tập trung cao độ " + optimalStart + "–" + optimalEnd + " không trùng lịch")
+                                .note("Dedicated high-energy focus block " + optimalStart + "–" + optimalEnd)
                                 .subtaskTitles(todayTaskTitles)
                                 .build()))
                         .build());
@@ -549,14 +549,14 @@ public class GoalScheduleService {
 
         return GoalScenarioOption.builder()
                 .id("faster")
-                .title("Dedicated Project Blocks (Khung giờ tập trung riêng)")
+                .title("Dedicated Project Blocks (Fast-Track)")
                 .badge("FASTER")
-                .description("Thiết lập các buổi Deep Work (High Energy) vào cùng khung giờ cố định để tối đa hóa hiệu suất và không bị phân tâm.")
+                .description("Creates dedicated High Energy Deep Work blocks at consistent hours to maximize progress and prevent distraction.")
                 .internalTargetDate(fasterTarget)
                 .bufferDays(4)
                 .daysCount(roadmap.size())
                 .totalPlannedMinutes(plannedMinutes)
-                .strategySummary(String.format("Tạo các phiên Deep Work (High Energy) · Cố định khung giờ, không trùng lịch"))
+                .strategySummary("Dedicated High Energy Deep Work sessions · Consistent schedule, no overlaps")
                 .roadmapDays(roadmap)
                 .build();
     }
@@ -593,10 +593,10 @@ public class GoalScheduleService {
                                 .startTime("19:30")
                                 .endTime(calculateEndTime("19:30", dayMinutes))
                                 .milestoneName(getMilestoneForSubtask(st.getTitle(), milestones))
-                                .title("Thong thả: " + st.getTitle())
+                                .title("Gentle: " + st.getTitle())
                                 .durationMinutes(dayMinutes)
                                 .blockType("FLEXIBLE_SLOT")
-                                .note("Phiên làm việc nhẹ nhàng 1-1.5h mỗi tối")
+                                .note("Gentle 1-1.5h session each evening")
                                 .subtaskTitles(List.of(st.getTitle()))
                                 .build()))
                         .build());
@@ -607,14 +607,14 @@ public class GoalScheduleService {
 
         return GoalScenarioOption.builder()
                 .id("flexible")
-                .title("Low-Pressure Flexible Plan (Nhẹ nhàng, thong thả)")
+                .title("Low-Pressure Flexible Plan (Gentle & Steady)")
                 .badge("LOW_PRESSURE")
-                .description("Chia nhỏ tải trọng mỗi ngày thành các phiên 1–1.5 tiếng, trải đều đến sát ngày deadline để không bị áp lực.")
+                .description("Splits workload into light 1–1.5 hour sessions spread evenly up to the deadline to avoid burnout.")
                 .internalTargetDate(officialDeadline)
                 .bufferDays(0)
                 .daysCount(roadmap.size())
                 .totalPlannedMinutes(plannedMinutes)
-                .strategySummary("Chia nhỏ 1-1.5h mỗi ngày · Tải trọng thấp, trải đều")
+                .strategySummary("Bite-sized 1–1.5h daily sprints · Low cognitive load")
                 .roadmapDays(roadmap)
                 .build();
     }
@@ -672,13 +672,13 @@ public class GoalScheduleService {
 
     private String getDayOfWeekName(LocalDate date) {
         return switch (date.getDayOfWeek()) {
-            case MONDAY -> "Thứ 2";
-            case TUESDAY -> "Thứ 3";
-            case WEDNESDAY -> "Thứ 4";
-            case THURSDAY -> "Thứ 5";
-            case FRIDAY -> "Thứ 6";
-            case SATURDAY -> "Thứ 7";
-            case SUNDAY -> "Chủ Nhật";
+            case MONDAY -> "Mon";
+            case TUESDAY -> "Tue";
+            case WEDNESDAY -> "Wed";
+            case THURSDAY -> "Thu";
+            case FRIDAY -> "Fri";
+            case SATURDAY -> "Sat";
+            case SUNDAY -> "Sun";
         };
     }
 

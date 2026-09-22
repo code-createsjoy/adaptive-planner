@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { format, parseISO } from "date-fns";
-import { vi } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import {
   History,
   X,
@@ -69,7 +69,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
             title: newBlock.title,
             type: "added",
             newTime: `${newBlock.startTime}–${newBlock.endTime}`,
-            note: "Khối thời gian mới thêm",
+            note: "Newly added block",
           });
         } else if (oldBlock.startTime !== newBlock.startTime || oldBlock.endTime !== newBlock.endTime) {
           diffs.push({
@@ -78,7 +78,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
             type: "moved",
             oldTime: `${oldBlock.startTime}–${oldBlock.endTime}`,
             newTime: `${newBlock.startTime}–${newBlock.endTime}`,
-            note: "Đã dời khung giờ",
+            note: "Rescheduled time",
           });
         }
         beforeMap.delete(newBlock.id || newBlock.title);
@@ -90,7 +90,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
           title: missingBlock.title,
           type: "deferred",
           oldTime: `${missingBlock.startTime}–${missingBlock.endTime}`,
-          note: "Đã chuyển vào Hộp thư / Hoãn",
+          note: "Moved to Inbox / Deferred",
         });
       });
 
@@ -127,10 +127,10 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
             </div>
             <div>
               <h3 className="font-display text-base font-bold text-foreground">
-                Lịch sử Quyết định & Thay đổi Lịch
+                Adaptation & Schedule History
               </h3>
               <p className="text-xs text-muted-foreground">
-                Minh bạch lý do AI điều chỉnh, diff trước/sau và hỗ trợ hoàn tác
+                Transparent AI decision log, diff previews, and undo support
               </p>
             </div>
           </div>
@@ -148,9 +148,9 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
           {adaptations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
               <Layers className="h-10 w-10 mb-3 opacity-30 stroke-1" />
-              <p className="text-sm font-medium">Chưa có thay đổi lịch trình nào</p>
+              <p className="text-sm font-medium">No schedule adaptations yet</p>
               <p className="text-xs text-muted-foreground/70 mt-1 max-w-sm">
-                Khi bạn áp dụng bất kỳ đề xuất điều chỉnh thông minh nào từ AI, lịch sử quyết định sẽ xuất hiện tại đây.
+                When you apply smart adaptive schedule changes from AI, decision records will appear here.
               </p>
             </div>
           ) : (
@@ -161,7 +161,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
 
               let formattedTime = "";
               try {
-                formattedTime = format(parseISO(action.createdAt), "HH:mm, dd/MM/yyyy", { locale: vi });
+                formattedTime = format(parseISO(action.createdAt), "HH:mm, MMM dd yyyy", { locale: enUS });
               } catch {
                 formattedTime = action.createdAt || "";
               }
@@ -195,12 +195,12 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
                               : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                           }`}
                         >
-                          {isUndone ? "Đã hoàn tác" : "Đã áp dụng"}
+                          {isUndone ? "Undone" : "Applied"}
                         </span>
                       </div>
                       <h4 className="font-display text-sm font-bold text-foreground mt-1 flex items-center gap-1.5 group-hover:text-primary transition-colors">
                         <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
-                        <span>{action.scenarioTitle || action.reason || "Điều chỉnh lịch trình thông minh"}</span>
+                        <span>{action.scenarioTitle || action.reason || "Smart Schedule Adaptation"}</span>
                         {isCollapsed ? (
                           <ChevronDown className="h-3.5 w-3.5 text-muted-foreground ml-1" />
                         ) : (
@@ -219,14 +219,14 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
                           className="h-8 gap-1.5 rounded-lg text-xs font-medium border-border/80 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
                         >
                           <RotateCcw className="h-3 w-3" />
-                          <span>Hoàn tác</span>
+                          <span>Undo</span>
                         </Button>
                       )}
                       <button
                         type="button"
                         onClick={() => toggleItemCollapse(action.id)}
                         className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
-                        title={isCollapsed ? "Mở rộng chi tiết" : "Thu gọn chi tiết"}
+                        title={isCollapsed ? "Expand details" : "Collapse details"}
                       >
                         {isCollapsed ? (
                           <ChevronDown className="h-4 w-4" />
@@ -243,7 +243,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
                       {reasons.length > 0 && (
                         <div className="mb-3.5 rounded-xl bg-muted/40 p-3 text-xs space-y-1.5 border border-border/30">
                           <p className="font-semibold text-foreground/90 text-[11px] uppercase tracking-wider flex items-center gap-1">
-                            <span>Lý do đề xuất (Why):</span>
+                            <span>Reasons for Adaptation (Why):</span>
                           </p>
                           <ul className="space-y-1 text-muted-foreground list-disc list-inside">
                             {reasons.map((r, idx) => (
@@ -259,7 +259,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
                       {diffs.length > 0 && (
                         <div className="space-y-2 mb-3">
                           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-                            Chi tiết thay đổi:
+                            Change details:
                           </p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {diffs.map((diff) => (
@@ -281,7 +281,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
                                       <ArrowRight className="h-3 w-3 opacity-60" />
                                     </>
                                   )}
-                                  <span className="font-semibold">{diff.newTime || "Hộp thư"}</span>
+                                  <span className="font-semibold">{diff.newTime || "Inbox"}</span>
                                 </div>
                               </div>
                             ))}
@@ -301,7 +301,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
                             className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
                           >
                             <MessageSquare className="h-3.5 w-3.5" />
-                            <span>Xem cuộc trò chuyện</span>
+                            <span>View Conversation</span>
                             <ChevronRight className="h-3 w-3" />
                           </button>
                         </div>
@@ -317,7 +317,7 @@ export const ActivityHistoryDrawer: React.FC<ActivityHistoryDrawerProps> = ({
         {/* Footer */}
         <div className="border-t border-border/60 p-4 bg-card/50 flex justify-end">
           <Button variant="outline" onClick={onClose} className="rounded-xl text-xs">
-            Đóng
+            Close
           </Button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { TimeBlock, NotificationPreferences } from '@/types/planner';
+import { getTodayDateString } from '@/store/usePlannerStore';
 
 export interface InAppToast {
   id: string;
@@ -86,7 +87,7 @@ export function useNotificationScheduler(params: {
       timerRef.current = null;
     }
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getTodayDateString();
     // Only schedule proactive timeblock alerts for today's active date
     if (selectedDate !== todayStr) return;
 
@@ -121,10 +122,10 @@ export function useNotificationScheduler(params: {
                 id: earlyKey,
                 type: 'BLOCK_STARTING',
                 priority: block.priority === 'HIGH' || block.energyLevel === 'high' ? 'HIGH' : 'NORMAL',
-                title: `${block.title} bắt đầu sau ${leadTime} phút (${block.startTime})`,
-                message: block.detail || 'Chuẩn bị hoàn tất các hoạt động để bước vào ca làm việc.',
+                title: `${block.title} starts in ${leadTime} min (${block.startTime})`,
+                message: block.detail || 'Wrap up current activities to prepare for this upcoming session.',
                 timeBlockId: block.id,
-                actionLabel: 'Xem ca làm việc',
+                actionLabel: 'View session',
                 onAction: () => onNavigateToSession?.(block.id),
                 createdAt: Date.now(),
               };
@@ -156,10 +157,10 @@ export function useNotificationScheduler(params: {
                 id: endKey,
                 type: 'BLOCK_ENDED',
                 priority: 'NORMAL',
-                title: `Phiên ${block.title} đã kết thúc (${block.endTime})`,
-                message: 'Hãy kiểm tra và đánh dấu checklist công việc đã hoàn thành.',
+                title: `Session ${block.title} has ended (${block.endTime})`,
+                message: 'Review and mark completed checklist items.',
                 timeBlockId: block.id,
-                actionLabel: 'Mở checklist',
+                actionLabel: 'Open checklist',
                 onAction: () => onNavigateToSession?.(block.id),
                 createdAt: Date.now(),
               };

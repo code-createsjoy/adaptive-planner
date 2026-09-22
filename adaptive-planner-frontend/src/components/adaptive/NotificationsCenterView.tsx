@@ -24,6 +24,7 @@ interface NotificationsCenterViewProps {
   onMarkAsRead: (id: number) => void;
   onMarkAllAsRead: () => void;
   onDeleteNotification: (id: number) => void;
+  onDeleteAllRead?: () => void;
   preferences: NotificationPreferences;
   onUpdatePreferences: (pref: Partial<NotificationPreferences>) => void;
   onNavigate: (viewId: string) => void;
@@ -31,15 +32,15 @@ interface NotificationsCenterViewProps {
   onCreateTestNotification?: () => void;
 }
 
-// Format relative date into Vietnamese grouping
+// Format relative date into English grouping
 function groupNotificationsByDate(items: NotificationItem[]) {
   const today = new Date().toISOString().slice(0, 10);
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 
   const groups: { label: string; items: NotificationItem[] }[] = [
-    { label: 'Hôm nay', items: [] },
-    { label: 'Hôm qua', items: [] },
-    { label: 'Trước đó', items: [] },
+    { label: 'Today', items: [] },
+    { label: 'Yesterday', items: [] },
+    { label: 'Earlier', items: [] },
   ];
 
   for (const item of items) {
@@ -57,18 +58,18 @@ function groupNotificationsByDate(items: NotificationItem[]) {
 }
 
 function formatRelativeTime(dateStr?: string): string {
-  if (!dateStr) return 'Vừa xong';
+  if (!dateStr) return 'Just now';
   try {
     const diffMs = Date.now() - new Date(dateStr).getTime();
     const diffMin = Math.floor(diffMs / 60000);
-    if (diffMin < 1) return 'Vừa xong';
-    if (diffMin < 60) return `${diffMin} phút trước`;
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return `${diffMin}m ago`;
     const diffHours = Math.floor(diffMin / 60);
-    if (diffHours < 24) return `${diffHours} giờ trước`;
+    if (diffHours < 24) return `${diffHours}h ago`;
     const diffDays = Math.floor(diffHours / 24);
-    return `${diffDays} ngày trước`;
+    return `${diffDays}d ago`;
   } catch {
-    return 'Vừa xong';
+    return 'Just now';
   }
 }
 
@@ -78,6 +79,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
   onMarkAsRead,
   onMarkAllAsRead,
   onDeleteNotification,
+  onDeleteAllRead,
   preferences,
   onUpdatePreferences,
   onNavigate,
@@ -91,10 +93,11 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
     : notifications;
 
   const grouped = groupNotificationsByDate(filteredNotifications);
+  const readCount = notifications.length - unreadCount;
 
   const handleRequestBrowserPermission = async () => {
     if (!('Notification' in window)) {
-      alert('Trình duyệt của bạn không hỗ trợ Web Notifications API.');
+      alert('Your browser does not support the Web Notifications API.');
       return;
     }
     const perm = await Notification.requestPermission();
@@ -102,7 +105,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
       onUpdatePreferences({ browserEnabled: true });
       try {
         new Notification('Adaptive Planner', {
-          body: 'Thông báo trên trình duyệt đã được bật thành công!',
+          body: 'Browser notifications have been enabled successfully!',
         });
       } catch {}
     } else {
@@ -122,13 +125,13 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
             </div>
             <div>
               <h2 className="font-display text-base font-bold text-foreground">
-                Trung tâm thông báo
+                Notification Center
               </h2>
               <p className="text-xs text-muted-foreground">
                 {unreadCount > 0 ? (
-                  <span className="text-primary font-medium">{unreadCount} thông báo chưa đọc</span>
+                  <span className="text-primary font-medium">{unreadCount} unread notification{unreadCount > 1 ? 's' : ''}</span>
                 ) : (
-                  'Bạn đã xem hết mọi thông báo'
+                  'All caught up! No unread notifications'
                 )}
               </p>
             </div>
@@ -146,7 +149,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Tất cả ({notifications.length})
+                All ({notifications.length})
               </button>
               <button
                 type="button"
@@ -157,7 +160,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                Chưa đọc ({unreadCount})
+                Unread ({unreadCount})
               </button>
             </div>
 
@@ -167,10 +170,10 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                 size="sm"
                 className="rounded-xl text-xs bg-primary/10 hover:bg-primary/20 text-primary border-primary/30 font-semibold"
                 onClick={onCreateTestNotification}
-                title="Tạo một thông báo mẫu để kiểm tra hoạt động"
+                title="Create a sample notification to test announcements"
               >
                 <Sparkles className="size-3.5 mr-1" />
-                Gửi thông báo mẫu
+                Send Test Alert
               </Button>
             )}
 
@@ -178,11 +181,25 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-xl text-xs bg-card/60 hover:bg-card border-border/80"
+                className="rounded-xl text-xs bg-card/60 hover:bg-card border-border/80 font-medium"
                 onClick={onMarkAllAsRead}
+                title="Mark all notifications as read"
               >
                 <Check className="size-3.5 mr-1" />
-                Đọc tất cả
+                Mark all as read
+              </Button>
+            )}
+
+            {readCount > 0 && onDeleteAllRead && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl text-xs bg-destructive/5 hover:bg-destructive/15 text-destructive border-destructive/30 font-medium transition-all"
+                onClick={onDeleteAllRead}
+                title="Clear all read notifications"
+              >
+                <Trash2 className="size-3.5 mr-1" />
+                Clear Read ({readCount})
               </Button>
             )}
           </div>
@@ -195,10 +212,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
               <Inbox className="size-6 opacity-60" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-foreground">Không có thông báo nào</h4>
-              <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto leading-relaxed">
-                Mọi nhắc nhở ca làm việc, cảnh báo tiến độ dự án và gợi ý từ AI sẽ xuất hiện tại đây khi phát sinh.
-              </p>
+              <h4 className="text-sm font-bold text-foreground">No notifications yet</h4>
               {onCreateTestNotification && (
                 <div className="mt-4">
                   <Button
@@ -207,7 +221,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                     onClick={onCreateTestNotification}
                   >
                     <Sparkles className="size-3.5 mr-1.5" />
-                    Tạo thông báo thử nghiệm
+                    Create Test Notification
                   </Button>
                 </div>
               )}
@@ -302,10 +316,10 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                                 >
                                   <span>
                                     {item.actionType === 'VIEW_REBALANCE' || item.type === 'REBALANCE_AVAILABLE'
-                                      ? 'Xem phương án cân đối'
+                                      ? 'Review Rebalance Plan'
                                       : item.actionType === 'OPEN_SESSION'
-                                      ? 'Xem ca làm việc'
-                                      : 'Xem chi tiết'}
+                                      ? 'Open Session'
+                                      : 'View Details'}
                                   </span>
                                   <ChevronRight className="size-3" />
                                 </button>
@@ -317,7 +331,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                                   onClick={() => onMarkAsRead(item.id)}
                                   className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1"
                                 >
-                                  Đánh dấu đã đọc
+                                  Mark as read
                                 </button>
                               )}
                             </div>
@@ -326,7 +340,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                               type="button"
                               onClick={() => onDeleteNotification(item.id)}
                               className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all"
-                              title="Xóa thông báo"
+                              title="Delete notification"
                             >
                               <Trash2 className="size-3.5" />
                             </button>
@@ -351,11 +365,11 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                 <Sliders className="size-4" />
               </span>
               <h3 className="font-display text-sm font-bold text-foreground">
-                Tùy chỉnh thông báo
+                Notification Preferences
               </h3>
             </div>
             <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-              Kiểm soát các cập nhật quan trọng mà không làm đứt đoạn sự tập trung.
+              Stay informed on important updates without interrupting your flow state.
             </p>
           </div>
 
@@ -363,7 +377,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
           <div className="space-y-2 pt-2 border-t border-border/60">
             <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
               <Clock className="size-3.5 text-primary" />
-              <span>Nhắc trước khi bắt đầu ca</span>
+              <span>Remind before block starts</span>
             </label>
             <div className="grid grid-cols-3 gap-1.5">
               {[5, 10, 15].map((mins) => (
@@ -377,7 +391,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
                       : 'bg-card border-border hover:border-primary/50 text-foreground'
                   }`}
                 >
-                  {mins} phút
+                  {mins} mins
                 </button>
               ))}
             </div>
@@ -386,13 +400,13 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
           {/* Delivery Channels */}
           <div className="space-y-3 pt-3 border-t border-border/60">
             <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
-              Kênh thông báo
+              Delivery Channels
             </p>
 
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-medium text-foreground">In-app Toasts</p>
-                <p className="text-[10px] text-muted-foreground">Bật thông báo nổi trong ứng dụng</p>
+                <p className="text-[10px] text-muted-foreground">Show popup toasts within the app</p>
               </div>
               <Switch
                 checked={preferences.inAppEnabled}
@@ -403,7 +417,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-medium text-foreground">Browser Push</p>
-                <p className="text-[10px] text-muted-foreground">Nhắc nhở khi đang ở tab khác</p>
+                <p className="text-[10px] text-muted-foreground">Alerts when running in background tabs</p>
               </div>
               <Switch
                 checked={preferences.browserEnabled}
@@ -420,7 +434,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-medium text-foreground">Gentle Chime</p>
-                <p className="text-[10px] text-muted-foreground">Âm thanh chuông 432Hz dịu nhẹ</p>
+                <p className="text-[10px] text-muted-foreground">Soft 432Hz ambient audio chime</p>
               </div>
               <Switch
                 checked={preferences.soundEnabled}
@@ -433,13 +447,13 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
           <div className="space-y-3 pt-3 border-t border-border/60">
             <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1">
               <ShieldCheck className="size-3 text-emerald-500" />
-              <span>Bảo vệ trạng thái tập trung</span>
+              <span>Focus Protection</span>
             </p>
 
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-medium text-foreground">Không ngắt Deep Work</p>
-                <p className="text-[10px] text-muted-foreground">Chỉ nhận cảnh báo khẩn cấp</p>
+                <p className="text-xs font-medium text-foreground">Do Not Disturb in Deep Work</p>
+                <p className="text-[10px] text-muted-foreground">Only deliver high-priority urgent alerts</p>
               </div>
               <Switch
                 checked={preferences.suppressDuringFocus}
@@ -449,8 +463,8 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
 
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-medium text-foreground">Không làm phiền giờ nghỉ & ngủ</p>
-                <p className="text-[10px] text-muted-foreground">Giữ yên lặng trong giờ Break/Sleep</p>
+                <p className="text-xs font-medium text-foreground">Mute during Breaks & Sleep</p>
+                <p className="text-[10px] text-muted-foreground">Keep quiet during recovery intervals</p>
               </div>
               <Switch
                 checked={preferences.suppressDuringSleep}

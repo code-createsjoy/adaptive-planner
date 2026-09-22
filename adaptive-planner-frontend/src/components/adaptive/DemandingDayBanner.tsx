@@ -31,9 +31,9 @@ export const DemandingDayBanner: React.FC<DemandingDayBannerProps> = ({
         </div>
         <div>
           <h4 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-2">
-            Lịch trình hôm nay có mật độ khá dày đặc
+            Today's schedule has high cognitive density
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30">
-              Tải trọng: {assessment.score}/100
+              Workload Score: {assessment.score}/100
             </span>
           </h4>
         </div>
@@ -46,7 +46,7 @@ export const DemandingDayBanner: React.FC<DemandingDayBannerProps> = ({
           className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          Xem đề xuất giảm tải
+          Review Workload Relief
         </button>
 
         {onDismiss && (
@@ -54,7 +54,7 @@ export const DemandingDayBanner: React.FC<DemandingDayBannerProps> = ({
             type="button"
             onClick={onDismiss}
             className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-            aria-label="Đóng"
+            aria-label="Dismiss"
           >
             <X className="w-4 h-4" />
           </button>

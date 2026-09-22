@@ -60,7 +60,7 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
           endTime: '11:00',
           durationMinutes: 60,
           calmScore: 0.95,
-          reason: 'Khoảng trống sáng thông thoáng, cách xa giờ ăn trưa',
+          reason: 'Spacious morning opening, well clear of lunch breaks',
           isRecommended: true,
         },
         {
@@ -68,7 +68,7 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
           endTime: '15:00',
           durationMinutes: 60,
           calmScore: 0.85,
-          reason: 'Khoảng nghỉ êm ả buổi chiều',
+          reason: 'Gentle low-stress afternoon slot',
           isRecommended: false,
         }
       ]);
@@ -117,7 +117,7 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
                   Tomorrow Inbox
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  {inboxBlocks.length} việc hoãn lại
+                  {inboxBlocks.length} deferred {inboxBlocks.length === 1 ? 'task' : 'tasks'}
                 </span>
               </div>
             </div>
@@ -163,7 +163,7 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
                     )}
                   </div>
                   <p className="text-xs text-slate-400">
-                    {block.detail || 'Chưa xếp giờ cố định · Sẵn sàng xếp vào Calm Opening.'}
+                    {block.detail || 'Not scheduled yet · Ready to place in a Calm Opening.'}
                   </p>
                 </div>
 
@@ -177,7 +177,7 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-teal-600/80 to-emerald-600/80 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-semibold shadow-lg shadow-teal-950/30 border border-teal-400/30 transition-all"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>✦ Tìm Calm Opening</span>
+                    <span>✦ Find Calm Opening</span>
                   </button>
                 </div>
               </div>
@@ -193,21 +193,21 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
                 <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
                   <div className="flex items-center gap-2 text-teal-400 text-xs font-semibold uppercase tracking-wider">
                     <Sparkles className="w-4 h-4" />
-                    <span>Gợi ý Calm Opening cho: {selectedTask.title}</span>
+                    <span>Calm Opening Recommendations for: {selectedTask.title}</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedTask(null)}
                     className="text-xs text-slate-400 hover:text-white"
                   >
-                    ✕ Đóng
+                    ✕ Close
                   </button>
                 </div>
 
                 {isLoadingSlots ? (
                   <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
                     <Clock className="w-4 h-4 animate-spin text-teal-400" />
-                    <span>Đang tìm khoảng trống êm ả không gây quá tải...</span>
+                    <span>Finding gentle openings to prevent overload...</span>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -228,7 +228,7 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
                             </span>
                             {slot.isRecommended && (
                               <span className="px-2 py-0.5 rounded-md bg-teal-500/20 text-teal-300 text-[10px] font-bold border border-teal-500/40">
-                                ✦ Tốt nhất
+                                ✦ Best Match
                               </span>
                             )}
                           </div>
@@ -248,10 +248,10 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
                           }`}
                         >
                           {schedulingId === selectedTask.id ? (
-                            <span>Đang xếp...</span>
+                            <span>Scheduling...</span>
                           ) : (
                             <>
-                              <span>Xếp vào lịch {slot.startTime}</span>
+                              <span>Schedule at {slot.startTime}</span>
                               <ArrowRight className="w-3.5 h-3.5" />
                             </>
                           )}

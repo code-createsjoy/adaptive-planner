@@ -7,7 +7,7 @@ export async function fetchProgressiveInsights(weekStart?: string): Promise<Prog
   const res = await fetch(url);
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Không thể tải tiến trình thông tin tuần.');
+    throw new Error(errorData.detail || 'Unable to load progressive insights.');
   }
   return res.json();
 }
@@ -17,7 +17,7 @@ export async function fetchWeeklyInsights(weekStart?: string): Promise<WeeklyIns
   const res = await fetch(url);
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Không thể tải phân tích thông tin tuần.');
+    throw new Error(errorData.detail || 'Unable to load weekly insights analysis.');
   }
   return res.json();
 }
@@ -34,7 +34,7 @@ export async function saveExperimentApi(data: {
   });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Không thể lưu thử nghiệm.');
+    throw new Error(errorData.detail || 'Unable to save experiment.');
   }
   return res.json();
 }
@@ -51,6 +51,6 @@ export async function dismissExperimentApi(data: {
   });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.detail || 'Không thể hủy thử nghiệm.');
+    throw new Error(errorData.detail || 'Unable to dismiss experiment.');
   }
 }

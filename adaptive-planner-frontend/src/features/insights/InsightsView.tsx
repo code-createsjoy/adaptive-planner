@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format, startOfWeek, addWeeks, subWeeks, isSameWeek } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import {
   Lightbulb,
   ChevronLeft,
@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button';
 import { useWeeklyInsights, useProgressiveInsights, useSaveExperimentMutation, useDismissExperimentMutation } from './hooks';
 import { ThisWeekProgressCard } from './components/ThisWeekProgressCard';
 import { LastWeekReflectionCard } from './components/LastWeekReflectionCard';
-import { FirstUseTip } from '@/components/adaptive/guidance/FirstUseTip';
 
 interface InsightsViewProps {
   onNavigateToWeek?: (weekStart: string) => void;
@@ -74,7 +73,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
 
   const handleConfirmApplySuggestion = () => {
     setPreviewSuggestionId(null);
-    setAppliedToast('Đã áp dụng mẫu hình bảo vệ khung giờ tập trung buổi sáng vào lịch trình!');
+    setAppliedToast('Applied morning focus protection pattern to your schedule!');
     setTimeout(() => {
       setAppliedToast(null);
     }, 6000);
@@ -84,15 +83,6 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 animate-fadeIn">
-      {/* Contextual First-Use Guidance */}
-      <FirstUseTip
-        tipId="insights"
-        icon={<Lightbulb className="size-4 text-teal-600 dark:text-teal-400" />}
-        title="Patterns, not grades."
-        description="Modo looks for patterns that may help you plan future days."
-        actionLabel="Got it"
-      />
-
       {/* Toast notification */}
       {appliedToast && (
         <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-foreground text-background shadow-2xl flex items-center gap-3 border border-border animate-in slide-in-from-bottom-5 duration-300">
@@ -117,12 +107,9 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
               <Lightbulb className="size-4" />
             </div>
             <h2 className="font-display text-xl font-bold text-foreground">
-              Insights & Nhịp điệu cá nhân
+              Insights & Personal Rhythm
             </h2>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Your patterns, not your performance · Nhận diện nhịp điệu thực tế để nâng đỡ lịch trình mà không tạo áp lực.
-          </p>
         </div>
 
         {/* Week Navigator */}
@@ -132,7 +119,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
             size="icon"
             onClick={handlePrevWeek}
             className="size-8 rounded-xl hover:bg-background"
-            title="Tuần trước"
+            title="Previous week"
           >
             <ChevronLeft className="size-4" />
           </Button>
@@ -141,12 +128,12 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
             <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-foreground">
               <Calendar className="size-3.5 text-primary" />
               <span>
-                {format(currentWeekMonday, 'dd/MM', { locale: vi })} –{' '}
-                {format(addWeeks(currentWeekMonday, 1), 'dd/MM/yyyy', { locale: vi })}
+                {format(currentWeekMonday, 'MMM dd', { locale: enUS })} –{' '}
+                {format(addWeeks(currentWeekMonday, 1), 'MMM dd, yyyy', { locale: enUS })}
               </span>
             </div>
             <span className="text-[10px] text-muted-foreground font-medium">
-              {isCurrentWeek ? 'Tuần đang diễn ra' : 'Tuần đã lưu'}
+              {isCurrentWeek ? 'Current Week' : 'Archived Week'}
             </span>
           </div>
 
@@ -156,7 +143,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
             onClick={handleNextWeek}
             disabled={isCurrentWeek}
             className="size-8 rounded-xl hover:bg-background disabled:opacity-40"
-            title="Tuần kế tiếp"
+            title="Next week"
           >
             <ChevronRight className="size-4" />
           </Button>
@@ -167,8 +154,8 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
       {isLoading && (
         <div className="glass-panel rounded-3xl p-12 text-center space-y-3">
           <RefreshCw className="size-8 animate-spin text-primary mx-auto opacity-75" />
-          <p className="text-sm font-medium text-foreground">Đang tổng hợp nhịp điệu sinh hoạt từ lịch trình...</p>
-          <p className="text-xs text-muted-foreground">Theo dõi trực tiếp và minh bạch từng ngày.</p>
+          <p className="text-sm font-medium text-foreground">Aggregating weekly rhythm from your schedule...</p>
+          <p className="text-xs text-muted-foreground">Tracking transparent daily progress.</p>
         </div>
       )}
 
@@ -176,13 +163,13 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
       {progressiveError && !isLoading && (
         <div className="glass-panel rounded-3xl p-8 border-destructive/30 bg-destructive/5 text-center space-y-3">
           <AlertCircle className="size-8 text-destructive mx-auto" />
-          <h3 className="font-bold text-sm text-foreground">Không thể tải nhịp điệu tuần này</h3>
+          <h3 className="font-bold text-sm text-foreground">Unable to load this week's rhythm</h3>
           <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            {(progressiveError as Error)?.message || 'Đã xảy ra lỗi khi kết nối tới máy chủ phân tích.'}
+            {(progressiveError as Error)?.message || 'An error occurred while connecting to insights server.'}
           </p>
           <Button onClick={() => refetchProgressive()} size="sm" variant="outline" className="rounded-xl gap-1.5 text-xs">
             <RefreshCw className="size-3" />
-            Thử lại
+            Retry
           </Button>
         </div>
       )}
@@ -204,7 +191,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
             <div className="space-y-3">
               <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2">
                 <Sparkles className="size-4 text-primary" />
-                <span>Mẫu hình thói quen định kỳ khác</span>
+                <span>Observed Routine Patterns</span>
               </h3>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -218,7 +205,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold uppercase tracking-wider">
-                            {pat.confidence} CONFIDENCE · {pat.sampleSize} mẫu
+                            {pat.confidence} CONFIDENCE · {pat.sampleSize} samples
                           </span>
                           <h4 className="font-bold text-sm text-foreground mt-2">{pat.title}</h4>
                         </div>
@@ -232,7 +219,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
                             onClick={() => togglePatternExpand(pat.ruleKey)}
                             className="text-[11px] font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer"
                           >
-                            <span>{isExpanded ? 'Ẩn bằng chứng' : `Xem ${pat.evidence.length} bằng chứng thực`}</span>
+                            <span>{isExpanded ? 'Hide evidence' : `View ${pat.evidence.length} real observations`}</span>
                           </button>
 
                           {isExpanded && (
@@ -260,7 +247,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
             <div className="space-y-3">
               <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2">
                 <BookmarkCheck className="size-4 text-emerald-500" />
-                <span>Thử nghiệm nhỏ cho tuần tới</span>
+                <span>Micro-Experiments for Next Week</span>
               </h3>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -282,7 +269,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
                           {isSaved && (
                             <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                               <CheckCircle2 className="size-3" />
-                              Đã lưu thử nghiệm
+                              Saved Experiment
                             </span>
                           )}
                         </div>
@@ -297,7 +284,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
                         {isSaved ? (
                           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1.5">
                             <Clock className="size-3.5" />
-                            <span>Nhắc nhở vào 09:00 Thứ Hai ({insights.experimentState?.reminderDate})</span>
+                            <span>Reminder at 09:00 Monday ({insights.experimentState?.reminderDate})</span>
                           </div>
                         ) : (
                           <Button
@@ -307,7 +294,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
                             className="w-full rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-sm"
                           >
                             <BookmarkCheck className="size-3.5 mr-1.5" />
-                            Thử vào tuần tới
+                            Try Next Week
                           </Button>
                         )}
                       </div>
@@ -330,8 +317,8 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
                   <Sparkles className="size-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-foreground">Xem trước đề xuất lịch trình</h3>
-                  <p className="text-xs text-muted-foreground">Bảo vệ 1 khung giờ tập trung buổi sáng</p>
+                  <h3 className="font-bold text-base text-foreground">Schedule Proposal Preview</h3>
+                  <p className="text-xs text-muted-foreground">Protect 1 morning focus block</p>
                 </div>
               </div>
               <button
@@ -344,21 +331,21 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
 
             <div className="space-y-3 text-xs">
               <p className="text-muted-foreground leading-relaxed">
-                Dựa trên dữ liệu tuần trước cho thấy bạn tập trung tốt nhất trước 12h, Modo đề xuất tạo một khối <strong>Deep Work</strong> cố định:
+                Based on last week's pattern showing your peak focus before noon, Modo suggests creating a recurring <strong>Deep Work</strong> slot:
               </p>
 
               <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 space-y-2 font-mono">
                 <div className="flex items-center justify-between text-[11px] text-foreground font-semibold">
-                  <span>Khung giờ: 09:00 – 10:30 (90 phút)</span>
+                  <span>Slot: 09:00 – 10:30 (90 min)</span>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px]">
-                    + Mới
+                    + New
                   </span>
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  Phân bổ: Thứ Hai, Thứ Ba, Thứ Tư, Thứ Năm, Thứ Sáu
+                  Days: Monday, Tuesday, Wednesday, Thursday, Friday
                 </div>
                 <div className="text-[11px] text-muted-foreground">
-                  Trạng thái bảo vệ: 🛡️ Protected Buffer (không bị chèn lịch khẩn)
+                  Protection: 🛡️ Protected Buffer (exempt from urgent insertions)
                 </div>
               </div>
             </div>
@@ -370,7 +357,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
                 onClick={() => setPreviewSuggestionId(null)}
                 className="rounded-xl text-xs"
               >
-                Đóng
+                Close
               </Button>
               <Button
                 size="sm"
@@ -378,7 +365,7 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
                 className="rounded-xl text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Check className="size-3.5" />
-                Xác nhận áp dụng đề xuất
+                Confirm and Apply
               </Button>
             </div>
           </div>

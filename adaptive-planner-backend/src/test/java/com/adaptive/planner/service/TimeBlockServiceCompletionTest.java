@@ -52,7 +52,7 @@ class TimeBlockServiceCompletionTest {
                 weeklyRoutineRepository,
                 holidayService,
                 new ObjectMapper(),
-                Clock.fixed(Instant.parse("2026-09-21T02:00:00Z"), ZoneOffset.UTC)
+                Clock.fixed(Instant.parse("2026-09-21T12:00:00Z"), ZoneOffset.UTC)
         );
     }
 
@@ -159,8 +159,8 @@ class TimeBlockServiceCompletionTest {
     @Test
     void sameRoutineOnTwoDatesCreatesTwoIndependentEvidenceIds() {
         WeeklyRoutineEntity routine = routine(7L, DayOfWeek.MONDAY);
-        LocalDate firstDate = LocalDate.of(2026, 9, 21);
-        LocalDate secondDate = LocalDate.of(2026, 9, 28);
+        LocalDate firstDate = LocalDate.of(2026, 9, 14);
+        LocalDate secondDate = LocalDate.of(2026, 9, 21);
         when(weeklyRoutineRepository.findByIdForUpdate(7L)).thenReturn(Optional.of(routine));
         when(repository.findFirstBySourceRoutineIdAndDate(eq(7L), any(LocalDate.class)))
                 .thenReturn(Optional.empty());
@@ -223,6 +223,33 @@ class TimeBlockServiceCompletionTest {
 
         assertNotNull(lock);
         assertEquals(LockModeType.PESSIMISTIC_WRITE, lock.value());
+    }
+
+    @Test
+    void futureDateCompletionIsRejected() {
+        TimeBlockEntity futureBlock = customBlock(99L, false);
+        futureBlock.setDate(LocalDate.of(2026, 9, 22)); // tomorrow relative to 2026-09-21
+        when(repository.findById(99L)).thenReturn(Optional.of(futureBlock));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateCompletion(99L, true)
+        );
+        assertTrue(ex.getMessage().contains("tương lai"));
+    }
+
+    @Test
+    void futureStartTimeTodayIsRejected() {
+        TimeBlockEntity futureTimeBlock = customBlock(100L, false);
+        futureTimeBlock.setDate(LocalDate.of(2026, 9, 21));
+        futureTimeBlock.setStartTime("18:00"); // 18:00 is after test clock 12:00
+        when(repository.findById(100L)).thenReturn(Optional.of(futureTimeBlock));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> service.updateCompletion(100L, true)
+        );
+        assertTrue(ex.getMessage().contains("trước giờ bắt đầu"));
     }
 
     private TimeBlockEntity customBlock(Long id, boolean completed) {

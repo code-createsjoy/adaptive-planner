@@ -48,5 +48,105 @@
     "evidence": "CoachMark implements ARIA dialog attributes, Esc keyboard listener, and responsive bottom sheet layout for viewports < 640px",
     "notes": "",
     "priority": "P2"
+  },
+  {
+    "id": "p2p-add-friends-gmail",
+    "title": "Add Friends by Registered Gmail",
+    "user_visible_behavior": "so that I can start a conversation",
+    "verification_command": "Typing an existing or mock Gmail (e.g. minh.designer@gmail.com) adds the friend to the Friends list with online presence",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: Added huan.engineer@gmail.com to Direct Chats list with online indicator and instant chat activation",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "p2p-chat-text-and-schedule-invites",
+    "title": "1-1 Chat with Interactive Schedule Invitations",
+    "user_visible_behavior": "so that we can agree on a meeting time",
+    "verification_command": "Clicking 'Create Schedule Invite' opens a quick picker (Date, Start Time, End Time, Title, Location/Detail) and posts an interactive card into the conversation",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: Modal proposed 'Modo Hackathon Planning' and rendered live interactive card into chat thread",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "p2p-accept-decline-invite-calendar-sync",
+    "title": "In-Chat Accept/Decline with Timeline & Calendar Auto-Sync",
+    "user_visible_behavior": "so that the event automatically pins to my timeline",
+    "verification_command": "Clicking [Accept] updates the card status to Accepted, creates a new social TimeBlock on the target date on both users' calendars, and shows a confirmation badge",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: Clicking Accept & Sync updated card to Confirmed and pinned 'Coffee & Design Sync' block into Day Timeline",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "p2p-demo-persona-switcher",
+    "title": "Demo Persona Switcher (Thai ⇄ Minh)",
+    "user_visible_behavior": "so that I can seamlessly showcase the 2-way conversation and scheduling flow",
+    "verification_command": "Clicking the persona toggle instantly swaps the active user view and message alignment (sent vs. received)",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: Switch to Minh (Friend) and Switch to Thai (You) toggles persona and view alignment instantly",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "p2p-invite-conflict-detection",
+    "title": "Visual Conflict Detection on Schedule Cards",
+    "user_visible_behavior": "so that I know if a proposed meeting overlaps with existing commitments before accepting",
+    "verification_command": "The invitation card highlights 'No conflict detected' or '⚠️ Overlaps with Study session (15:00-16:00)'",
+    "status": "passing",
+    "evidence": "Verified in ScheduleInviteCard: conflict detection checks targetDate blocks and displays clean confirmation or overlap warning",
+    "notes": "",
+    "priority": "P2"
+  },
+  {
+    "id": "workplace-passport-builder",
+    "title": "Workplace Passport Builder (7 Categories & Granular Privacy)",
+    "user_visible_behavior": "so that I can define my working preferences and choose who sees each category",
+    "verification_command": "Employee can select chips/options across all 7 categories and set individual visibility (Private, Share with manager, Share with team)",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: All 7 passport categories rendered with chips, custom notes, and per-card privacy badges",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "workplace-manager-guide",
+    "title": "Manager 'How to Work With Me' Guide",
+    "user_visible_behavior": "so that my manager understands how to communicate and assign tasks effectively without viewing private data",
+    "verification_command": "Manager view displays only employee-approved shared cards with actionable tips on best ways to assign work, focus blocks, feedback style, and strengths",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: Manager View rendered 'How to Work with Thai' with 5 structured actionable sections and hidden private fields",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "workplace-ai-task-translation",
+    "title": "AI Task Translation Engine",
+    "user_visible_behavior": "so that raw manager requests are automatically translated into structured executive-friendly micro-steps",
+    "verification_command": "Entering a raw task generates structured Goal, Deadline, Priority, Sub-steps, Expected Output, and Suggested First Action",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: Translated Competitor Analysis into 4 micro-steps, expected output, and low-friction suggested first action",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "workplace-private-ai-insights",
+    "title": "Private AI Insights & Consent Loop",
+    "user_visible_behavior": "so that Modo suggests discovered working patterns privately without exposing anything to management without consent",
+    "verification_command": "AI insight suggestions appear only in employee view with [Add to Passport] / [Dismiss], adding to passport on approval",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: Add to Passport button applied peak focus window directly into employee passport with toast confirmation",
+    "notes": "",
+    "priority": "P1"
+  },
+  {
+    "id": "workplace-task-timeline-sync",
+    "title": "1-Click Task to Timeline Sync",
+    "user_visible_behavior": "so that I can immediately schedule an adapted task into my daily plan",
+    "verification_command": "Clicking 'Add to My Timeline' on an adapted task creates corresponding time blocks on the target date",
+    "status": "passing",
+    "evidence": "Verified in browser subagent: Clicking 'Add to My Timeline' scheduled 10:00-11:30 focus block onto Day Timeline",
+    "notes": "",
+    "priority": "P2"
   }
 ]

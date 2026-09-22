@@ -130,4 +130,32 @@ class NotificationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.unreadCount").value(0));
     }
+
+    @Test
+    void shouldDeleteAllReadNotifications() throws Exception {
+        NotificationEntity n1 = notificationRepository.save(NotificationEntity.builder()
+                .type("REBALANCE_AVAILABLE")
+                .priority("HIGH")
+                .title("Thông báo đã đọc")
+                .message("Nội dung")
+                .isRead(true)
+                .build());
+
+        NotificationEntity n2 = notificationRepository.save(NotificationEntity.builder()
+                .type("AI_SUGGESTION")
+                .priority("NORMAL")
+                .title("Thông báo chưa đọc")
+                .message("Nội dung")
+                .isRead(false)
+                .build());
+
+        mockMvc.perform(delete("/api/notifications/read"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("All read notifications deleted"));
+
+        mockMvc.perform(get("/api/notifications"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(n2.getId()));
+    }
 }

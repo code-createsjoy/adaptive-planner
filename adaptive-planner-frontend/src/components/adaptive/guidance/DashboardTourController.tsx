@@ -23,10 +23,10 @@ const DASHBOARD_TOUR_STEPS: TourStepConfig[] = [
     targetSelector: '[data-tour="now-hero"]',
     fallbackSelector: 'main',
     icon: '🎯',
-    title: 'Bắt đầu tại đây',
-    description: 'Đây là công việc cần sự chú ý của bạn ngay lúc này.',
-    detailedExplanation: 'Modo luôn giữ tiêu điểm vào một công việc duy nhất để hạn chế tình trạng quá tải nhận thức (executive dysfunction).',
-    primaryActionLabel: 'Đã hiểu',
+    title: 'Start Here',
+    description: 'This is the task requiring your attention right now.',
+    detailedExplanation: 'Modo maintains focus on a single task at a time to reduce cognitive overload and executive fatigue.',
+    primaryActionLabel: 'Got it',
     placement: 'bottom',
   },
   {
@@ -34,11 +34,11 @@ const DASHBOARD_TOUR_STEPS: TourStepConfig[] = [
     targetSelector: '[data-tour="next-preview"]',
     fallbackSelector: '[data-tour="now-hero"]',
     icon: '⏭️',
-    title: 'Việc tiếp theo',
-    description: 'Modo giữ bước tiếp theo luôn trong tầm mắt để bạn an tâm.',
-    detailedExplanation: 'Khoảng thời gian đệm (buffer) giữa các việc được tính toán để bạn có thời gian chuyển tiếp thoải mái.',
-    primaryActionLabel: 'Tiếp tục',
-    secondaryActionLabel: 'Quay lại',
+    title: 'Up Next',
+    description: 'Modo keeps the next step in view so you always feel prepared.',
+    detailedExplanation: 'Smart buffer intervals between tasks are automatically calculated for seamless transitions.',
+    primaryActionLabel: 'Continue',
+    secondaryActionLabel: 'Back',
     placement: 'top',
   },
   {
@@ -46,11 +46,11 @@ const DASHBOARD_TOUR_STEPS: TourStepConfig[] = [
     targetSelector: '[data-tour="quick-add-task"]',
     fallbackSelector: 'header',
     icon: '➕',
-    title: 'Thêm việc cần làm',
-    description: 'Thêm một việc bạn cần làm hôm nay một cách nhanh chóng.',
-    detailedExplanation: 'Bạn có thể bấm tạo tác vụ trực tiếp hoặc nhắn câu ngắn tự nhiên vào AI chat.',
-    primaryActionLabel: 'Thử ngay',
-    secondaryActionLabel: 'Quay lại',
+    title: 'Add a Task',
+    description: 'Quickly schedule an activity or task for today.',
+    detailedExplanation: 'You can click to create a task directly or type natural phrases in the AI chat.',
+    primaryActionLabel: 'Try it',
+    secondaryActionLabel: 'Back',
     placement: 'bottom',
   },
   {
@@ -58,11 +58,11 @@ const DASHBOARD_TOUR_STEPS: TourStepConfig[] = [
     targetSelector: '[data-tour="start-focus-btn"]',
     fallbackSelector: '[data-tour="now-hero"]',
     icon: '⚡',
-    title: 'Sẵn sàng tập trung?',
-    description: 'Tập trung vào từng việc một cùng bộ đếm giờ và nhạc nền êm dịu.',
-    detailedExplanation: 'Chế độ Focus ẩn đi toàn bộ chi tiết thừa để bạn bắt tay vào việc với lực ma sát nhỏ nhất.',
-    primaryActionLabel: 'Tiếp theo',
-    secondaryActionLabel: 'Quay lại',
+    title: 'Ready to Focus?',
+    description: 'Enter flow state with gentle timers and calming ambient sound.',
+    detailedExplanation: 'Focus Mode strips away unnecessary visual noise so you can start with zero friction.',
+    primaryActionLabel: 'Next',
+    secondaryActionLabel: 'Back',
     placement: 'top',
   },
   {
@@ -70,11 +70,11 @@ const DASHBOARD_TOUR_STEPS: TourStepConfig[] = [
     targetSelector: '[data-tour="ask-modo-input"]',
     fallbackSelector: 'main',
     icon: '💬',
-    title: 'Cần hỗ trợ?',
-    description: 'Nhắn cho Modo để lên lịch, chia nhỏ việc khó hoặc dời giờ khi mệt.',
-    detailedExplanation: 'Chỉ cần gõ câu tự nhiên ngắn gọn (ví dụ: mai 7h cafe 2h, 8h họp), Modo sẽ tự phân tích và bảo vệ các giờ nghỉ của bạn.',
-    primaryActionLabel: 'Tiếp tục',
-    secondaryActionLabel: 'Quay lại',
+    title: 'Need Assistance?',
+    description: 'Ask Modo to plan, break down challenging tasks, or rebalance when tired.',
+    detailedExplanation: 'Type naturally (e.g., "coffee tomorrow 7am 2hrs, 9am meeting"), and Modo will automatically structure and protect your recovery blocks.',
+    primaryActionLabel: 'Continue',
+    secondaryActionLabel: 'Back',
     placement: 'top',
   },
 ];
@@ -126,11 +126,11 @@ export const DashboardTourController: React.FC<DashboardTourControllerProps> = (
         {() => (
           <CoachMark
             icon="✨"
-            title="Bạn đã sẵn sàng!"
-            description="Modo sẽ chỉ giới thiệu các công cụ khác khi bạn thực sự cần đến chúng."
+            title="You're all set!"
+            description="Modo will introduce additional tools only when you actually need them."
             currentStep={DASHBOARD_TOUR_STEPS.length}
             totalSteps={DASHBOARD_TOUR_STEPS.length}
-            primaryActionLabel="Bắt đầu sử dụng"
+            primaryActionLabel="Get Started"
             onPrimaryAction={() => {
               setIsReadyStep(false);
               completeTour();

@@ -37,6 +37,8 @@ import {
   CheckCircle2,
   Target,
   HelpCircle,
+  Users,
+  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -105,7 +107,6 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useGuidanceStore } from "@/store/useGuidanceStore";
 import { DashboardTourController } from "./guidance/DashboardTourController";
 import { HelpDrawer } from "./guidance/HelpDrawer";
-import { HelpAndGuidanceSettingsCard } from "./guidance/HelpAndGuidanceSettingsCard";
 import { OnboardingWizard } from "@/features/onboarding/OnboardingWizard";
 import {
   useProjectGoals,
@@ -143,6 +144,7 @@ import {
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
   useDeleteNotificationMutation,
+  useDeleteAllReadNotificationsMutation,
   useCreateNotificationMutation,
 } from "@/hooks/useNotifications";
 import { DailyCheckinPopover } from "./DailyCheckinPopover";
@@ -157,6 +159,8 @@ import { AccessibilityProfileSettings } from "./AccessibilityProfileSettings";
 import { AdaptiveOnboardingModal } from "./AdaptiveOnboardingModal";
 import { TodayWorkloadCard } from "./TodayWorkloadCard";
 import { QuickRebalanceModal } from "./QuickRebalanceModal";
+import { FriendsChatView, useP2PChatStore } from "@/features/chat";
+import { WorkModeView } from "@/features/work-mode";
 import { useAccessibilityProfileQuery } from "@/hooks/useAccessibilityProfile";
 import { useAccessibilityStore } from "@/store/useAccessibilityStore";
 import { useWorkloadAssessmentQuery } from "@/hooks/useCognitiveLoad";
@@ -320,6 +324,8 @@ function computeDiff(before: TimeBlock[], after: TimeBlock[]): BlockDiffItem[] {
 const navigation = [
   { id: "today", label: "Day Timeline", icon: Clock3 },
   { id: "calendar", label: "Monthly Calendar", icon: CalendarDays },
+  { id: "work-mode", label: "Work Mode", icon: Briefcase },
+  { id: "friends-chat", label: "Friends & Chat", icon: Users },
   { id: "planner", label: "AI Planner", icon: ListChecks },
   { id: "interview", label: "Interview Lab", icon: Video },
   { id: "insights", label: "Insights", icon: Lightbulb },
@@ -394,13 +400,13 @@ function generateLocalAdaptiveScenarios(
       b.priority === 'PROTECTED' ||
       b.priority === 'Protected' ||
       b.isMovable === false ||
-      (b.category === 'rest' && b.title.toLowerCase().includes('ngủ'));
+      (b.category === 'rest' && (b.title.toLowerCase().includes('sleep') || b.title.toLowerCase().includes('bedtime') || b.title.toLowerCase().includes('ngủ')));
 
     const hasTodayDeadline = Boolean(b.deadline && b.deadline.trim() !== '');
 
     if (isProtected) {
       recommendedBlocks.push(b);
-      reasons.push(`Bảo vệ tuyệt đối khung giờ cố định/nghỉ ngơi: ${b.title}`);
+      reasons.push(`Protected fixed/rest time: ${b.title}`);
       continue;
     }
 
@@ -432,29 +438,29 @@ function generateLocalAdaptiveScenarios(
   recommendedBlocks.push(urgentBlockWithId);
   recommendedBlocks.sort((a, b) => toMin(a.startTime) - toMin(b.startTime));
 
-  reasons.push("Bảo vệ tuyệt đối khung giờ ngủ (23:00–07:00) và các block Protected.");
+  reasons.push("Strictly protect sleep hours (23:00–07:00) and Protected fixed blocks.");
   if (shiftedTitles.length > 0) {
-    reasons.push(`Tự động dời ${shiftedTitles.join(', ')} kèm 15 phút đệm chuyển tiếp.`);
+    reasons.push(`Automatically shifted ${shiftedTitles.join(', ')} with a 15-minute transition buffer.`);
   }
   if (deferredTitles.length > 0) {
-    reasons.push(`Hoãn ${deferredTitles.join(', ')} sang Tomorrow Inbox để không làm việc đêm muộn.`);
+    reasons.push(`Deferred ${deferredTitles.join(', ')} to Tomorrow Inbox to prevent late night burnout.`);
   }
 
   const explanation: ExplanationDetails = {
-    whatChanged: `Sự kiện ${urgentBlock.title} (${urgentBlock.startTime}–${urgentBlock.endTime}) gây trùng lặp lịch tối.`,
+    whatChanged: `New event ${urgentBlock.title} (${urgentBlock.startTime}–${urgentBlock.endTime}) created a schedule conflict.`,
     whatWillHappen: shiftedTitles.length > 0
-      ? `Dời các hoạt động linh hoạt sang slot sau ${urgentBlock.endTime} và chèn 15m đệm.`
-      : `Tối ưu hóa lịch trình và bảo toàn giờ nghỉ ngơi.`,
+      ? `Shift flexible tasks to start after ${urgentBlock.endTime} with 15m safety buffers.`
+      : `Optimized daily rhythm and safeguarded rest blocks.`,
     reasons,
     confidenceLevel: 0.96,
   };
 
   const recommended: ScenarioOption = {
     id: 'recommended',
-    title: '✦ Điều chỉnh thông minh (Khuyến nghị)',
-    description: `Phương án cân bằng nhất: Xếp ${urgentBlock.title}, trượt các task liên quan và giữ nguyên giờ nghỉ ngơi.`,
+    title: '✦ Smart Balanced Adjustment (Recommended)',
+    description: `Most balanced plan: Schedule ${urgentBlock.title}, cascade affected tasks, and preserve sleep hours.`,
     energyImpact: 'medium',
-    highlightText: 'Bảo toàn năng lượng và hạn chót mà không gây quá tải não bộ.',
+    highlightText: 'Preserves cognitive bandwidth and milestones without mental fatigue.',
     tag: 'Optimized',
     blocks: recommendedBlocks,
   };
@@ -490,10 +496,10 @@ function generateLocalAdaptiveScenarios(
 
   const altCascade: ScenarioOption = {
     id: 'alt_cascade',
-    title: 'Dời toàn bộ về sau (Cascade Shift)',
-    description: `Trượt toàn bộ công việc bị trùng sang khung giờ muộn hơn kèm 15 phút đệm.`,
+    title: 'Cascade Shift All',
+    description: `Shift all overlapping activities into later open time slots with 15-minute transition buffers.`,
     energyImpact: 'medium',
-    highlightText: 'Giữ trọn vẹn 100% công việc trong ngày.',
+    highlightText: 'Retains 100% of planned tasks on today\'s timeline.',
     tag: 'Alternative',
     blocks: altCascadeBlocks,
   };
@@ -510,10 +516,10 @@ function generateLocalAdaptiveScenarios(
 
   const altDefer: ScenarioOption = {
     id: 'alt_defer',
-    title: 'Zero-Guilt / Tạm hoãn sang ngày mai',
-    description: `Tạm hoãn các hoạt động bị trùng sang Tomorrow Inbox để dồn tâm trí cho ${urgentBlock.title}.`,
+    title: 'Zero-Guilt / Defer to Tomorrow',
+    description: `Defer conflicting tasks to Tomorrow Inbox so you can focus entirely on ${urgentBlock.title}.`,
     energyImpact: 'low',
-    highlightText: 'Bảo vệ năng lượng nhận thức, không cảm thấy có lỗi.',
+    highlightText: 'Protects mental bandwidth with zero pressure.',
     tag: 'Low-Demand',
     blocks: altDeferBlocks,
   };
@@ -544,7 +550,7 @@ export function AdaptiveApp() {
   const [plannerMessages, setPlannerMessages] = useState<PlannerMessage[]>([
     {
       role: "assistant",
-      text: "Xin chào! Bạn muốn lên kế hoạch hay thêm lịch trình gì hôm nay?",
+      text: "Hello! How can I help you plan or adjust your schedule today?",
     },
   ]);
   const [plannerThinking, setPlannerThinking] = useState(false);
@@ -701,8 +707,8 @@ export function AdaptiveApp() {
         id: `relief-applied-${Date.now()}`,
         type: 'SCHEDULE_CHANGED',
         priority: 'NORMAL',
-        title: 'Đã giảm tải lịch trình hôm nay',
-        message: 'Các task nặng đã được dời để bạn có thêm thời gian nghỉ ngơi và hồi phục thể trạng.',
+        title: 'Schedule load relieved for today',
+        message: 'Demanding tasks have been shifted so you have more time to recharge and rest.',
       });
       setProactiveAdaptation(null);
     } catch (err) {
@@ -725,6 +731,36 @@ export function AdaptiveApp() {
 
   const handleToggleComplete = async (block: TimeBlock) => {
     const completed = !block.isCompleted;
+
+    // Validation: Prevent marking future time block as completed
+    if (completed) {
+      const today = getTodayDateString();
+      const isFutureDate = selectedDate > today;
+      let isFutureTimeToday = false;
+      if (selectedDate === today && block.startTime) {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const startMinutes = timeStringToMinutes(block.startTime);
+        if (startMinutes > currentMinutes) {
+          isFutureTimeToday = true;
+        }
+      }
+
+      if (isFutureDate || isFutureTimeToday) {
+        handleShowToast({
+          id: `future-block-${block.id}-${Date.now()}`,
+          type: 'FUTURE_COMPLETION_PREVENTED',
+          priority: 'NORMAL',
+          title: 'Cannot complete yet',
+          message: `Focus block "${block.title}" starts at ${block.startTime} in the future. You can only mark it as complete once it has started or finished.`,
+          actionLabel: 'Got it',
+          onAction: () => {},
+          createdAt: Date.now(),
+        });
+        return;
+      }
+    }
+
     try {
       await completionMutation.mutateAsync({ block, date: selectedDate, completed });
     } catch (error) {
@@ -733,10 +769,10 @@ export function AdaptiveApp() {
         id: `completion-error-${block.id}`,
         type: 'COMPLETION_UPDATE_FAILED',
         priority: 'HIGH',
-        title: 'Chưa thể lưu trạng thái',
-        message: error instanceof Error ? error.message : 'Vui lòng thử lại khi kết nối ổn định.',
+        title: 'Unable to update status',
+        message: error instanceof Error ? error.message : 'Please check your connection and try again.',
         timeBlockId: block.id,
-        actionLabel: 'Thử lại',
+        actionLabel: 'Retry',
         onAction: retry,
         createdAt: Date.now(),
       });
@@ -745,14 +781,18 @@ export function AdaptiveApp() {
 
   const { data: notifications = [], refetch: refetchNotifications } = useNotificationsQuery();
   const { data: unreadNotificationCount = 0 } = useUnreadNotificationCountQuery();
+  const unreadChatCount = useP2PChatStore((s) =>
+    s.friends.reduce((acc, f) => acc + (f.unreadCount || 0), 0)
+  );
   const markNotificationReadMutation = useMarkNotificationAsReadMutation();
   const markAllNotificationsReadMutation = useMarkAllNotificationsAsReadMutation();
   const deleteNotificationMutation = useDeleteNotificationMutation();
+  const deleteAllReadNotificationsMutation = useDeleteAllReadNotificationsMutation();
   const createNotificationMutation = useCreateNotificationMutation();
 
   const handleCreateTestNotification = () => {
-    const testTitle = "Thông báo thử nghiệm: Ca làm việc sắp bắt đầu";
-    const testMessage = "Đây là thông báo mẫu để bạn kiểm tra âm thanh chuông 432Hz, popup nổi và danh sách hộp thư thông báo.";
+    const testTitle = "Test Alert: Scheduled focus session starting soon";
+    const testMessage = "This is a sample notification to verify 432Hz sound chimes, floating alerts, and notification center logs.";
     
     // 1. Create persistent record in database
     createNotificationMutation.mutate({
@@ -776,7 +816,7 @@ export function AdaptiveApp() {
         priority: "NORMAL",
         title: testTitle,
         message: testMessage,
-        actionLabel: "Đã hiểu",
+        actionLabel: "Got it",
         onAction: () => {},
         createdAt: Date.now(),
       });
@@ -819,7 +859,7 @@ export function AdaptiveApp() {
         setPlannerMessages([
           {
             role: "assistant",
-            text: "Xin chào! Bạn muốn lên kế hoạch hay thêm lịch trình gì hôm nay?",
+            text: "Hello! How can I help you plan or adjust your schedule today?",
           },
         ]);
       }
@@ -831,7 +871,7 @@ export function AdaptiveApp() {
     setPlannerMessages([
       {
         role: "assistant",
-        text: "Xin chào! Bạn muốn lên kế hoạch hay thêm lịch trình gì hôm nay?",
+        text: "Hello! How can I help you plan or adjust your schedule today?",
       },
     ]);
     setPendingActivity(null);
@@ -867,11 +907,11 @@ export function AdaptiveApp() {
 
   const formatDateForDisplay = (dStr?: string) => {
     if (!dStr) return "";
-    if (dStr === todayStr) return `Hôm nay (${format(new Date(), 'dd/MM')})`;
-    if (dStr === tomorrowStr) return `Ngày mai (${format(tmDate, 'dd/MM')})`;
+    if (dStr === todayStr) return `Today (${format(new Date(), 'MMM dd')})`;
+    if (dStr === tomorrowStr) return `Tomorrow (${format(tmDate, 'MMM dd')})`;
     const parts = dStr.split('-');
     if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return `${parts[1]}/${parts[2]}/${parts[0]}`;
     }
     return dStr;
   };
@@ -948,6 +988,24 @@ export function AdaptiveApp() {
       const parsedBlock = await parseIntentMutation.mutateAsync(cleanText);
       setPlannerThinking(false);
 
+      // 1. If AI classified as conversational / emotional support or general chit-chat
+      if (parsedBlock && (parsedBlock.intentType === "CONVERSATION" || !parsedBlock.title)) {
+        const reply = parsedBlock.replyMessage || "I'm listening. Take a deep breath, and let's protect your calm today. I'm right here with you.";
+        setPlannerMessages((current) => [
+          ...current,
+          {
+            role: "assistant",
+            text: reply,
+          },
+        ]);
+        setPendingActivity(null);
+        setPendingConflicts([]);
+        setPendingRecommendedScenario(null);
+        setPendingAlternativeScenarios([]);
+        setPendingExplanation(null);
+        return;
+      }
+
       if (parsedBlock && parsedBlock.title) {
         const targetDate = parsedBlock.date || selectedDate;
 
@@ -956,7 +1014,7 @@ export function AdaptiveApp() {
             ...current,
             {
               role: "assistant",
-              text: `⚠️ **Không thể lên lịch cho ngày trong quá khứ:** Ngày bạn yêu cầu (**${formatDateForDisplay(targetDate)}**) đã qua. Vui lòng chọn ngày hôm nay hoặc một ngày trong tương lai để lên lịch trình.`,
+              text: `⚠️ **Cannot schedule for a past date:** The requested date (**${formatDateForDisplay(targetDate)}**) has passed. Please select today or a future date to schedule your plan.`,
             },
           ]);
           setPendingActivity(null);
@@ -979,8 +1037,8 @@ export function AdaptiveApp() {
           isCompleted: false,
           isBufferBlock: parsedBlock.isBufferBlock || false,
           microSteps: parsedBlock.microSteps || [
-            { id: "p-1", text: "Chuẩn bị công việc và không gian", done: false },
-            { id: "p-2", text: "Bắt đầu từng bước nhỏ", done: false },
+            { id: "p-1", text: "Prepare focus workspace & materials", done: false },
+            { id: "p-2", text: "Start with initial micro-step", done: false },
           ],
           date: targetDate,
         };
@@ -1049,7 +1107,7 @@ export function AdaptiveApp() {
             ...current,
             {
               role: "assistant",
-              text: `⚠️ **Phát hiện trùng khung giờ:** Sự kiện **${newBlock.title}** (${newBlock.startTime}–${newBlock.endTime}) vào ngày **${formatDateForDisplay(targetDate)}** bị trùng giờ với ${conflictDetails}.\n\nAI đã tính toán phương án điều chỉnh tối ưu nhất kèm giải thích minh bạch bên dưới để bạn duyệt 1-chạm:`,
+              text: `⚠️ **Schedule overlap detected:** Event **${newBlock.title}** (${newBlock.startTime}–${newBlock.endTime}) on **${formatDateForDisplay(targetDate)}** overlaps with ${conflictDetails}.\n\nAdaptive AI calculated optimal adjustment scenarios below with transparent rationale for your 1-tap review:`,
             },
           ]);
         } else {
@@ -1057,12 +1115,12 @@ export function AdaptiveApp() {
           setPendingRecommendedScenario(null);
           setPendingAlternativeScenarios([]);
           setPendingExplanation(null);
-          const dateSuffix = targetDate === todayStr ? "" : ` vào ngày **${formatDateForDisplay(targetDate)}**`;
+          const dateSuffix = targetDate === todayStr ? "" : ` on **${formatDateForDisplay(targetDate)}**`;
           setPlannerMessages((current) => [
             ...current,
             {
               role: "assistant",
-              text: `Đã rõ! Tôi đã tìm thấy khung giờ phù hợp cho **${newBlock.title}**${dateSuffix} từ **${newBlock.startTime}–${newBlock.endTime}**, bảo toàn nguyên vẹn khoảng đệm chuyển tiếp an toàn. Vui lòng xem lại và xác nhận bên dưới.`,
+              text: `Got it! I found an open slot for **${newBlock.title}**${dateSuffix} from **${newBlock.startTime}–${newBlock.endTime}**, keeping your transition safety buffers intact. Please review and confirm below.`,
             },
           ]);
         }
@@ -1075,7 +1133,50 @@ export function AdaptiveApp() {
       setPendingRecommendedScenario(null);
       setPendingAlternativeScenarios([]);
       setPendingExplanation(null);
-      const lower = cleanText.toLowerCase();
+      const lower = cleanText.toLowerCase().trim();
+
+      const isGreeting = lower.match(/^(hi|hello|hey|chào|chào bạn|chao|alo|alo modo|modo ơi|modo oi|ê|helo|hi modo|hello modo)[.!?~]*$/i)
+        || lower.includes("chào bạn") || lower.includes("chào modo") || lower.includes("hello modo");
+
+      const isEmotionalOrChat = lower.includes("mệt") || lower.includes("tired") || lower.includes("chán")
+        || lower.includes("áp lực") || lower.includes("stress") || lower.includes("quá tải")
+        || lower.includes("overwhelm") || lower.includes("lo lắng") || lower.includes("anxious")
+        || lower.includes("tâm sự") || lower.includes("nói chuyện") || lower.includes("chat")
+        || lower.includes("buồn") || lower.includes("sad") || lower.includes("mất tập trung")
+        || lower.includes("không muốn làm") || lower.includes("bạn là ai") || lower.includes("who are you")
+        || lower.includes("cảm ơn") || lower.includes("thank") || lower.includes("làm sao để")
+        || lower.includes("lời khuyên") || lower.includes("advice") || lower.includes("bạn khoẻ không")
+        || lower.includes("how are you");
+
+      const hasTimeIndicator = lower.match(/\b(\d{1,2}h|\d{1,2}:\d{2}|\d{1,2}g|sáng|chiều|tối|đêm|am|pm|mai|mốt|tomorrow|yesterday|ngày \d{1,2}|hôm \d{1,2})\b/i);
+      const hasTaskKeywords = lower.includes("họp") || lower.includes("meeting") || lower.includes("khám")
+        || lower.includes("gym") || lower.includes("tập") || lower.includes("chạy bộ")
+        || lower.includes("học") || lower.includes("deadline") || lower.includes("nộp")
+        || lower.includes("cafe") || lower.includes("cà phê") || lower.includes("ăn tối") || lower.includes("dinner");
+
+      if ((isGreeting || isEmotionalOrChat) && !hasTimeIndicator && !hasTaskKeywords) {
+        let reply = "I'm listening. Take a deep breath, and let's protect your calm today. I'm right here with you.";
+        if (isGreeting) {
+          reply = "Hello! I'm Modo, your calm companion. How are you feeling today? You can share anything on your mind, or let me know if you'd like to plan your schedule.";
+        } else if (lower.includes("mệt") || lower.includes("tired") || lower.includes("quá tải") || lower.includes("overwhelm")) {
+          reply = "I hear you, and it is completely okay to feel exhausted. Take a deep breath, drop your shoulders, and give yourself permission to rest. You don't have to push through everything right now. I'm right here with you.";
+        } else if (lower.includes("stress") || lower.includes("áp lực") || lower.includes("lo lắng") || lower.includes("anxious")) {
+          reply = "It's completely normal to feel stressed when things pile up. Let's take it one small step at a time. Sip some cool water, unclench your jaw, and let's protect your calm together.";
+        } else if (lower.includes("tâm sự") || lower.includes("nói chuyện")) {
+          reply = "I'm always here to listen. Tell me what's on your mind—whether it's thoughts about your day, challenges you're facing, or just wanting a friendly chat.";
+        } else if (lower.includes("cảm ơn") || lower.includes("thank")) {
+          reply = "You're very welcome! I'm glad I could be here for you. Take care of yourself today!";
+        }
+
+        setPlannerMessages((current) => [
+          ...current,
+          {
+            role: "assistant",
+            text: reply,
+          },
+        ]);
+        return;
+      }
 
       // Heuristic date
       let targetDate = selectedDate;
@@ -1094,7 +1195,7 @@ export function AdaptiveApp() {
           const y = dmyMatch[3] || today.getFullYear().toString();
           targetDate = `${y}-${m}-${d}`;
         } else {
-          const singleDayMatch = cleanText.match(/(?:ngày|hôm|mùng)\s*(\d{1,2})\b/i);
+          const singleDayMatch = cleanText.match(/(?:ngày|hôm|mùng|day)?\s*(\d{1,2})\b/i);
           if (singleDayMatch) {
             const dNum = parseInt(singleDayMatch[1], 10);
             if (dNum >= 1 && dNum <= 31) {
@@ -1184,7 +1285,7 @@ export function AdaptiveApp() {
           ...current,
           {
             role: "assistant",
-            text: `⚠️ **Không thể lên lịch cho ngày trong quá khứ:** Ngày bạn yêu cầu (**${formatDateForDisplay(targetDate)}**) đã qua. Vui lòng chọn ngày hôm nay hoặc một ngày trong tương lai để lên lịch trình.`,
+            text: `⚠️ **Cannot schedule for a past date:** The requested date (**${formatDateForDisplay(targetDate)}**) has passed. Please select today or a future date to schedule your plan.`,
           },
         ]);
         setPendingActivity(null);
@@ -1194,11 +1295,11 @@ export function AdaptiveApp() {
       const isPark = lower.includes("công viên") || lower.includes("park");
       const isCafe = lower.includes("cafe") || lower.includes("coffee") || lower.includes("cà phê");
       const isGym = lower.includes("gym") || lower.includes("tập") || lower.includes("workout");
-      const isUrgentMeeting = lower.includes("đột xuất") || lower.includes("khẩn") || lower.includes("gấp");
+      const isUrgentMeeting = lower.includes("đột xuất") || lower.includes("khẩn") || lower.includes("gấp") || lower.includes("urgent");
 
       const newBlock: Omit<TimeBlock, 'id'> = {
-        title: isPark ? "Đi dạo công viên" : isCafe ? "Đi cà phê" : isGym ? "Tập gym / Thể dục" : isUrgentMeeting ? "Cuộc họp đột xuất" : "Focused Work Session",
-        detail: isPark ? "Thư giãn ngoài trời & hít thở không khí tự nhiên" : isCafe ? "The Workshop Cafe · Nạp lại năng lượng xã hội" : isGym ? "Rèn luyện thể lực & duy trì sức khỏe" : isUrgentMeeting ? "Cuộc họp phát sinh khẩn cấp cần ưu tiên xử lý" : "Dedicated priority task",
+        title: isPark ? "Park Walk" : isCafe ? "Coffee Break" : isGym ? "Gym Workout" : isUrgentMeeting ? "Urgent Meeting" : "Focused Work Session",
+        detail: isPark ? "Outdoor walk & fresh air" : isCafe ? "The Workshop Cafe · Social recharge" : isGym ? "Physical exercise & wellness" : isUrgentMeeting ? "Urgent unscheduled priority meeting" : "Dedicated priority task",
         startTime,
         endTime,
         category: isPark ? "rest" : isCafe ? "social" : isGym ? "health" : isUrgentMeeting ? "urgent" : "work",
@@ -1208,8 +1309,8 @@ export function AdaptiveApp() {
         isCompleted: false,
         date: targetDate,
         microSteps: [
-          { id: "p-1", text: "Chuẩn bị tài liệu và không gian", done: false },
-          { id: "p-2", text: "Bắt đầu từng bước nhỏ", done: false },
+          { id: "p-1", text: "Prepare focus workspace & materials", done: false },
+          { id: "p-2", text: "Start with initial micro-step", done: false },
         ],
       };
 
@@ -1251,7 +1352,7 @@ export function AdaptiveApp() {
           ...current,
           {
             role: "assistant",
-            text: `⚠️ **Phát hiện trùng khung giờ:** Sự kiện **${newBlock.title}** (${newBlock.startTime}–${newBlock.endTime}) vào ngày **${formatDateForDisplay(targetDate)}** bị trùng giờ với ${conflictDetails}.\n\nAI đã tính toán phương án điều chỉnh tối ưu nhất kèm giải thích minh bạch bên dưới để bạn duyệt 1-chạm:`,
+            text: `⚠️ **Schedule overlap detected:** Event **${newBlock.title}** (${newBlock.startTime}–${newBlock.endTime}) on **${formatDateForDisplay(targetDate)}** overlaps with ${conflictDetails}.\n\nAdaptive AI calculated optimal adjustment scenarios below with transparent rationale for your 1-tap review:`,
           },
         ]);
       } else {
@@ -1259,12 +1360,12 @@ export function AdaptiveApp() {
         setPendingRecommendedScenario(null);
         setPendingAlternativeScenarios([]);
         setPendingExplanation(null);
-        const dateSuffix = targetDate === todayStr ? "" : ` vào ngày **${formatDateForDisplay(targetDate)}**`;
+        const dateSuffix = targetDate === todayStr ? "" : ` on **${formatDateForDisplay(targetDate)}**`;
         setPlannerMessages((current) => [
           ...current,
           {
             role: "assistant",
-            text: `Đã rõ! Tôi đã tìm thấy khung giờ phù hợp cho **${newBlock.title}**${dateSuffix} từ **${newBlock.startTime}–${newBlock.endTime}**, bảo toàn nguyên vẹn khoảng đệm chuyển tiếp an toàn. Vui lòng xem lại và xác nhận bên dưới.`,
+            text: `Got it! I found an open slot for **${newBlock.title}**${dateSuffix} from **${newBlock.startTime}–${newBlock.endTime}**, keeping your transition safety buffers intact. Please review and confirm below.`,
           },
         ]);
       }
@@ -1279,7 +1380,7 @@ export function AdaptiveApp() {
           ...current,
           {
             role: "assistant",
-            text: `⚠️ Không thể thêm lịch trình cho ngày trong quá khứ (${formatDateForDisplay(targetDate)}).`,
+            text: `⚠️ Cannot add schedule for a past date (${formatDateForDisplay(targetDate)}).`,
           },
         ]);
         setPendingActivity(null);
@@ -1314,7 +1415,7 @@ export function AdaptiveApp() {
         ...current,
         {
           role: "assistant",
-          text: `⚠️ Không thể điều chỉnh lịch trình cho ngày trong quá khứ (${formatDateForDisplay(targetDate)}).`,
+          text: `⚠️ Cannot adjust schedule for a past date (${formatDateForDisplay(targetDate)}).`,
         },
       ]);
       setPendingActivity(null);
@@ -1364,7 +1465,7 @@ export function AdaptiveApp() {
     setUndoToast({
       visible: true,
       actionId,
-      message: `✓ Đã áp dụng: ${scenario.title}`,
+      message: `✓ Applied: ${scenario.title}`,
       targetDate,
     });
     const tid = window.setTimeout(() => {
@@ -1395,7 +1496,7 @@ export function AdaptiveApp() {
         ...current,
         {
           role: "assistant",
-          text: `🎉 **Đã áp dụng lộ trình "${scenario.title}" thành công!**\n\nCác phiên làm việc đã được phân bổ vào lịch trình theo từng ngày kèm **${scenario.bufferDays} ngày đệm an toàn**. Bạn có thể theo dõi checklist subtasks ngay trên Day Timeline!`,
+          text: `🎉 **Successfully applied roadmap: "${scenario.title}"!**\n\nFocus sessions have been distributed across days with **${scenario.bufferDays} safety buffer days**. You can track milestone subtasks directly on your Day Timeline!`,
         },
       ]);
       setPendingGoalDecomposition(null);
@@ -1428,7 +1529,7 @@ export function AdaptiveApp() {
       ...current,
       {
         role: "assistant",
-        text: `✨ **Đã tái cân bằng lịch trình thành công (${option.title})!**\n\n${option.impactSummary}. Toàn bộ giờ nghỉ ngơi và meeting của bạn đều được bảo toàn.`,
+        text: `✨ **Schedule rebalanced successfully (${option.title})!**\n\n${option.impactSummary}. All your rest hours and protected meetings are preserved.`,
       },
     ]);
     refetchBlocks();
@@ -1443,7 +1544,7 @@ export function AdaptiveApp() {
       setUndoToast({
         visible: true,
         actionId: null,
-        message: `Đã áp dụng phương án: "${scenarioTitle}"`,
+        message: `Applied option: "${scenarioTitle}"`,
         targetDate: selectedDate,
       });
       if (undoTimeoutId) window.clearTimeout(undoTimeoutId);
@@ -1478,7 +1579,7 @@ export function AdaptiveApp() {
       setUndoToast({
         visible: false,
         actionId: null,
-        message: "Đã hoàn tác toàn bộ điều chỉnh về trạng thái ban đầu",
+        message: "Reverted all schedule adaptations to original state",
       });
       refetchBlocks();
       refetchAdaptations();
@@ -1554,6 +1655,7 @@ export function AdaptiveApp() {
           onNavigate={navigate}
           voiceOn={voiceOn}
           unreadCount={unreadNotificationCount}
+          unreadChatCount={unreadChatCount}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
         />
@@ -1565,7 +1667,7 @@ export function AdaptiveApp() {
                 <Brand />
                 <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X /></Button>
               </div>
-              <NavItems active={view} onNavigate={navigate} unreadCount={unreadNotificationCount} className="mt-8" />
+              <NavItems active={view} onNavigate={navigate} unreadCount={unreadNotificationCount} unreadChatCount={unreadChatCount} className="mt-8" />
             </div>
           </div>
         )}
@@ -1584,9 +1686,6 @@ export function AdaptiveApp() {
               </Button>
               <div className="rise">
                 <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{title}</h1>
-                {subtitleFor(view) && (
-                  <p className="mt-1.5 text-sm text-muted-foreground">{subtitleFor(view)}</p>
-                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -1595,10 +1694,10 @@ export function AdaptiveApp() {
                   type="button"
                   onClick={() => startTour(0)}
                   className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-colors cursor-pointer"
-                  title="Tiếp tục trải nghiệm hướng dẫn 5 bước"
+                  title="Resume 5-step onboarding tour"
                 >
                   <Play className="size-3 fill-current" />
-                  Tiếp tục hướng dẫn
+                  Resume Tour
                 </button>
               )}
               <SensoryModeSwitcher />
@@ -1606,10 +1705,10 @@ export function AdaptiveApp() {
                 variant="outline"
                 className="inline-flex items-center gap-1.5 rounded-full bg-card/60 text-xs font-semibold border-border/80 text-foreground hover:bg-card hover:border-teal-500/50 transition-colors cursor-pointer"
                 onClick={() => setHelpDrawerOpen(true)}
-                title="Trợ giúp nhanh & Hướng dẫn (Quick Help)"
+                title="Quick Help & Guidance"
               >
                 <HelpCircle className="size-3.5 text-teal-600 dark:text-teal-400" />
-                <span className="hidden sm:inline">Trợ giúp</span>
+                <span className="hidden sm:inline">Help</span>
               </Button>
               <Button
                 variant="outline"
@@ -1617,7 +1716,7 @@ export function AdaptiveApp() {
                 onClick={() => setIsActivityHistoryOpen(true)}
               >
                 <History className="size-3.5 text-amber-500" />
-                Lịch sử quyết định
+                Decision History
               </Button>
               <Button variant="outline" size="icon" className="relative bg-card/60" onClick={() => navigate("notifications")} aria-label="Notifications">
                 <Bell />
@@ -1688,7 +1787,26 @@ export function AdaptiveApp() {
                 setSelectedDate(`${nextYear}-${nextMonth}-${nextDay}`);
               }}
               onResetToday={() => setSelectedDate(getTodayDateString())}
-              onAddNewBlock={() => setEditingTimeBlock({ id: '', title: '', startTime: '09:00', endTime: '10:00', category: 'work', energyLevel: 'medium', priority: 'Normal' } as any)}
+              onAddNewBlock={() => {
+                const now = new Date();
+                const curH = now.getHours();
+                const curM = now.getMinutes();
+                const startM = curM < 30 ? 30 : 0;
+                const startH = curM < 30 ? curH : (curH + 1) % 24;
+                const endH = (startH + 1) % 24;
+                const startTime = `${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}`;
+                const endTime = `${String(endH).padStart(2, '0')}:${String(startM).padStart(2, '0')}`;
+                setEditingTimeBlock({
+                  id: '',
+                  title: '',
+                  startTime,
+                  endTime,
+                  category: 'work',
+                  energyLevel: 'medium',
+                  priority: 'Normal',
+                  date: selectedDate,
+                } as any);
+              }}
             />
           )}
           {view === "calendar" && (
@@ -1699,6 +1817,8 @@ export function AdaptiveApp() {
               }}
             />
           )}
+          {view === "work-mode" && <WorkModeView />}
+          {view === "friends-chat" && <FriendsChatView />}
           {view === "planner" && (
             <PlannerView
               messages={plannerMessages}
@@ -1768,6 +1888,7 @@ export function AdaptiveApp() {
               onMarkAsRead={(id) => markNotificationReadMutation.mutate(id)}
               onMarkAllAsRead={() => markAllNotificationsReadMutation.mutate()}
               onDeleteNotification={(id) => deleteNotificationMutation.mutate(id)}
+              onDeleteAllRead={() => deleteAllReadNotificationsMutation.mutate()}
               preferences={notificationPreferences}
               onUpdatePreferences={(newPref) => {
                 setNotificationPreferences((prev) => {
@@ -1788,7 +1909,26 @@ export function AdaptiveApp() {
             />
           )}
           {view === "settings" && <SettingsView onNavigate={navigate} />}
-          {view === "preferences" && <PreferencesView voiceOn={voiceOn} setVoiceOn={setVoiceOn} askFirst={askFirst} setAskFirst={setAskFirst} allowSuggestions={allowSuggestions} setAllowSuggestions={setAllowSuggestions} />}
+          {view === "preferences" && (
+            <PreferencesView
+              voiceOn={voiceOn}
+              setVoiceOn={setVoiceOn}
+              askFirst={askFirst}
+              setAskFirst={setAskFirst}
+              allowSuggestions={allowSuggestions}
+              setAllowSuggestions={setAllowSuggestions}
+              remindMinutesBefore={notificationPreferences.remindMinutesBefore || 10}
+              onUpdateRemindMinutes={(mins) => {
+                setNotificationPreferences((prev) => {
+                  const updated = { ...prev, remindMinutesBefore: mins };
+                  try {
+                    localStorage.setItem('adaptive_notification_preferences', JSON.stringify(updated));
+                  } catch {}
+                  return updated;
+                });
+              }}
+            />
+          )}
           {view === "companion" && <CompanionView voiceOn={voiceOn} setVoiceOn={setVoiceOn} importantOn={importantOn} setImportantOn={setImportantOn} transitionOn={transitionOn} setTransitionOn={setTransitionOn} testing={voiceTesting} onTest={testVoice} />}
           {view === "profile" && <ProfileView onRetakeOnboarding={() => setIsOnboardingOpen(true)} />}
         </main>
@@ -1806,7 +1946,8 @@ export function AdaptiveApp() {
           >
             <item.icon className="size-4" />
             {item.label}
-            {item.id === "notifications" && unreadNotificationCount > 0 && (
+            {((item.id === "notifications" && unreadNotificationCount > 0) ||
+              (item.id === "friends-chat" && unreadChatCount > 0)) && (
               <span className="absolute top-1.5 right-2 size-2 rounded-full bg-primary ring-2 ring-background" />
             )}
           </button>
@@ -1843,13 +1984,13 @@ export function AdaptiveApp() {
                   onClick={handleUndoAdaptation}
                 >
                   <RotateCcw className="size-3.5" />
-                  Hoàn tác (Undo)
+                  Undo
                 </Button>
                 <button
                   type="button"
                   onClick={() => setUndoToast((prev) => ({ ...prev, visible: false }))}
                   className="p-1 rounded-lg hover:bg-background/10 text-background/60 hover:text-background transition-colors"
-                  title="Đóng thông báo"
+                  title="Dismiss notification"
                 >
                   <X className="size-4" />
                 </button>
@@ -1952,7 +2093,19 @@ export function AdaptiveApp() {
 }
 
 function Brand() {
-  return <div className="flex items-center gap-2.5"><span className="grid size-9 place-items-center rounded-xl bg-primary font-display text-sm font-extrabold text-primary-foreground">A</span><div><p className="font-display text-[15px] font-extrabold leading-none">Adaptive</p><p className="mt-1 font-mono text-[9px] text-muted-foreground">YOUR DAY, WITH YOU</p></div></div>;
+  return (
+    <div className="flex items-center gap-2.5">
+      <img
+        src={companionImage}
+        alt="Modo"
+        className="size-9 rounded-2xl object-cover border border-primary/20 shadow-sm shrink-0"
+      />
+      <div>
+        <p className="font-display text-[15px] font-extrabold leading-none">Modo</p>
+        <p className="mt-1 font-mono text-[9px] text-muted-foreground">YOUR DAY, WITH YOU</p>
+      </div>
+    </div>
+  );
 }
 
 function DesktopSidebar({
@@ -1960,6 +2113,7 @@ function DesktopSidebar({
   onNavigate,
   voiceOn: _voiceOn,
   unreadCount,
+  unreadChatCount,
   collapsed,
   onToggleCollapse,
 }: {
@@ -1967,60 +2121,66 @@ function DesktopSidebar({
   onNavigate: (id: ViewId) => void;
   voiceOn: boolean;
   unreadCount?: number;
+  unreadChatCount?: number;
   collapsed: boolean;
   onToggleCollapse: () => void;
 }) {
   return (
     <aside
-      className={`sticky top-4 sm:top-5 self-start hidden h-[calc(100vh-2rem)] shrink-0 flex-col justify-between transition-all duration-300 ease-in-out md:flex z-30 ${
-        collapsed ? "w-18" : "w-56"
+      className={`sticky top-4 sm:top-5 self-start hidden h-[calc(100vh-2.5rem)] shrink-0 flex-col justify-between transition-all duration-300 ease-in-out md:flex z-30 ${
+        collapsed ? "w-16 items-center" : "w-56"
       }`}
     >
-      <div>
-        <div className={`flex items-center justify-between gap-2 ${collapsed ? "flex-col items-center" : ""}`}>
+      <div className="w-full">
+        <div className={collapsed ? "flex items-center justify-center mb-6" : "flex items-center justify-between gap-2 mb-6"}>
           {!collapsed ? (
-            <Brand />
+            <>
+              <Brand />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleCollapse}
+                className="size-8 rounded-xl text-muted-foreground hover:bg-card/80 hover:text-foreground cursor-pointer"
+                title="Collapse sidebar"
+                aria-label="Collapse sidebar"
+              >
+                <Menu className="size-4" />
+              </Button>
+            </>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onToggleCollapse}
-              title="Mở rộng menu"
-              className="grid size-9 place-items-center rounded-xl bg-primary font-display text-sm font-extrabold text-primary-foreground transition-transform hover:scale-105"
+              className="size-10 rounded-xl text-foreground hover:bg-card/80 hover:text-primary transition-colors cursor-pointer"
+              title="Expand sidebar"
+              aria-label="Expand sidebar"
             >
-              A
-            </button>
+              <Menu className="size-5" />
+            </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleCollapse}
-            className="size-8 rounded-xl text-muted-foreground hover:bg-card/80 hover:text-foreground"
-            title={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
-            aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
-          >
-            <Menu className="size-4" />
-          </Button>
         </div>
 
         <NavItems
           active={active}
           onNavigate={onNavigate}
           unreadCount={unreadCount}
+          unreadChatCount={unreadChatCount}
           collapsed={collapsed}
-          className={collapsed ? "mt-6 space-y-2" : "mt-8"}
+          className="space-y-2"
         />
       </div>
 
-      <div>
+      <div className="w-full">
         <button
           type="button"
           onClick={() => onNavigate("profile")}
-          title="Thai · Hồ sơ cá nhân"
-          className={`flex w-full items-center gap-2.5 rounded-2xl border text-left transition-all ${
+          title="Thai · Profile"
+          className={`flex w-full items-center transition-all cursor-pointer ${
             active === "profile" ? "border-primary/30 bg-primary/10" : "border-border/70 bg-card/45 hover:bg-card/70"
-          } ${collapsed ? "justify-center p-1.5" : "p-2.5"}`}
+          } ${collapsed ? "size-10 justify-center rounded-xl mx-auto border" : "gap-2.5 rounded-2xl border p-2.5 text-left"}`}
         >
-          <img src={avatarImage} alt="Thai" width={512} height={512} className="size-9 rounded-xl object-cover shrink-0" />
+          <img src={avatarImage} alt="Thai" width={512} height={512} className="size-7 rounded-lg object-cover shrink-0" />
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-bold leading-none text-foreground truncate">Thai</p>
@@ -2037,19 +2197,26 @@ function NavItems({
   active,
   onNavigate,
   unreadCount,
+  unreadChatCount,
   collapsed = false,
   className = "",
 }: {
   active: ViewId;
   onNavigate: (id: ViewId) => void;
   unreadCount?: number;
+  unreadChatCount?: number;
   collapsed?: boolean;
   className?: string;
 }) {
   return (
     <nav className={`space-y-1.5 ${className}`}>
       {navigation.map((item) => {
-        const badgeCount = item.id === "notifications" ? unreadCount : undefined;
+        const badgeCount =
+          item.id === "notifications"
+            ? unreadCount
+            : item.id === "friends-chat"
+            ? unreadChatCount
+            : undefined;
         const isActive = active === item.id;
         return (
           <button
@@ -2238,14 +2405,14 @@ function TodayView(props: {
             <button
               onClick={() => props.onNavigateDate(-1)}
               className="p-1.5 rounded-xl border border-border hover:bg-muted text-foreground transition-colors"
-              title="Ngày trước (Previous Day)"
+              title="Previous Day"
             >
               <ChevronRight className="size-4 rotate-180" />
             </button>
             <div className="flex items-center gap-2">
               {isSelectedToday ? (
                 <span className="px-2 py-1 rounded-lg bg-primary/15 text-primary text-xs font-bold">
-                  HÔM NAY
+                  TODAY
                 </span>
               ) : (
                 <span className="px-2 py-1 rounded-lg bg-muted text-muted-foreground text-xs font-mono font-medium">
@@ -2256,7 +2423,7 @@ function TodayView(props: {
             <button
               onClick={() => props.onNavigateDate(1)}
               className="p-1.5 rounded-xl border border-border hover:bg-muted text-foreground transition-colors"
-              title="Ngày sau (Next Day)"
+              title="Next Day"
             >
               <ChevronRight className="size-4" />
             </button>
@@ -2276,7 +2443,7 @@ function TodayView(props: {
                 title={
                   props.dailyCheckin
                     ? `Check-in: ${props.dailyCheckin.moodLabel || props.dailyCheckin.moodEmoji}${props.dailyCheckin.note ? ` (${props.dailyCheckin.note})` : ''}`
-                    : 'Check-in cảm xúc, năng lượng & chu kỳ'
+                    : 'Daily mood, energy & cycle check-in'
                 }
               >
                 <span className="text-sm leading-none">
@@ -2287,7 +2454,7 @@ function TodayView(props: {
                 </span>
                 {props.dailyCheckin?.isPeriodDay && (
                   <span className="px-1.5 py-0.2 rounded bg-rose-500 text-white text-[9px] font-bold flex items-center gap-0.5">
-                    🩸 <span className="hidden lg:inline">{props.dailyCheckin?.flowIntensity === 'HEAVY' ? 'Nhiều' : 'Kỳ'}</span>
+                    🩸 <span className="hidden lg:inline">{props.dailyCheckin?.flowIntensity === 'HEAVY' ? 'Heavy' : 'Period'}</span>
                   </span>
                 )}
               </button>
@@ -2298,7 +2465,7 @@ function TodayView(props: {
                 onClick={props.onResetToday}
                 className="px-2.5 py-1.5 rounded-xl border border-border text-xs font-semibold hover:bg-muted transition-colors"
               >
-                Về hôm nay
+                Today
               </button>
             )}
             <button
@@ -2306,14 +2473,14 @@ function TodayView(props: {
               className="px-3 py-1.5 rounded-xl bg-muted/80 text-foreground text-xs font-semibold hover:bg-muted transition-colors flex items-center gap-1.5"
             >
               <CalendarDays className="size-3.5 text-primary" />
-              Lịch tháng
+              Month Calendar
             </button>
             <button
               onClick={props.onOpenRoutineModal}
               className="px-3 py-1.5 rounded-xl bg-muted/80 hover:bg-muted text-foreground text-xs font-semibold transition-all flex items-center gap-1.5"
             >
               <Settings2 className="size-3.5" />
-              Thời khóa biểu tuần
+              Weekly Routines
             </button>
             {props.onAddNewBlock && (
               <button
@@ -2321,10 +2488,10 @@ function TodayView(props: {
                 data-tour="quick-add-task"
                 onClick={props.onAddNewBlock}
                 className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs shadow-teal-500/20 cursor-pointer"
-                title="Tạo nhanh một công việc mới cho ngày này"
+                title="Create a new scheduled task"
               >
                 <Plus className="size-3.5" />
-                Thêm việc
+                Add Task
               </button>
             )}
           </div>
@@ -2352,7 +2519,7 @@ function TodayView(props: {
                       {props.holidayData.name} ({props.holidayData.englishName})
                     </h4>
                     <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-rose-500/20 text-rose-600 dark:text-rose-400">
-                      Nghỉ Lễ Toàn Quốc
+                      National Holiday
                     </span>
                   </div>
                 </div>
@@ -2363,14 +2530,14 @@ function TodayView(props: {
                   onClick={props.onPauseHoliday}
                   className="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors shadow-xs"
                 >
-                  Tạm ngưng lịch hôm nay
+                  Pause Today's Routine
                 </button>
                 <button
                   type="button"
                   onClick={props.onResumeHoliday}
                   className="px-3 py-1.5 rounded-xl border border-border bg-card text-xs font-semibold hover:bg-muted transition-colors"
                 >
-                  Khôi phục lịch
+                  Resume Routine
                 </button>
               </div>
             </div>
@@ -2449,14 +2616,14 @@ function TodayView(props: {
               {resolvedConfig.taskDisplayLimit === 2 && sortedBlocks.length > 2 && (
                 <div className="flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-xs">
                   <span className="text-teal-700 dark:text-teal-300 font-medium flex items-center gap-2">
-                    🧘 Chế độ Calm: Đang hiển thị Now + Next ({displayBlocks.length}/{sortedBlocks.length} việc)
+                    🧘 Calm Mode: Showing Now + Next ({displayBlocks.length}/{sortedBlocks.length} tasks)
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowAllCalmBlocks(!showAllCalmBlocks)}
                     className="text-xs font-bold text-teal-700 dark:text-teal-300 hover:underline cursor-pointer"
                   >
-                    {showAllCalmBlocks ? "Thu gọn về Now + Next" : `Xem tất cả (${sortedBlocks.length})`}
+                    {showAllCalmBlocks ? "Collapse to Now + Next" : `View all (${sortedBlocks.length})`}
                   </button>
                 </div>
               )}
@@ -2466,14 +2633,14 @@ function TodayView(props: {
                 <div className="text-center py-12 border border-dashed border-border/80 rounded-2xl bg-muted/10 space-y-3">
                   <Coffee className="size-8 mx-auto text-teal-600 dark:text-teal-400" />
                   <div>
-                    <p className="text-sm font-semibold text-muted-foreground">Chưa có lịch trình cho ngày này</p>
+                    <p className="text-sm font-semibold text-muted-foreground">No schedule found for this day</p>
                   </div>
                   <div className="flex items-center justify-center gap-2 pt-2">
                     <button
                       onClick={props.onOpenRoutineModal}
                       className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all shadow-xs"
                     >
-                      Cài đặt thời khóa biểu tuần
+                      Set Weekly Routines
                     </button>
                   </div>
                 </div>
@@ -2484,7 +2651,7 @@ function TodayView(props: {
                     <div className="text-center py-4 px-4 border border-emerald-500/30 rounded-2xl bg-emerald-500/10">
                       <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 flex items-center justify-center gap-1.5">
                         <Sparkles className="size-4 text-emerald-600 dark:text-emerald-400" />
-                        Bạn đã hoàn thành tất cả lịch trình của ngày hôm nay!
+                        All scheduled tasks for today are completed!
                       </p>
                     </div>
                   )}
@@ -2554,7 +2721,7 @@ function TodayView(props: {
                             <CheckCircle2 className="size-3.5" />
                           </div>
                           <span className="font-display text-xs font-bold text-foreground">
-                            Đã hoàn thành ({completedBlocks.length})
+                            Completed ({completedBlocks.length})
                           </span>
                           <span className="text-[10px] text-muted-foreground font-mono">
                             · {Math.round((completedBlocks.length / sortedBlocks.length) * 100)}%
@@ -2565,7 +2732,7 @@ function TodayView(props: {
                           onClick={() => setShowCompletedSection(!showCompletedSection)}
                           className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-muted cursor-pointer"
                         >
-                          <span>{showCompletedSection ? 'Thu gọn' : 'Xem danh sách'}</span>
+                          <span>{showCompletedSection ? 'Collapse' : 'View list'}</span>
                           {showCompletedSection ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
                         </button>
                       </div>
@@ -2646,9 +2813,9 @@ function TodayView(props: {
               <div className="size-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
                 <Target className="size-5" />
               </div>
-              <h4 className="text-sm font-bold text-foreground">Tiến trình mục tiêu dự án</h4>
+              <h4 className="text-sm font-bold text-foreground">Project Goals Progress</h4>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Bạn có thể nhập mục tiêu lớn (như viết bài báo, ôn thi, hoàn thành đồ án) vào AI Chat để AI tự động phân rã tiến độ và hiển thị chi tiết tại đây!
+                Enter major milestones (e.g. thesis writing, exam prep, project deliverables) into the AI Chat to automatically decompose timelines and track progress here!
               </p>
             </div>
           )}
@@ -2737,14 +2904,14 @@ function CurrentActiveCard(props: {
           <div className="flex items-center justify-between text-xs font-mono font-bold">
             <span className="text-foreground flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5 text-primary" />
-              <span>Danh sách công việc trong ca này ({completedCount}/{subtasks.length})</span>
+              <span>Task checklist for this session ({completedCount}/{subtasks.length})</span>
             </span>
             <button
               type="button"
               onClick={() => setShowTasks(!showTasks)}
               className="text-primary hover:underline text-[11px] font-normal cursor-pointer"
             >
-              {showTasks ? 'Thu gọn' : 'Mở rộng'}
+              {showTasks ? 'Collapse' : 'Expand'}
             </button>
           </div>
 
@@ -2777,7 +2944,7 @@ function CurrentActiveCard(props: {
                       {st.title}
                     </p>
                     <p className="text-[10px] text-muted-foreground font-mono">
-                      {st.milestoneName} · {st.estimatedMinutes}p
+                      {st.milestoneName} · {st.estimatedMinutes}m
                     </p>
                   </div>
                 </label>
@@ -2860,7 +3027,7 @@ function EnhancedTimelineCard({
           <button
             type="button"
             onClick={onToggleComplete}
-            title="Đánh dấu chưa hoàn thành"
+            title="Mark as incomplete"
             className="grid size-4.5 place-items-center rounded-md border border-primary bg-primary text-primary-foreground shrink-0 transition-transform active:scale-90"
           >
             <Check className="size-3" />
@@ -2894,7 +3061,7 @@ function EnhancedTimelineCard({
               type="button"
               onClick={onEditBlock}
               className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-all"
-              title="Chỉnh sửa hoạt động này"
+              title="Edit this activity"
             >
               <Pencil className="size-3" />
             </button>
@@ -2903,9 +3070,9 @@ function EnhancedTimelineCard({
             type="button"
             onClick={() => setIsExpanded(true)}
             className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-background/80 hover:text-foreground transition-colors"
-            title="Mở rộng chi tiết"
+            title="Expand details"
           >
-            <span>Chi tiết</span>
+            <span>Details</span>
             <ChevronDown className="size-3" />
           </button>
         </div>
@@ -2969,9 +3136,9 @@ function EnhancedTimelineCard({
                 type="button"
                 onClick={() => setIsExpanded(false)}
                 className="flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[9.5px] text-muted-foreground hover:bg-muted transition-colors"
-                title="Thu gọn"
+                title="Collapse"
               >
-                <span>Thu gọn</span>
+                <span>Collapse</span>
                 <ChevronUp className="size-3" />
               </button>
             )}
@@ -2981,8 +3148,8 @@ function EnhancedTimelineCard({
                 type="button"
                 onClick={onEditBlock}
                 className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-all focus:opacity-100"
-                title="Chỉnh sửa hoạt động này"
-                aria-label="Chỉnh sửa"
+                title="Edit this activity"
+                aria-label="Edit"
               >
                 <Pencil className="size-3.5" />
               </button>
@@ -2998,8 +3165,8 @@ function EnhancedTimelineCard({
                   }
                 }}
                 className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all focus:opacity-100"
-                title={isRoutine ? "Hủy task này riêng cho ngày hôm nay (không ảnh hưởng tuần khác)" : "Xóa hoạt động này"}
-                aria-label={isRoutine ? "Hủy ngày này" : "Xóa"}
+                title={isRoutine ? "Cancel this routine for today (does not affect other weeks)" : "Delete this activity"}
+                aria-label={isRoutine ? "Cancel today" : "Delete"}
               >
                 <Trash2 className="size-3.5" />
               </button>
@@ -3019,10 +3186,10 @@ function EnhancedTimelineCard({
           <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
             <span className="font-bold text-primary flex items-center gap-1">
               <Target className="size-3" />
-              <span>Nhiệm vụ trọng tâm ({subtasks.filter((s) => s.completed).length}/{subtasks.length})</span>
+              <span>Key Focus Tasks ({subtasks.filter((s) => s.completed).length}/{subtasks.length})</span>
             </span>
             <button type="button" onClick={() => setShowSteps(!showSteps)} className="text-primary hover:underline">
-              {showSteps ? 'Thu gọn' : 'Mở rộng'}
+              {showSteps ? 'Collapse' : 'Expand'}
             </button>
           </div>
           {showSteps && (
@@ -3047,7 +3214,7 @@ function EnhancedTimelineCard({
                       {st.title}
                     </span>
                     <span className="text-[9px] text-muted-foreground font-mono">
-                      {st.milestoneName} · {st.estimatedMinutes}p
+                      {st.milestoneName} · {st.estimatedMinutes}m
                     </span>
                   </div>
                 </label>
@@ -3090,7 +3257,7 @@ function EnhancedTimelineCard({
         </div>
       ) : (
         <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-2">
-          <span className="text-[11px] text-muted-foreground">Chia nhỏ nhiệm vụ:</span>
+          <span className="text-[11px] text-muted-foreground">Break down task:</span>
           <button
             type="button"
             disabled={isBreakingDown}
@@ -3105,7 +3272,7 @@ function EnhancedTimelineCard({
             className="flex items-center gap-1 rounded-lg bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary transition-all hover:bg-primary/20 disabled:opacity-50 active:scale-95"
           >
             <Sparkles className={`size-3 ${isBreakingDown ? 'animate-spin text-amber-500' : ''}`} />
-            {isBreakingDown ? 'Đang phân rã...' : 'Magic Breakdown'}
+            {isBreakingDown ? 'Decomposing...' : 'Magic Breakdown'}
           </button>
         </div>
       )}
@@ -3553,7 +3720,7 @@ function PlannerView({
                 onClick={onNewChat}
                 className="text-xs gap-1.5 rounded-xl font-medium bg-card/60 hover:bg-card border-border/80 shadow-xs text-foreground transition-all"
               >
-                <Plus className="size-3.5 text-primary" /> Chat mới
+                <Plus className="size-3.5 text-primary" /> New Chat
               </Button>
             )}
           </div>
@@ -3566,9 +3733,9 @@ function PlannerView({
               <div className="size-12 rounded-3xl bg-primary/10 text-primary mx-auto grid place-items-center">
                 <Sparkles className="size-6" />
               </div>
-              <h3 className="font-display text-xl font-extrabold text-foreground">Hôm nay bạn muốn sắp xếp lịch gì?</h3>
+              <h3 className="font-display text-xl font-extrabold text-foreground">What would you like to plan today?</h3>
               <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto">
-                Nhắn tin bất kỳ kế hoạch, lịch hẹn hoặc điều chỉnh nào. AI sẽ tự động phân tích và bảo toàn khoảng đệm của bạn.
+                Type any task, appointment, or schedule adjustment. The AI will seamlessly organize it while protecting your transition buffers.
               </p>
               <div className="pt-2 flex flex-wrap justify-center gap-2 max-w-xl mx-auto">
                 {suggestions.map((suggestion) => (
@@ -3606,7 +3773,7 @@ function PlannerView({
           {thinking && (
             <div className="flex justify-start animate-in fade-in">
               <div className="max-w-[85%] rounded-2xl rounded-bl-xs p-4 bg-card border border-border/80 text-foreground shadow-xs text-sm">
-                <Shimmer>Đang phân tích tin nhắn và tối ưu hóa khoảng đệm lịch trình…</Shimmer>
+                <Shimmer>Analyzing your request and optimizing schedule buffers…</Shimmer>
               </div>
             </div>
           )}
@@ -3615,19 +3782,19 @@ function PlannerView({
           {matchedRoutine && (
             <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20 flex flex-wrap items-center justify-between gap-2 text-xs animate-in fade-in">
               <span className="text-primary font-medium flex items-center gap-1.5">
-                <span>✨ Gợi ý theo thói quen:</span>
+                <span>✨ Routine Suggestion:</span>
                 <b>{matchedRoutine.title}</b> ({matchedRoutine.startTime}–{matchedRoutine.endTime})
               </span>
               <button
                 type="button"
                 onClick={() => {
-                  const prompt = `mai ${matchedRoutine.startTime} ${matchedRoutine.title}`;
+                  const prompt = `tomorrow ${matchedRoutine.startTime} ${matchedRoutine.title}`;
                   setInputText("");
                   onSubmit({ text: prompt });
                 }}
                 className="px-2.5 py-1 rounded-lg bg-primary text-primary-foreground font-semibold text-[11px] hover:opacity-90 transition-opacity"
               >
-                Lên lịch theo thói quen này ⚡
+                Schedule this routine ⚡
               </button>
             </div>
           )}
@@ -3635,7 +3802,7 @@ function PlannerView({
           {/* Non-conflicting Placement & Instant Confirm Inside Chat */}
           {pendingActivity && pendingConflicts.length === 0 && (
             <div className="max-w-xl rounded-2xl border border-primary/30 bg-primary/10 p-4 sm:p-5 animate-in fade-in space-y-3">
-              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary">Đề xuất xếp lịch trình (Proposed Placement)</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary">Proposed Schedule Placement</p>
               <div className="mt-2 flex items-start justify-between gap-3">
                 <div>
                   <h3 className="font-display text-lg font-bold">{pendingActivity.title}</h3>
@@ -3648,8 +3815,8 @@ function PlannerView({
                     </p>
                   )}
                   <div className="mt-2 flex gap-2 font-mono text-[9px]">
-                    <span className="rounded bg-muted px-1.5 py-0.5">Năng lượng: {pendingActivity.energyLevel === 'high' ? 'Cao' : pendingActivity.energyLevel === 'medium' ? 'Vừa' : 'Thấp'}</span>
-                    <span className="rounded bg-muted px-1.5 py-0.5">Nhắc nhở: {pendingActivity.reminderMinutesBefore?.join(', ') || '30, 10, 0'}p trước</span>
+                    <span className="rounded bg-muted px-1.5 py-0.5">Energy: {pendingActivity.energyLevel === 'high' ? 'High' : pendingActivity.energyLevel === 'medium' ? 'Medium' : 'Low'}</span>
+                    <span className="rounded bg-muted px-1.5 py-0.5">Reminder: {pendingActivity.reminderMinutesBefore?.join(', ') || '30, 10, 0'}m before</span>
                   </div>
                 </div>
                 <Coffee className="text-primary size-5" />
@@ -3659,15 +3826,15 @@ function PlannerView({
               {pendingActivity.missingFields?.includes("DURATION") && (
                 <div className="pt-3 border-t border-primary/20 animate-in fade-in">
                   <p className="text-xs font-semibold text-primary mb-1.5 flex items-center gap-1">
-                    ⏱️ Chọn nhanh thời lượng dự kiến:
+                    ⏱️ Select estimated duration:
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {[
-                      { label: '30 phút', minutes: 30 },
-                      { label: '45 phút', minutes: 45 },
-                      { label: '1 tiếng', minutes: 60 },
-                      { label: '1.5 tiếng', minutes: 90 },
-                      { label: '2 tiếng', minutes: 120 },
+                      { label: '30 mins', minutes: 30 },
+                      { label: '45 mins', minutes: 45 },
+                      { label: '1 hour', minutes: 60 },
+                      { label: '1.5 hours', minutes: 90 },
+                      { label: '2 hours', minutes: 120 },
                     ].map((d) => (
                       <button
                         key={d.minutes}
@@ -3702,14 +3869,14 @@ function PlannerView({
               <div className="pt-3 border-t border-border/40 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap gap-2">
                   <Button size="sm" className="rounded-lg shadow-sm font-semibold" onClick={onAdd}>
-                    <Check /> Xác nhận & Thêm vào Lịch
+                    <Check /> Confirm & Add to Schedule
                   </Button>
                   <Button size="sm" variant="ghost" onClick={onCancel}>
-                    Hủy bỏ
+                    Cancel
                   </Button>
                 </div>
                 <span className="text-[10px] text-muted-foreground font-mono">
-                  Bảo toàn khoảng đệm chuyển tiếp 🧠
+                  Preserving transition buffers 🧠
                 </span>
               </div>
             </div>
@@ -3719,7 +3886,7 @@ function PlannerView({
           {activityAdded && (
             <div className="rounded-2xl bg-emerald-500/10 p-3.5 text-sm font-medium text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 animate-in fade-in flex items-center gap-2">
               <Check className="size-4 shrink-0" />
-              <span>Đã thêm vào lịch! Các cam kết cố định và khoảng đệm chuyển tiếp của bạn đã được bảo toàn.</span>
+              <span>Added to schedule! Your fixed commitments and transition buffers remain protected.</span>
             </div>
           )}
         </div>
@@ -3737,13 +3904,13 @@ function PlannerView({
             <PromptInputTextarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Planner"
+              placeholder="Ask Planner anything or add a schedule item..."
               className="min-h-20 max-h-40 px-4 py-3 text-sm sm:text-base resize-none"
             />
             <PromptInputFooter className="px-3 pb-3">
               <PromptInputTools>
-                <PromptInputButton tooltip="Ghi âm giọng nói"><Mic /></PromptInputButton>
-                <span className="hidden text-[10px] text-muted-foreground sm:inline">Enter để gửi · Shift + Enter xuống dòng</span>
+                <PromptInputButton tooltip="Voice input"><Mic /></PromptInputButton>
+                <span className="hidden text-[10px] text-muted-foreground sm:inline">Enter to send · Shift + Enter for new line</span>
               </PromptInputTools>
               <PromptInputSubmit status={thinking ? "submitted" : "ready"} disabled={thinking || !inputText.trim()} />
             </PromptInputFooter>
@@ -3759,7 +3926,7 @@ function PlannerView({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300 font-bold">
-                  Phát hiện xung đột lịch trình (Conflict Detected)
+                  Schedule Conflict Detected
                 </p>
                 <h3 className="mt-1.5 font-display text-xl font-extrabold text-foreground">{pendingActivity.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -3773,7 +3940,7 @@ function PlannerView({
             {/* Overlap warning pill */}
             <div className="mt-3 p-3 rounded-xl bg-card/80 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2">
               <AlertCircle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span>Trùng giờ với {pendingConflicts.map((c) => `"${c.title}" (${c.startTime}–${c.endTime})`).join(', ')}.</span>
+              <span>Overlaps with {pendingConflicts.map((c) => `"${c.title}" (${c.startTime}–${c.endTime})`).join(', ')}.</span>
             </div>
           </div>
 
@@ -3781,12 +3948,12 @@ function PlannerView({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Chọn phương án tối ưu ({allScenarios.length} kịch bản đề xuất)
+                Select Optimal Strategy ({allScenarios.length} proposed scenarios)
               </p>
               <span className="text-[11px] text-muted-foreground hidden sm:inline">
                 {selectedRecommendationId !== null
-                  ? "✓ Đang xem trước chi tiết kế bên"
-                  : "👉 Bấm vào từng thẻ để xem trước thay đổi kế bên"}
+                  ? "✓ Previewing changes on the right"
+                  : "👉 Click any scenario to preview schedule impact"}
               </span>
             </div>
 
@@ -3838,10 +4005,10 @@ function PlannerView({
                           {isSelected ? (
                             <>
                               <Sparkles className="size-3.5 text-primary animate-pulse" />
-                              <span>✓ Đang xem trước kế bên</span>
+                              <span>✓ Previewing right now</span>
                             </>
                           ) : (
-                            <span>👉 Bấm để xem trước kế bên</span>
+                            <span>👉 Click to preview impact</span>
                           )}
                         </span>
                         <Button
@@ -3854,7 +4021,7 @@ function PlannerView({
                             onApplyScenario?.(sc);
                           }}
                         >
-                          Áp dụng
+                          Apply
                         </Button>
                       </div>
                     </div>
@@ -3884,10 +4051,10 @@ function PlannerView({
           {/* Actions */}
           <div className="flex items-center justify-between gap-2 pt-3 border-t border-border/60">
             <Button size="sm" variant="outline" className="text-xs text-muted-foreground" onClick={onAdd}>
-              Vẫn thêm đè lên lịch
+              Add anyway & overwrite
             </Button>
             <Button size="sm" variant="ghost" className="text-xs text-muted-foreground" onClick={onCancel}>
-              Hủy bỏ
+              Cancel
             </Button>
           </div>
         </section>
@@ -3905,19 +4072,19 @@ function PlannerView({
                     <Sparkles className="size-4" />
                   </span>
                   <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary font-bold">
-                    Phân rã mục tiêu (AI Goal Decomposition)
+                    AI Goal Decomposition
                   </p>
                 </div>
                 <h3 className="mt-1.5 font-display text-xl font-extrabold text-foreground">
                   {pendingGoalDecomposition.goalTitle}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground flex flex-wrap items-center gap-2">
-                  <span>Hạn chót: <strong>{pendingGoalDecomposition.officialDeadline}</strong></span>
+                  <span>Deadline: <strong>{pendingGoalDecomposition.officialDeadline}</strong></span>
                   <span>•</span>
-                  <span>Tổng thời lượng: <strong>{Math.round(pendingGoalDecomposition.totalRequiredMinutes / 60)}h</strong></span>
+                  <span>Total effort: <strong>{Math.round(pendingGoalDecomposition.totalRequiredMinutes / 60)}h</strong></span>
                   <span>•</span>
                   <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                    🛡️ {pendingGoalDecomposition.bufferDays} ngày đệm an toàn
+                    🛡️ {pendingGoalDecomposition.bufferDays} safe buffer days
                   </span>
                 </p>
               </div>
@@ -3931,10 +4098,10 @@ function PlannerView({
                     : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30'
                 }`}>
                   {pendingGoalDecomposition.feasibilityStatus === 'FEASIBLE'
-                    ? '✓ Khả thi cao (Feasible)'
+                    ? '✓ Highly Feasible'
                     : pendingGoalDecomposition.feasibilityStatus === 'TIGHT'
-                    ? '⚠️ Lịch sát (Tight)'
-                    : '✗ Không đủ giờ trống'}
+                    ? '⚠️ Tight Schedule'
+                    : '✗ Insufficient Free Time'}
                 </span>
               </div>
             </div>
@@ -3948,12 +4115,12 @@ function PlannerView({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Chọn phương án phân bổ ({pendingGoalDecomposition.scenarios.length} kịch bản)
+                Select Allocation Plan ({pendingGoalDecomposition.scenarios.length} scenarios)
               </p>
               <span className="text-[11px] text-muted-foreground hidden sm:inline">
                 {selectedGoalScenarioIdx !== null
-                  ? "✓ Đang xem trước toàn bộ roadmap bên phải"
-                  : "👉 Bấm chọn từng thẻ để xem roadmap phân bổ"}
+                  ? "✓ Previewing complete roadmap on the right"
+                  : "👉 Click a scenario to preview roadmap allocation"}
               </span>
             </div>
 
@@ -3995,10 +4162,10 @@ function PlannerView({
                           {isSelected ? (
                             <>
                               <Sparkles className="size-3.5 text-primary animate-pulse" />
-                              <span>✓ Đang xem trước lộ trình</span>
+                              <span>✓ Previewing roadmap</span>
                             </>
                           ) : (
-                            <span>👉 Bấm để xem roadmap kế bên</span>
+                            <span>👉 Click to preview roadmap</span>
                           )}
                         </span>
                         <Button
@@ -4011,7 +4178,7 @@ function PlannerView({
                             onApplyGoalScenario?.(sc);
                           }}
                         >
-                          Áp dụng
+                          Apply
                         </Button>
                       </div>
                     </div>
@@ -4102,15 +4269,13 @@ function NotificationsView({
 
 function SettingsView({ onNavigate }: { onNavigate: (id: ViewId) => void }) {
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       <div className="grid gap-4 sm:grid-cols-2">
         <SettingsCard icon={SlidersHorizontal} title="Planning preferences" copy="Buffers, breaks, quiet hours, and confirmation rules." onClick={() => onNavigate("preferences")} />
         <SettingsCard icon={Headphones} title="Desk Companion" copy="Voice reminders and physical companion settings." onClick={() => onNavigate("companion")} />
         <SettingsCard icon={Bell} title="Notifications" copy="Choose the updates that deserve your attention." onClick={() => onNavigate("notifications")} />
         <SettingsCard icon={CircleUserRound} title="Profile" copy="Your name, timezone, and daily rhythm." onClick={() => onNavigate("profile")} />
       </div>
-
-      <HelpAndGuidanceSettingsCard onReplayTour={() => onNavigate("today")} />
     </div>
   );
 }
@@ -4133,6 +4298,8 @@ function PreferencesView({
   setAskFirst,
   allowSuggestions,
   setAllowSuggestions,
+  remindMinutesBefore,
+  onUpdateRemindMinutes,
 }: {
   voiceOn: boolean;
   setVoiceOn: (v: boolean) => void;
@@ -4140,6 +4307,8 @@ function PreferencesView({
   setAskFirst: (v: boolean) => void;
   allowSuggestions: boolean;
   setAllowSuggestions: (v: boolean) => void;
+  remindMinutesBefore: number;
+  onUpdateRemindMinutes: (mins: number) => void;
 }) {
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
@@ -4148,6 +4317,15 @@ function PreferencesView({
           These preferences describe what works for you. Adaptive does not assume one planning style fits every neurodivergent person.
         </p>
         <div className="mt-6 divide-y divide-border">
+          <PreferenceSelect
+            label="Remind before event starts"
+            value={`${remindMinutesBefore} min`}
+            options={["5 min", "10 min", "15 min", "30 min"]}
+            onChange={(val) => {
+              const m = parseInt(val, 10);
+              if (!isNaN(m)) onUpdateRemindMinutes(m);
+            }}
+          />
           <PreferenceSelect label="Transition buffer" value="15 min" options={["10 min", "15 min", "20 min", "30 min"]} />
           <PreferenceSelect label="Travel time" value="20 min" options={["10 min", "20 min", "30 min", "45 min"]} />
           <PreferenceSelect label="Break preference" value="Every 90 min" options={["Every 60 min", "Every 90 min", "Every 120 min"]} />
@@ -4173,13 +4351,27 @@ function PreferencesView({
   );
 }
 
-function PreferenceSelect({ label, value, options }: { label: string; value: string; options: string[] }) {
+function PreferenceSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange?: (val: string) => void;
+}) {
   return (
     <label className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between">
       <span className="text-sm font-medium">{label}</span>
-      <select defaultValue={value} className="focus-ring rounded-lg border border-border bg-card/70 px-3 py-2 text-sm text-foreground">
+      <select
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        className="focus-ring rounded-lg border border-border bg-card/70 px-3 py-2 text-sm text-foreground cursor-pointer"
+      >
         {options.map((option) => (
-          <option key={option}>{option}</option>
+          <option key={option} value={option}>{option}</option>
         ))}
       </select>
     </label>
@@ -4214,20 +4406,67 @@ function CompanionView({
   testing: boolean;
   onTest: () => void;
 }) {
+  const [viewMode, setViewMode] = useState<"3d" | "2d">("3d");
+
   return (
-    <div className="grid gap-5 lg:grid-cols-[1.05fr_.95fr]">
-      <section className="glass-panel overflow-hidden rounded-2xl">
-        <div className="aspect-[16/10] overflow-hidden bg-muted">
-          <img src={companionImage} alt="Adaptive Desk Companion" width={768} height={768} className="size-full object-cover" />
+    <div className="grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
+      <section className="glass-panel overflow-hidden rounded-2xl flex flex-col">
+        <div className="relative aspect-[16/11] min-h-[360px] sm:min-h-[420px] w-full overflow-hidden bg-zinc-900">
+          {viewMode === "3d" ? (
+            <iframe
+              src="https://modo-iota.vercel.app/"
+              title="Interactive Modo 3D Desk Companion"
+              className="size-full border-0"
+              allow="accelerometer; gyroscope; vr; xr"
+              loading="lazy"
+            />
+          ) : (
+            <img
+              src={companionImage}
+              alt="Adaptive Desk Companion"
+              width={768}
+              height={768}
+              className="size-full object-cover"
+            />
+          )}
+
+          {/* View mode toggle pill */}
+          <div className="absolute top-3 right-3 z-10 flex items-center gap-1 rounded-xl bg-background/80 p-1 backdrop-blur-md border border-border/80 shadow-md">
+            <button
+              type="button"
+              onClick={() => setViewMode("3d")}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                viewMode === "3d"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              🎮 3D Studio
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("2d")}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                viewMode === "2d"
+                  ? "bg-primary text-primary-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              🖼️ Portrait
+            </button>
+          </div>
         </div>
         <div className="p-5">
-          <div className="flex items-center gap-2">
-            <span className="size-2.5 rounded-full bg-emerald-500" />
-            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Connected</span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="size-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Connected to Desk Robot</span>
+            </div>
+            <span className="text-[11px] font-mono text-muted-foreground">Interactive 3D Hardware Model</span>
           </div>
           <h2 className="mt-3 font-display text-2xl font-extrabold">Stay informed without constantly checking your phone.</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Adaptive is ready to notify you with calm, useful voice reminders from your desk.
+            Adaptive is connected with your physical Modo desk companion. You can orbit, zoom, inspect illuminated controls in 3D above, and receive calm voice reminders during task transitions.
           </p>
         </div>
       </section>
@@ -4266,37 +4505,38 @@ function ProfileView({ onRetakeOnboarding }: { onRetakeOnboarding: () => void })
   const { user } = useAuthStore();
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div className="glass-panel rounded-2xl p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="size-20 rounded-2xl bg-teal-600 text-white font-bold text-2xl flex items-center justify-center shadow-md">
+    <div className="space-y-6 w-full">
+      <div className="glass-panel rounded-3xl p-6 border border-border/80 shadow-xs">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="size-16 sm:size-18 rounded-2xl bg-teal-600 text-white font-bold text-2xl sm:text-3xl flex items-center justify-center shadow-md shrink-0">
               {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-display text-2xl font-extrabold">{user?.name || "Modo User"}</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-900">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="font-display text-xl sm:text-2xl font-extrabold text-foreground">{user?.name || "Modo User"}</h2>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-900 font-mono">
                   {user?.platformRole || "INDIVIDUAL"}
                 </span>
               </div>
-              <p className="mt-0.5 text-sm text-muted-foreground">{user?.email}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
               {user?.journeyStage && (
-                <p className="mt-1 text-xs text-teal-600 dark:text-teal-400 font-medium">
+                <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">
                   Journey: {user.journeyStage.replace(/_/g, ' ')}
                 </p>
               )}
             </div>
           </div>
-        </div>
-        <div className="mt-7 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl bg-muted p-4">
-            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Typical focus window</p>
-            <p className="mt-2 font-semibold">90 minutes</p>
-          </div>
-          <div className="rounded-xl bg-muted p-4">
-            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Preferred transition</p>
-            <p className="mt-2 font-semibold">15–30 minutes</p>
+
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto shrink-0">
+            <div className="rounded-2xl bg-muted/60 border border-border/60 p-3.5 min-w-[150px]">
+              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Typical focus window</p>
+              <p className="mt-1 font-bold text-sm text-foreground">90 minutes</p>
+            </div>
+            <div className="rounded-2xl bg-muted/60 border border-border/60 p-3.5 min-w-[150px]">
+              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Preferred transition</p>
+              <p className="mt-1 font-bold text-sm text-foreground">15–30 minutes</p>
+            </div>
           </div>
         </div>
       </div>
@@ -4428,20 +4668,4 @@ function TransitionDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
       </DialogContent>
     </Dialog>
   );
-}
-
-function subtitleFor(view: ViewId) {
-  const subtitles: Record<ViewId, string> = {
-    today: "",
-    calendar: "Browse your schedule without losing the day view.",
-    planner: "Add or adjust plans in the words that come naturally.",
-    interview: "A simple candidate flow and a structured review space for interviewers.",
-    insights: "A calm summary, without scores or pressure.",
-    notifications: "Useful updates only—grouped so they do not interrupt your day.",
-    settings: "A few clear ways to make Adaptive work for you.",
-    profile: "Your planning context and daily rhythm.",
-    preferences: "Personalize support without assumptions.",
-    companion: "Optional voice support, right where you work.",
-  };
-  return subtitles[view];
 }

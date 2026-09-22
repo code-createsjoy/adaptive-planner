@@ -37,7 +37,8 @@ coverage/
 .nyc_output/
 *.tsbuildinfo
 .eslintcache
-device-bridge/audio-cache/
+device-bridge/
+
 
 # IDE & OS
 .idea/

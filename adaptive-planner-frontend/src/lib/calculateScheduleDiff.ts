@@ -83,9 +83,9 @@ export function calculateScheduleDiff(
       newStartTime: newStart,
       newEndTime: newEnd,
       changeType: 'NEW',
-      badgeLabel: '➕ Mới thêm',
+      badgeLabel: '➕ Newly added',
       badgeColor: 'emerald',
-      explanationReason: 'Hoạt động mới được xếp vào lịch trình',
+      explanationReason: 'New activity scheduled into timetable',
     });
     newAddedCount++;
   }
@@ -118,9 +118,9 @@ export function calculateScheduleDiff(
         oldStartTime: base.startTime,
         oldEndTime: base.endTime,
         changeType: 'DEFERRED',
-        badgeLabel: '📥 Hoãn sang ngày mai',
+        badgeLabel: '📥 Deferred to tomorrow',
         badgeColor: 'rose',
-        explanationReason: 'Dời sang Tomorrow Inbox để bảo toàn các khung giờ quan trọng',
+        explanationReason: 'Moved to Tomorrow Inbox to protect high-priority slots',
       });
       totalDeferredCount++;
       continue;
@@ -151,9 +151,9 @@ export function calculateScheduleDiff(
         newEndTime: matched.endTime,
         changeType: 'SHIFT_LATER',
         deltaMinutes: startDelta,
-        badgeLabel: `⏳ Dời lùi +${startDelta}p`,
+        badgeLabel: `⏳ Shifted +${startDelta}m`,
         badgeColor: 'amber',
-        explanationReason: `Dời lùi ${startDelta} phút để nhường chỗ cho sự kiện ưu tiên`,
+        explanationReason: `Shifted later by ${startDelta} minutes to accommodate higher priority event`,
       });
       totalShiftedCount++;
     } else if (startDelta < 0) {
@@ -171,9 +171,9 @@ export function calculateScheduleDiff(
         newEndTime: matched.endTime,
         changeType: 'SHIFT_EARLIER',
         deltaMinutes: startDelta,
-        badgeLabel: `⏩ Dời sớm -${absDelta}p`,
+        badgeLabel: `⏩ Moved earlier -${absDelta}m`,
         badgeColor: 'sky',
-        explanationReason: `Đẩy sớm ${absDelta} phút vào khoảng trống phù hợp`,
+        explanationReason: `Moved earlier by ${absDelta} minutes into available slot`,
       });
       totalShiftedCount++;
     } else if (newDur < oldDur) {
@@ -191,9 +191,9 @@ export function calculateScheduleDiff(
         newEndTime: matched.endTime,
         changeType: 'COMPRESSED',
         durationDeltaMinutes: durDelta,
-        badgeLabel: `⚡ Rút ngắn -${durDelta}p`,
+        badgeLabel: `⚡ Shortened -${durDelta}m`,
         badgeColor: 'violet',
-        explanationReason: `Rút ngắn thời lượng để vừa vặn khung thời gian`,
+        explanationReason: `Shortened duration to fit time constraints`,
       });
       totalCompressedCount++;
     } else {
@@ -213,7 +213,7 @@ export function calculateScheduleDiff(
         newStartTime: sb.startTime,
         newEndTime: sb.endTime,
         changeType: 'NEW',
-        badgeLabel: '➕ Mới thêm',
+        badgeLabel: '➕ Newly added',
         badgeColor: 'emerald',
       });
       newAddedCount++;

@@ -38,7 +38,7 @@ export const ConfidencePatternBadge: React.FC<ConfidencePatternBadgeProps> = ({ 
           className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 font-medium transition-colors"
         >
           <Info className="w-3.5 h-3.5" />
-          <span>Bằng chứng</span>
+          <span>Evidence</span>
           {showEvidence ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         </button>
       </div>
@@ -49,7 +49,7 @@ export const ConfidencePatternBadge: React.FC<ConfidencePatternBadgeProps> = ({ 
 
       {isEarly && (
         <p className="text-[11px] text-muted-foreground italic">
-          💡 Modo đang quan sát các ca làm việc đầu tuần để nhận diện nhịp điệu của bạn mà không vội vàng kết luận.
+          💡 Modo is observing early-week sessions to map your rhythm accurately without jumping to conclusions.
         </p>
       )}
 

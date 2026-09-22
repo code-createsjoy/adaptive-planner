@@ -55,59 +55,59 @@ const questions: Question[] = [
   {
     id: "shoes",
     number: 1,
-    title: "Bán đôi giày cũ này",
-    prompt: "Đây là một đôi giày đã qua sử dụng. Bạn hãy tìm cách bán nó cho một khách hàng tiềm năng.",
+    title: "Sell these pre-owned shoes",
+    prompt: "Imagine these are pre-owned shoes. How would you approach selling them to a prospective buyer?",
     helper:
-      "Phần 1: Nêu quy trình tiếp cận. Phần 2: Xác định khách hàng mục tiêu và thuyết phục họ mua hàng.",
-    competency: "Giao tiếp & Thuyết phục",
+      "Part 1: Outline your outreach approach. Part 2: Identify the target audience and deliver your pitch.",
+    competency: "Communication & Persuasion",
   },
   {
     id: "project",
     number: 2,
-    title: "Dự án bạn tự hào nhất",
-    prompt: "Chia sẻ về một dự án kỹ thuật hoặc sản phẩm bạn đã từng thực hiện và thấy tự hào nhất.",
-    helper: "Nêu rõ bài toán, vai trò của bạn và kết quả/tác động thực tế sau khi triển khai.",
-    competency: "Tinh thần trách nhiệm & Tác động",
+    title: "Most impactful project",
+    prompt: "Share a technical or product initiative you led or contributed to that you are most proud of.",
+    helper: "Clarify the problem statement, your personal ownership, and the measurable business/technical impact.",
+    competency: "Ownership & Impact",
   },
   {
     id: "tradeoff",
     number: 3,
-    title: "Quyết định đánh đổi khó khăn",
-    prompt: "Mô tả một lần bạn phải lựa chọn giữa tốc độ ra mắt sản phẩm và chất lượng kỹ thuật.",
-    helper: "Bạn đã cân nhắc tiêu chí nào để ra quyết định và bài học rút ra là gì?",
-    competency: "Tư duy phán đoán",
+    title: "Difficult technical tradeoff",
+    prompt: "Describe a situation where you had to make a tough call between shipping velocity and code quality.",
+    helper: "What decision criteria did you evaluate, and what were the key takeaways?",
+    competency: "Judgment & Decision Making",
   },
   {
     id: "feedback",
     number: 4,
-    title: "Tiếp nhận phản hồi",
-    prompt: "Kể về một lời góp ý thẳng thắn đã thay đổi tích cực cách bạn làm việc.",
-    helper: "Tập trung vào những gì bạn đã lắng nghe, thay đổi và kết quả đạt được.",
-    competency: "Tư duy phát triển",
+    title: "Receiving critical feedback",
+    prompt: "Tell us about a time you received candid feedback that fundamentally improved how you work.",
+    helper: "Focus on how you digested the feedback, what adjustments you made, and the positive outcome.",
+    competency: "Growth Mindset",
   },
   {
     id: "first-month",
     number: 5,
-    title: "Kế hoạch 30 ngày đầu tiên",
-    prompt: "Nếu gia nhập đội ngũ, bạn dự định tìm hiểu và đạt được những cột mốc nào trong 30 ngày đầu?",
-    helper: "Cụ thể hóa về con người, công nghệ, ưu tiên công việc và kết quả ban đầu.",
-    competency: "Hợp tác & Hòa nhập",
+    title: "First 30 days roadmap",
+    prompt: "If you join our team, what milestones and learning goals do you plan to achieve in your first 30 days?",
+    helper: "Detail team collaboration, system architecture onboarding, prioritization, and initial deliverables.",
+    competency: "Collaboration & Onboarding",
   },
   {
     id: "priorities",
     number: 6,
-    title: "Ưu tiên công việc gấp",
-    prompt: "Khi có hai nhiệm vụ quan trọng cùng xuất hiện bất ngờ, bạn sắp xếp thứ tự xử lý thế nào?",
-    helper: "Mô tả các câu hỏi bạn tự đặt ra trước khi cam kết kế hoạch hành động.",
-    competency: "Giải quyết vấn đề",
+    title: "Handling conflicting priorities",
+    prompt: "When two urgent tasks emerge unexpectedly, how do you triage and sequence your workload?",
+    helper: "Describe the questions you ask and framework you apply before committing to a plan.",
+    competency: "Problem Solving",
   },
   {
     id: "questions",
     number: 7,
-    title: "Câu hỏi dành cho công ty",
-    prompt: "Bạn có câu hỏi hoặc điều gì muốn tìm hiểu thêm về văn hóa, lộ trình hoặc đội ngũ của chúng tôi?",
-    helper: "Hãy thoải mái chia sẻ những điều giúp bạn đưa ra quyết định phù hợp nhất.",
-    competency: "Sự chủ động & Tò mò",
+    title: "Questions for our team",
+    prompt: "Do you have any questions regarding our engineering culture, product roadmap, or team dynamics?",
+    helper: "Feel free to ask whatever helps you assess whether our team is the best fit for your growth.",
+    competency: "Initiative & Curiosity",
   },
 ];
 
@@ -117,34 +117,34 @@ const demoCandidates: DemoCandidate[] = [
     name: "Maya Nguyen",
     role: "Senior Backend Engineer",
     initials: "MN",
-    submitted: "Hôm nay, 10:32",
+    submitted: "Today, 10:32 AM",
     duration: "12:48",
     progress: 100,
-    status: "Sẵn sàng đánh giá",
+    status: "Ready for review",
   },
   {
     id: "alex",
     name: "Alex Tran",
     role: "Senior Backend Engineer",
     initials: "AT",
-    submitted: "Hôm qua, 16:08",
+    submitted: "Yesterday, 4:08 PM",
     duration: "13:21",
     progress: 100,
-    status: "Sẵn sàng đánh giá",
+    status: "Ready for review",
   },
   {
     id: "jordan",
     name: "Jordan Lee",
     role: "Senior Backend Engineer",
     initials: "JL",
-    submitted: "Hôm qua, 11:42",
+    submitted: "Yesterday, 11:42 AM",
     duration: "08:06",
     progress: 75,
-    status: "6/7 câu trả lời",
+    status: "6/7 responses",
   },
 ];
 
-const scoreLabels = ["Cần cải thiện", "Đang phát triển", "Đạt yêu cầu", "Tốt", "Xuất sắc"];
+const scoreLabels = ["Needs Improvement", "Developing", "Meets Expectations", "Strong", "Exceptional"];
 
 function formatDuration(seconds: number) {
   const minutes = Math.floor(seconds / 60)
@@ -170,7 +170,7 @@ export function InterviewLab({ onExit: _onExit }: { onExit?: () => void }) {
     "first-month": 4,
   });
   const [notes, setNotes] = useState(
-    "Cấu trúc trả lời mạch lạc, tư duy ownership tốt. Cần hỏi thêm về cách đo lường hiệu quả thực tế.",
+    "Well-structured responses with clear ownership mentality. Explore real-world metric tracking further.",
   );
   const [savedEvaluation, setSavedEvaluation] = useState(false);
 
@@ -183,8 +183,8 @@ export function InterviewLab({ onExit: _onExit }: { onExit?: () => void }) {
             <Sparkles className="size-4" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-foreground">Không gian phỏng vấn chuẩn hóa</p>
-            <p className="text-[11px] text-muted-foreground">Vị trí: Backend Engineer · 7 câu hỏi tiêu chuẩn</p>
+            <p className="text-xs font-semibold text-foreground">Standardized Interview Lab</p>
+            <p className="text-[11px] text-muted-foreground">Role: Backend Engineer · 7 Standard Questions</p>
           </div>
         </div>
 
@@ -198,7 +198,7 @@ export function InterviewLab({ onExit: _onExit }: { onExit?: () => void }) {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <UserRound className="size-3.5" /> Ứng viên
+            <UserRound className="size-3.5" /> Candidate
           </button>
           <button
             type="button"
@@ -209,7 +209,7 @@ export function InterviewLab({ onExit: _onExit }: { onExit?: () => void }) {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Award className="size-3.5" /> Người đánh giá
+            <Award className="size-3.5" /> Interviewer
           </button>
         </div>
       </div>
@@ -339,7 +339,7 @@ function IntervieweeFlow({
       recorder.start();
       setIsRecording(true);
     } catch {
-      setPermissionMessage("Camera/mic chưa được cấp quyền. Bạn vẫn có thể chạy thử luồng demo.");
+      setPermissionMessage("Camera/mic permissions unavailable. You can still practice in simulation mode.");
       setIsRecording(true);
     }
   };
@@ -390,10 +390,10 @@ function IntervieweeFlow({
         <aside className="glass-panel flex flex-col rounded-3xl p-4 border border-border bg-card/60 backdrop-blur-md">
           <div className="border-b border-border/80 px-3 pb-3 pt-1">
             <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-              Câu hỏi phỏng vấn
+              Interview Questions
             </p>
             <p className="mt-1 text-xs font-semibold text-foreground">
-              {Object.keys(recordings).length} / {questions.length} đã hoàn thành
+              {Object.keys(recordings).length} / {questions.length} completed
             </p>
           </div>
 
@@ -445,7 +445,7 @@ function IntervieweeFlow({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
-                  Câu hỏi {question.number} / {questions.length}
+                  Question {question.number} / {questions.length}
                 </span>
                 <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                   {question.competency}
@@ -472,7 +472,7 @@ function IntervieweeFlow({
                 {question.prompt}
               </p>
               <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-xs leading-relaxed text-muted-foreground">
-                <span className="font-semibold text-primary">💡 Gợi ý trả lời: </span>
+                <span className="font-semibold text-primary">💡 Answering Tips: </span>
                 {question.helper}
               </div>
             </div>
@@ -480,15 +480,15 @@ function IntervieweeFlow({
             {/* Recorder & Video Area */}
             <div className="rounded-2xl border border-border bg-background/50 p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-foreground">Thu âm / Video câu trả lời của bạn</p>
+                <p className="text-xs font-semibold text-foreground">Record your audio / video response</p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     {cameraOn ? <Video className="size-3.5 text-emerald-500" /> : <VideoOff className="size-3.5 text-red-500" />}
-                    {cameraOn ? "Cam bật" : "Cam tắt"}
+                    {cameraOn ? "Camera On" : "Camera Off"}
                   </span>
                   <span className="flex items-center gap-1">
                     {micOn ? <Mic className="size-3.5 text-emerald-500" /> : <MicOff className="size-3.5 text-red-500" />}
-                    {micOn ? "Mic bật" : "Mic tắt"}
+                    {micOn ? "Mic On" : "Mic Off"}
                   </span>
                 </div>
               </div>
@@ -513,9 +513,9 @@ function IntervieweeFlow({
 
                 <div className="flex flex-1 flex-col justify-center space-y-3 sm:pl-4">
                   <div className="rounded-xl border border-border bg-card/60 p-4 space-y-2">
-                    <p className="text-xs font-semibold text-foreground">Điều khiển thiết bị linh hoạt</p>
+                    <p className="text-xs font-semibold text-foreground">Flexible Device Controls</p>
                     <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      Bạn có thể bấm nút biểu tượng <span className="font-semibold text-primary">Camera</span> hoặc <span className="font-semibold text-primary">Micro</span> bên dưới để bật/tắt thiết bị theo ý muốn trong suốt quá trình phỏng vấn.
+                      You can toggle the <span className="font-semibold text-primary">Camera</span> or <span className="font-semibold text-primary">Microphone</span> buttons at any time during your interview session.
                     </p>
                   </div>
 
@@ -526,14 +526,14 @@ function IntervieweeFlow({
                       disabled={questionIndex === 0 || isRecording}
                       onClick={() => setQuestionIndex((index) => index - 1)}
                     >
-                      <ChevronLeft className="size-4" /> Câu trước
+                      <ChevronLeft className="size-4" /> Previous
                     </Button>
                     <Button
                       className="rounded-xl"
                       disabled={!recording || isRecording || questionIndex === questions.length - 1}
                       onClick={() => setQuestionIndex((index) => index + 1)}
                     >
-                      Câu tiếp theo <ChevronRight className="size-4" />
+                      Next Question <ChevronRight className="size-4" />
                     </Button>
                   </div>
                 </div>
@@ -545,14 +545,14 @@ function IntervieweeFlow({
             <div className="glass-panel flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-800 dark:text-emerald-200">
               <div className="flex items-center gap-2.5">
                 <Check className="size-5 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-sm font-semibold">Tất cả câu trả lời đã được ghi lại thành công!</span>
+                <span className="text-sm font-semibold">All interview responses recorded successfully!</span>
               </div>
               <Button
                 size="sm"
                 className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
-                onClick={() => window.alert("Bản thử nghiệm: Toàn bộ câu trả lời đã sẵn sàng gửi hội đồng đánh giá.")}
+                onClick={() => window.alert("Demo: All responses are ready to be submitted to the evaluation committee.")}
               >
-                Nộp bài phỏng vấn
+                Submit Interview
               </Button>
             </div>
           )}
@@ -584,7 +584,7 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
     stopPreview();
 
     try {
-      if (!navigator.mediaDevices?.getUserMedia) throw new Error("Thiết bị không khả dụng");
+      if (!navigator.mediaDevices?.getUserMedia) throw new Error("Devices unavailable");
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       stream.getVideoTracks().forEach((t) => {
         t.enabled = desiredCam;
@@ -604,7 +604,7 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
       setCameraReady(false);
       setMicReady(false);
       setCheckState("demo");
-      setMessage("Không tìm thấy camera/mic hoặc chưa cấp quyền. Hệ thống sẽ tự động chuyển sang chế độ giả lập demo để bạn trải nghiệm.");
+      setMessage("Camera/microphone not detected or permission denied. Simulation mode has been enabled for your practice session.");
     }
   };
 
@@ -641,13 +641,13 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
           <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
-            Chuẩn bị phỏng vấn
+            Interview Preparation
           </span>
           <h2 className="mt-3 font-display text-2xl font-bold sm:text-3xl text-foreground">
-            Kiểm tra & Tùy chỉnh Camera & Micro
+            Camera & Microphone Setup
           </h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Bạn có thể bật hoặc tắt camera và micro bất cứ lúc nào tùy theo nhu cầu phỏng vấn.
+            Verify and adjust your camera and audio input before starting your session.
           </p>
         </div>
 
@@ -665,13 +665,13 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
                   {!cameraEnabled ? (
                     <>
                       <VideoOff className="mx-auto size-8 text-amber-500/80" />
-                      <p className="mt-2 text-xs font-semibold text-foreground/80">Camera đang tắt</p>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">Chế độ chỉ sử dụng Microphone</p>
+                      <p className="mt-2 text-xs font-semibold text-foreground/80">Camera is turned off</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">Audio-only mode active</p>
                     </>
                   ) : (
                     <>
                       <Video className="mx-auto size-8 opacity-40" />
-                      <p className="mt-2 text-xs">Bấm "Kiểm tra thiết bị" để xem trước</p>
+                      <p className="mt-2 text-xs">Click "Test Devices Again" to preview</p>
                     </>
                   )}
                 </div>
@@ -682,12 +682,12 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
                 <span className={`rounded-lg px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md ${
                   cameraEnabled ? "bg-emerald-500/80 text-white" : "bg-red-500/80 text-white"
                 }`}>
-                  {cameraEnabled ? "Cam: Bật" : "Cam: Tắt"}
+                  {cameraEnabled ? "Cam: On" : "Cam: Off"}
                 </span>
                 <span className={`rounded-lg px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md ${
                   micEnabled ? "bg-emerald-500/80 text-white" : "bg-red-500/80 text-white"
                 }`}>
-                  {micEnabled ? "Mic: Bật" : "Mic: Tắt"}
+                  {micEnabled ? "Mic: On" : "Mic: Off"}
                 </span>
               </div>
             )}
@@ -715,14 +715,14 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
                     }`}
                   >
                     {checkState === "checking"
-                      ? "Đang kết nối…"
+                      ? "Connecting…"
                       : cameraReady
                       ? cameraEnabled
-                        ? "Đang bật"
-                        : "Đã tắt"
-                      : "Chế độ Demo"}
+                        ? "Active"
+                        : "Off"
+                      : "Simulation Mode"}
                   </span>
-                  <Switch checked={cameraEnabled} onCheckedChange={handleToggleCam} aria-label="Bật/tắt camera" />
+                  <Switch checked={cameraEnabled} onCheckedChange={handleToggleCam} aria-label="Toggle camera" />
                 </div>
               </div>
 
@@ -746,14 +746,14 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
                     }`}
                   >
                     {checkState === "checking"
-                      ? "Đang kết nối…"
+                      ? "Connecting…"
                       : micReady
                       ? micEnabled
-                        ? "Đang bật"
-                        : "Đã tắt"
-                      : "Chế độ Demo"}
+                        ? "Active"
+                        : "Off"
+                      : "Simulation Mode"}
                   </span>
-                  <Switch checked={micEnabled} onCheckedChange={handleToggleMic} aria-label="Bật/tắt mic" />
+                  <Switch checked={micEnabled} onCheckedChange={handleToggleMic} aria-label="Toggle mic" />
                 </div>
               </div>
             </div>
@@ -771,7 +771,7 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
                 className="w-full rounded-xl"
               >
                 <Radio className="size-4" />{" "}
-                {checkState === "checking" ? "Đang kiểm tra thiết bị…" : "Kiểm tra lại thiết bị"}
+                {checkState === "checking" ? "Testing devices…" : "Test Devices Again"}
               </Button>
               <Button
                 variant="outline"
@@ -782,7 +782,7 @@ function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micO
                 disabled={checkState === "checking"}
                 className="w-full rounded-xl"
               >
-                Bắt đầu phỏng vấn <ChevronRight className="size-4" />
+                Start Interview <ChevronRight className="size-4" />
               </Button>
             </div>
           </div>
@@ -840,8 +840,8 @@ function RecorderCard({
               <div className="absolute inset-0 grid place-items-center bg-slate-900">
                 <div className="text-center text-white/70">
                   <VideoOff className="mx-auto size-7 text-red-400" />
-                  <p className="mt-2 font-semibold text-xs text-white">Camera đang tắt</p>
-                  <p className="mt-0.5 text-[10px] text-white/50">Chỉ ghi nhận âm thanh</p>
+                  <p className="mt-2 font-semibold text-xs text-white">Camera is turned off</p>
+                  <p className="mt-0.5 text-[10px] text-white/50">Recording audio only</p>
                 </div>
               </div>
             )}
@@ -851,7 +851,7 @@ function RecorderCard({
                   <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary text-base font-bold text-primary-foreground shadow-lg">
                     AP
                   </div>
-                  <p className="mt-2 text-[11px] font-semibold text-white/80">Khung xem trước</p>
+                  <p className="mt-2 text-[11px] font-semibold text-white/80">Camera Preview</p>
                 </div>
               </div>
             )}
@@ -860,12 +860,12 @@ function RecorderCard({
 
         <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-lg bg-black/60 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
           <span className={`size-1.5 rounded-full ${isRecording ? "animate-pulse bg-red-400" : "bg-emerald-400"}`} />
-          {isRecording ? "Đang ghi..." : hasRecording ? "Đã lưu" : "Sẵn sàng"}
+          {isRecording ? "Recording..." : hasRecording ? "Saved" : "Ready"}
         </div>
 
         {!micOn && (
           <div className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-lg bg-red-500/80 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-            <MicOff className="size-3" /> Mic tắt
+            <MicOff className="size-3" /> Mic Muted
           </div>
         )}
 
@@ -885,13 +885,13 @@ function RecorderCard({
           <button
             type="button"
             onClick={onToggleCamera}
-            title={cameraOn ? "Tắt Camera" : "Bật Camera"}
+            title={cameraOn ? "Turn off Camera" : "Turn on Camera"}
             className={`grid size-8 place-items-center rounded-xl border transition-all ${
               cameraOn
                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
                 : "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20"
             }`}
-            aria-label={cameraOn ? "Tắt camera" : "Bật camera"}
+            aria-label={cameraOn ? "Turn off camera" : "Turn on camera"}
           >
             {cameraOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
           </button>
@@ -899,13 +899,13 @@ function RecorderCard({
           <button
             type="button"
             onClick={onToggleMic}
-            title={micOn ? "Tắt Micro" : "Bật Micro"}
+            title={micOn ? "Mute Microphone" : "Unmute Microphone"}
             className={`grid size-8 place-items-center rounded-xl border transition-all ${
               micOn
                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
                 : "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20"
             }`}
-            aria-label={micOn ? "Tắt micro" : "Bật micro"}
+            aria-label={micOn ? "Mute microphone" : "Unmute microphone"}
           >
             {micOn ? <Mic className="size-3.5" /> : <MicOff className="size-3.5" />}
           </button>
@@ -917,7 +917,7 @@ function RecorderCard({
             onClick={onStop}
             className="rounded-xl bg-red-500 text-xs text-white hover:bg-red-600"
           >
-            <Pause className="size-3.5" /> Dừng
+            <Pause className="size-3.5" /> Stop
           </Button>
         ) : (
           <Button
@@ -925,16 +925,16 @@ function RecorderCard({
             onClick={onStart}
             className="rounded-xl text-xs"
           >
-            <Radio className="size-3.5" /> {hasRecording ? "Thu lại" : "Bắt đầu"}
+            <Radio className="size-3.5" /> {hasRecording ? "Re-record" : "Start Recording"}
           </Button>
         )}
       </div>
 
       {hasRecording && (
         <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2 text-[10px] text-muted-foreground">
-          <span>{realRecording ? (cameraOn ? "Video sẵn sàng." : "Audio sẵn sàng.") : "Bản thu demo đã lưu."}</span>
+          <span>{realRecording ? (cameraOn ? "Video response ready." : "Audio response ready.") : "Demo response saved."}</span>
           <span className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
-            <Save className="size-3" /> {saveState === "saving" ? "Đang lưu…" : "Đã lưu"}
+            <Save className="size-3" /> {saveState === "saving" ? "Saving…" : "Saved"}
           </span>
         </div>
       )}
@@ -1005,9 +1005,9 @@ function InterviewerFlow({
     <div className="space-y-6">
       {/* Overview Metric Cards */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <MetricCard label="Hồ sơ phỏng vấn" value="3 ứng viên" icon={UserRound} />
-        <MetricCard label="Đang đánh giá" value={candidate.name} icon={Video} />
-        <MetricCard label="Điểm trung bình" value={`${average.toFixed(1)} / 5`} icon={Star} />
+        <MetricCard label="Candidate Pool" value="3 Candidates" icon={UserRound} />
+        <MetricCard label="Active Review" value={candidate.name} icon={Video} />
+        <MetricCard label="Average Score" value={`${average.toFixed(1)} / 5`} icon={Star} />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -1016,9 +1016,9 @@ function InterviewerFlow({
           <div className="flex items-center justify-between px-3 pb-3 pt-1 border-b border-border/80">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                Hàng chờ duyệt
+                Review Queue
               </p>
-              <p className="mt-0.5 text-xs font-semibold text-foreground">Danh sách ứng viên</p>
+              <p className="mt-0.5 text-xs font-semibold text-foreground">Candidate Pool</p>
             </div>
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
               3
@@ -1054,7 +1054,7 @@ function InterviewerFlow({
                 </div>
                 <div className={`mt-2.5 flex items-center justify-between text-[10px] ${candidate.id === item.id ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
                   <span>{item.submitted}</span>
-                  <span className="font-medium">{item.progress === 100 ? "Hoàn thành" : item.status}</span>
+                  <span className="font-medium">{item.progress === 100 ? "Completed" : item.status}</span>
                 </div>
               </button>
             ))}
@@ -1062,10 +1062,10 @@ function InterviewerFlow({
 
           <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 text-xs text-muted-foreground">
             <div className="flex items-center gap-2 font-semibold text-primary">
-              <ShieldCheck className="size-4" /> Đánh giá chuẩn hóa
+              <ShieldCheck className="size-4" /> Standardized Rubrics
             </div>
             <p className="mt-1 text-[11px] leading-relaxed">
-              Áp dụng chung bộ tiêu chí rubrics cho mọi ứng viên để đảm bảo tính khách quan.
+              Unified rubric criteria applied across all candidates to guarantee objective evaluation.
             </p>
           </div>
         </aside>
@@ -1081,7 +1081,7 @@ function InterviewerFlow({
                 <div>
                   <h3 className="font-display text-xl font-bold text-foreground">{candidate.name}</h3>
                   <p className="text-xs text-muted-foreground">
-                    {candidate.role} · nộp bài lúc {candidate.submitted}
+                    {candidate.role} · submitted at {candidate.submitted}
                   </p>
                 </div>
               </div>
@@ -1103,7 +1103,7 @@ function InterviewerFlow({
                       : "border-border bg-background/50 text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  <span>Câu {item.number}</span>
+                  <span>Q{item.number}</span>
                   <span className="ml-1.5 hidden sm:inline opacity-80">· {item.competency}</span>
                 </button>
               ))}
@@ -1116,7 +1116,7 @@ function InterviewerFlow({
               <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Video câu trả lời
+                    Video Response
                   </p>
                   <p className="mt-0.5 text-xs font-semibold text-foreground">{question.title}</p>
                 </div>
@@ -1131,9 +1131,9 @@ function InterviewerFlow({
                       {candidate.initials}
                     </div>
                     <p className="mt-2.5 text-xs font-semibold text-white/90">
-                      Câu trả lời của {candidate.name}
+                      Response from {candidate.name}
                     </p>
-                    <p className="mt-0.5 text-[10px] text-white/50">Trình phát phỏng vấn</p>
+                    <p className="mt-0.5 text-[10px] text-white/50">Interview Playback</p>
                   </div>
                 </div>
                 <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3 rounded-xl border border-white/10 bg-black/40 px-3 py-2 backdrop-blur-md">
@@ -1153,7 +1153,7 @@ function InterviewerFlow({
               </div>
               <div className="flex items-center justify-between px-5 py-3 text-xs text-muted-foreground border-t border-border">
                 <span className="flex items-center gap-1.5">
-                  <FileText className="size-3.5" /> Bản ghi phụ đề tự động (AI Transcript)
+                  <FileText className="size-3.5" /> Automated AI Transcript & Subtitles
                 </span>
               </div>
             </section>
@@ -1163,14 +1163,14 @@ function InterviewerFlow({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    Tiêu chí chấm điểm
+                    Scoring Rubric
                   </p>
                   <h4 className="mt-0.5 font-display text-base font-bold text-foreground">
                     {question.competency}
                   </h4>
                 </div>
                 <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300">
-                  {score ? `${score}/5` : "Chưa chấm"}
+                  {score ? `${score}/5` : "Not Scored"}
                 </span>
               </div>
 
@@ -1188,7 +1188,7 @@ function InterviewerFlow({
                         ? "border-amber-500 bg-amber-400 text-amber-950 shadow-xs"
                         : "border-border bg-background/60 text-muted-foreground hover:border-amber-400/50 hover:text-foreground"
                     }`}
-                    aria-label={`Điểm ${value}`}
+                    aria-label={`Score ${value}`}
                   >
                     {value}
                   </button>
@@ -1206,7 +1206,7 @@ function InterviewerFlow({
                   queueAutosave();
                 }}
                 className="min-h-24 resize-none rounded-xl bg-background/60 text-xs"
-                placeholder="Ghi chú đánh giá dành cho hội đồng..."
+                placeholder="Evaluation notes for hiring committee..."
               />
 
               <div className="flex items-center justify-between gap-3 pt-1">
@@ -1219,11 +1219,11 @@ function InterviewerFlow({
                   }}
                   disabled={!score}
                 >
-                  <Save className="size-3.5" /> Lưu đánh giá
+                  <Save className="size-3.5" /> Save Evaluation
                 </Button>
                 <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                   <Check className="size-3" />{" "}
-                  {autoSaveState === "saving" ? "Đang lưu…" : saved ? "Đã lưu tự động" : "Sẵn sàng lưu"}
+                  {autoSaveState === "saving" ? "Saving…" : saved ? "Autosaved" : "Ready to save"}
                 </span>
               </div>
             </section>
@@ -1231,9 +1231,9 @@ function InterviewerFlow({
 
           <section className="glass-panel flex flex-col gap-4 rounded-3xl border border-primary/20 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-bold text-foreground">Hoàn tất đánh giá ứng viên</p>
+              <p className="text-sm font-bold text-foreground">Complete Candidate Evaluation</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Đồng bộ kết quả chấm điểm vào không gian tuyển dụng Adaptive.
+                Sync scores and feedback into the Adaptive Recruitment workspace.
               </p>
             </div>
             <Button
@@ -1243,11 +1243,11 @@ function InterviewerFlow({
             >
               {sentToAdaptive ? (
                 <>
-                  <Check className="size-4 text-emerald-600" /> Đã gửi đánh giá
+                  <Check className="size-4 text-emerald-600" /> Evaluation Submitted
                 </>
               ) : (
                 <>
-                  Xác nhận & Chuyển giao <ChevronRight className="size-4" />
+                  Confirm & Submit Review <ChevronRight className="size-4" />
                 </>
               )}
             </Button>

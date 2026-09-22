@@ -18,7 +18,7 @@ export const FirstUseTip: React.FC<FirstUseTipProps> = ({
   icon,
   title,
   description,
-  actionLabel = 'Đã hiểu',
+  actionLabel = 'Got it',
   onAction,
   className = '',
 }) => {
@@ -72,8 +72,8 @@ export const FirstUseTip: React.FC<FirstUseTipProps> = ({
             type="button"
             onClick={handleDismiss}
             className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
-            title="Đóng (không hiện lại)"
-            aria-label="Đóng mẹo"
+            title="Dismiss tip"
+            aria-label="Dismiss tip"
           >
             <X className="size-4" />
           </button>

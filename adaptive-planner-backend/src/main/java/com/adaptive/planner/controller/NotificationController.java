@@ -53,6 +53,14 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/read")
+    public ResponseEntity<Map<String, Object>> deleteAllReadNotifications() {
+        notificationService.deleteAllReadNotifications();
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "All read notifications deleted");
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping
     public ResponseEntity<NotificationDto> createNotification(@Valid @RequestBody CreateNotificationRequest request) {
         NotificationDto created = notificationService.createNotification(request);

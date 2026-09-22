@@ -41,7 +41,7 @@ export const HelpAndGuidanceSettingsCard: React.FC<HelpAndGuidanceSettingsCardPr
 
   const handleResetTips = () => {
     resetAllGuidance();
-    showToast('Đã đặt lại tất cả mẹo hướng dẫn về ban đầu!');
+    showToast('All guidance tips have been reset to default!');
   };
 
   return (
@@ -61,10 +61,10 @@ export const HelpAndGuidanceSettingsCard: React.FC<HelpAndGuidanceSettingsCardPr
           </div>
           <div>
             <h3 className="font-display text-lg font-bold">
-              Trợ giúp & Hướng dẫn (Help & Guidance)
+              Help & Guidance
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Tùy biến cách Modo hướng dẫn và xem lại các tour tương tác bất kỳ lúc nào.
+              Customize Modo's guidance density and replay interactive tours anytime.
             </p>
           </div>
         </div>
@@ -75,17 +75,17 @@ export const HelpAndGuidanceSettingsCard: React.FC<HelpAndGuidanceSettingsCardPr
         <div className="space-y-2.5">
           <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
             <HelpCircle className="size-3.5 text-teal-600 dark:text-teal-400" />
-            Mức độ chi tiết của hướng dẫn
+            Guidance Detail Level
           </label>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Dựa trên sở thích nhận thức của bạn, không phụ thuộc vào nhãn chẩn đoán bệnh lý.
+            Tailored to your cognitive preferences without rigid diagnostic labels.
           </p>
           <div className="grid grid-cols-3 gap-2 pt-1">
             {(
               [
-                { id: 'minimal', label: 'Tối giản', desc: 'Chỉ hành động' },
-                { id: 'guided', label: 'Chuẩn', desc: '1 câu giải thích' },
-                { id: 'detailed', label: 'Chi tiết', desc: 'Có nút Tại sao' },
+                { id: 'minimal', label: 'Minimal', desc: 'Action only' },
+                { id: 'guided', label: 'Standard', desc: '1-sentence note' },
+                { id: 'detailed', label: 'Detailed', desc: 'With "Why" expander' },
               ] as { id: GuidanceStyle; label: string; desc: string }[]
             ).map((opt) => (
               <button
@@ -108,7 +108,7 @@ export const HelpAndGuidanceSettingsCard: React.FC<HelpAndGuidanceSettingsCardPr
         {/* Section 2: Replay Actions */}
         <div className="space-y-3">
           <label className="text-xs font-bold text-foreground">
-            Xem lại các trải nghiệm hướng dẫn
+            Replay Guidance Experiences
           </label>
           <div className="flex flex-col gap-2">
             <button
@@ -118,7 +118,7 @@ export const HelpAndGuidanceSettingsCard: React.FC<HelpAndGuidanceSettingsCardPr
             >
               <span className="flex items-center gap-2">
                 <Play className="size-3.5 fill-white" />
-                Xem lại Dashboard Tour (5 bước)
+                Replay Dashboard Tour (5 steps)
               </span>
               <span className="text-[10px] opacity-80 font-normal">30-45s</span>
             </button>
@@ -130,7 +130,7 @@ export const HelpAndGuidanceSettingsCard: React.FC<HelpAndGuidanceSettingsCardPr
             >
               <span className="flex items-center gap-2">
                 <RotateCcw className="size-3.5 text-muted-foreground" />
-                Đặt lại toàn bộ mẹo đã xem (Reset all tips)
+                Reset all guidance tips
               </span>
             </button>
           </div>

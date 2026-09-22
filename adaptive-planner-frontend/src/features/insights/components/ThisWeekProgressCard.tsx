@@ -26,16 +26,16 @@ export const ThisWeekProgressCard: React.FC<ThisWeekProgressCardProps> = ({ curr
   const formatHoursMinutes = (mins: number) => {
     const h = Math.floor(mins / 60);
     const m = mins % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}p`;
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
     if (h > 0) return `${h}h`;
-    return `${m}p`;
+    return `${m}m`;
   };
 
   const formatDateRange = (start: string, end: string) => {
     try {
       const s = new Date(start);
       const e = new Date(end);
-      return `${s.getDate()}/${s.getMonth() + 1} – ${e.getDate()}/${e.getMonth() + 1}`;
+      return `${s.getMonth() + 1}/${s.getDate()} – ${e.getMonth() + 1}/${e.getDate()}`;
     } catch {
       return `${start} – ${end}`;
     }
@@ -48,7 +48,7 @@ export const ThisWeekProgressCard: React.FC<ThisWeekProgressCardProps> = ({ curr
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary">
-              Tuần này (Live Flow)
+              This Week (Live Flow)
             </span>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
@@ -56,13 +56,13 @@ export const ThisWeekProgressCard: React.FC<ThisWeekProgressCardProps> = ({ curr
             </span>
           </div>
           <h2 className="text-lg font-bold text-foreground mt-1">
-            Nhịp điệu đang diễn ra
+            Ongoing Rhythm & Progress
           </h2>
         </div>
 
         <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-xl text-xs font-medium">
-          <span className="text-muted-foreground">Tiến trình tuần:</span>
-          <span className="font-bold text-foreground">Ngày {dayIndex} / {totalDaysInWeek}</span>
+          <span className="text-muted-foreground">Week progress:</span>
+          <span className="font-bold text-foreground">Day {dayIndex} / {totalDaysInWeek}</span>
         </div>
       </div>
 
@@ -71,33 +71,33 @@ export const ThisWeekProgressCard: React.FC<ThisWeekProgressCardProps> = ({ curr
         <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <span>Nỗ lực hoàn tất</span>
+            <span>Completed Tasks</span>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-foreground">{completedTasks}</span>
-            <span className="text-xs text-muted-foreground">/ {scheduledTasks} việc ({completionRate}%)</span>
+            <span className="text-xs text-muted-foreground">/ {scheduledTasks} tasks ({completionRate}%)</span>
           </div>
         </div>
 
         <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <Clock className="w-4 h-4 text-primary" />
-            <span>Thời lượng Deep Focus</span>
+            <span>Deep Focus Time</span>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-foreground">{formatHoursMinutes(totalFocusMinutes)}</span>
-            <span className="text-xs text-muted-foreground">tổng cộng</span>
+            <span className="text-xs text-muted-foreground">total</span>
           </div>
         </div>
 
         <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <Flame className="w-4 h-4 text-amber-500" />
-            <span>Phiên tập trung</span>
+            <span>Focus Sessions</span>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-foreground">{focusSessionsCount}</span>
-            <span className="text-xs text-muted-foreground">phiên đã thực hiện</span>
+            <span className="text-xs text-muted-foreground">sessions completed</span>
           </div>
         </div>
       </div>

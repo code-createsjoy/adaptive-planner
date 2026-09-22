@@ -39,7 +39,7 @@ export const ProactiveWorkloadReliefBanner: React.FC<ProactiveWorkloadReliefBann
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Gợi ý chăm sóc thể trạng
+                <Sparkles className="w-3 h-3" /> Wellness Recommendation
               </span>
               <span className="text-xs text-muted-foreground font-medium">
                 AI Adaptive Companion
@@ -66,7 +66,7 @@ export const ProactiveWorkloadReliefBanner: React.FC<ProactiveWorkloadReliefBann
         <button
           onClick={onDismiss}
           className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0"
-          aria-label="Đóng gợi ý"
+          aria-label="Dismiss recommendation"
         >
           <X className="w-4 h-4" />
         </button>
@@ -76,7 +76,7 @@ export const ProactiveWorkloadReliefBanner: React.FC<ProactiveWorkloadReliefBann
       <div className="mt-3.5 pt-3 border-t border-rose-500/20 flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
           <Coffee className="w-3.5 h-3.5 text-amber-500" />
-          <span>Bảo toàn năng lượng để hồi phục thể trạng</span>
+          <span>Preserve energy to recover physical & mental rhythm</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -85,7 +85,7 @@ export const ProactiveWorkloadReliefBanner: React.FC<ProactiveWorkloadReliefBann
             onClick={onDismiss}
             className="px-3 py-1.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
           >
-            Giữ nguyên lịch
+            Keep Schedule
           </button>
 
           <button
@@ -95,11 +95,11 @@ export const ProactiveWorkloadReliefBanner: React.FC<ProactiveWorkloadReliefBann
             className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-600 text-white text-xs font-bold shadow-md hover:opacity-95 flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
           >
             {isApplying ? (
-              'Đang điều chỉnh...'
+              'Adjusting...'
             ) : (
               <>
                 <Sparkles className="w-3.5 h-3.5" />
-                Áp dụng giảm tải ({heavyBlockCount} task)
+                Apply Workload Relief ({heavyBlockCount} {heavyBlockCount === 1 ? 'task' : 'tasks'})
               </>
             )}
           </button>

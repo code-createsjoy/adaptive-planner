@@ -48,7 +48,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
   };
 
   const handleAskAIChat = () => {
-    const prompt = `Hôm nay lịch trình ngày ${date} của tôi có mật độ tải trọng khá cao (${proposal?.loadScore || 78}/100). Hãy phân tích và gợi ý cho tôi một phương án phân bổ lại công việc để có thêm khoảng nghỉ êm ái.`;
+    const prompt = `My schedule for ${date} has a relatively high workload density (${proposal?.loadScore || 78}/100). Please analyze and suggest a rebalanced plan with gentle buffer breaks.`;
     onOpenAIChatWithPrompt(prompt);
     onClose();
   };
@@ -70,16 +70,16 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-extrabold text-foreground">
-                  Tạo khoảng thở & Giảm tải nhận thức
+                  Create Breathing Room & Relieve Load
                 </h3>
                 {proposal && (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/20">
-                    Tải: {proposal.loadScore}/100
+                    Load: {proposal.loadScore}/100
                   </span>
                 )}
               </div>
               <p className="text-xs text-muted-foreground mt-0.5 max-w-lg leading-relaxed">
-                Modo đã tính toán 3 phương án điều chỉnh tức thì. Bạn có thể xem trước khác biệt trước khi quyết định áp dụng.
+                Modo computed 3 instant adjustment options. You can preview changes before applying.
               </p>
             </div>
           </div>
@@ -88,7 +88,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            aria-label="Đóng"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
@@ -108,8 +108,8 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
           ) : !proposal || proposal.options.length === 0 ? (
             <div className="text-center py-10 space-y-2">
               <Coffee className="w-8 h-8 mx-auto text-muted-foreground/60" />
-              <p className="text-sm font-semibold text-foreground">Lịch trình hôm nay đã rất cân bằng!</p>
-              <p className="text-xs text-muted-foreground">Không phát hiện tình trạng quá tải cần điều chỉnh.</p>
+              <p className="text-sm font-semibold text-foreground">Today's schedule is well balanced!</p>
+              <p className="text-xs text-muted-foreground">No cognitive overload detected.</p>
             </div>
           ) : (
             <div className="space-y-3.5">
@@ -145,7 +145,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
                               {opt.title}
                             </h4>
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                              Giảm ~{opt.estimatedLoadReduction} điểm tải
+                              Reduces ~{opt.estimatedLoadReduction} pts
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -165,7 +165,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
                           }`}
                         >
                           <Eye className="w-3 h-3" />
-                          {isPreviewing ? 'Ẩn Diff' : 'Xem trước'}
+                          {isPreviewing ? 'Hide Diff' : 'Preview'}
                         </button>
 
                         <button
@@ -174,7 +174,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
                           className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all flex items-center gap-1 shadow-xs cursor-pointer"
                         >
                           <Check className="w-3 h-3" />
-                          Áp dụng
+                          Apply
                         </button>
                       </div>
                     </div>
@@ -192,8 +192,8 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
                             {/* Left: Current Schedule */}
                             <div className="space-y-2">
                               <div className="flex items-center justify-between font-mono text-[10px] uppercase font-bold text-muted-foreground pb-1 border-b border-border/50">
-                                <span>Lịch trình Hiện tại</span>
-                                <span>{currentBlocks.length} task</span>
+                                <span>Current Schedule</span>
+                                <span>{currentBlocks.length} tasks</span>
                               </div>
                               <div className="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
                                 {currentBlocks.map((b) => (
@@ -215,8 +215,8 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
                             {/* Right: Proposed Schedule */}
                             <div className="space-y-2">
                               <div className="flex items-center justify-between font-mono text-[10px] uppercase font-bold text-primary pb-1 border-b border-primary/20">
-                                <span>Lịch trình Sau khi chỉnh</span>
-                                <span>{opt.proposedBlocks.length} task</span>
+                                <span>Proposed Schedule</span>
+                                <span>{opt.proposedBlocks.length} tasks</span>
                               </div>
                               <div className="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
                                 {opt.proposedBlocks.map((b, idx) => {
@@ -235,7 +235,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
                                       <div className="flex items-center gap-1.5 truncate max-w-[120px] sm:max-w-[140px]">
                                         {isMoved && (
                                           <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                                            Dời
+                                            Moved
                                           </span>
                                         )}
                                         <span className="font-medium truncate">{b.title}</span>
@@ -250,7 +250,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
                                 {opt.diff.deferredBlockCount > 0 && (
                                   <div className="p-2 rounded-xl border border-dashed border-sky-500/40 bg-sky-500/10 text-sky-800 dark:text-sky-300 text-[11px] font-medium flex items-center gap-1.5">
                                     <ArrowRight className="w-3 h-3 text-sky-500" />
-                                    Đã chuyển 1 task sang sáng mai 09:00
+                                    Deferred 1 task to tomorrow morning at 09:00
                                   </div>
                                 )}
                               </div>
@@ -274,7 +274,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
             className="text-xs font-semibold text-primary hover:underline flex items-center gap-1.5 cursor-pointer self-start sm:self-center"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            Hỏi Modo phương án sắp xếp khác qua AI Chat
+            Ask Modo for alternative rebalancing in AI Chat
           </button>
 
           <button
@@ -282,7 +282,7 @@ export const QuickRebalanceModal: React.FC<QuickRebalanceModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors cursor-pointer self-end sm:self-center"
           >
-            Giữ nguyên lịch hiện tại
+            Keep Current Schedule
           </button>
         </div>
       </motion.div>

@@ -42,12 +42,13 @@ interface MonthCalendarViewProps {
   onSelectDate?: (dateStr: string) => void;
 }
 
-function formatDateVietnamese(dateStr: string) {
+function formatDateEnglish(dateStr: string) {
   try {
     const [y, m, d] = dateStr.split('-').map(Number);
     const date = new Date(y, m - 1, d);
-    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-    return `${days[date.getDay()]}, ngày ${d} tháng ${m}, ${y}`;
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return `${days[date.getDay()]}, ${months[m - 1]} ${d}, ${y}`;
   } catch {
     return dateStr;
   }
@@ -158,12 +159,12 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ onSelectDa
   }, [monthlyData]);
 
   const monthNames = [
-    'Tháng 1 (January)', 'Tháng 2 (February)', 'Tháng 3 (March)', 'Tháng 4 (April)',
-    'Tháng 5 (May)', 'Tháng 6 (June)', 'Tháng 7 (July)', 'Tháng 8 (August)',
-    'Tháng 9 (September)', 'Tháng 10 (October)', 'Tháng 11 (November)', 'Tháng 12 (December)'
+    'January', 'February', 'March', 'April',
+    'May', 'June', 'July', 'August',
+    'September', 'October', 'November', 'December'
   ];
 
-  const weekHeaders = ['Thứ 2 (Mon)', 'Thứ 3 (Tue)', 'Thứ 4 (Wed)', 'Thứ 5 (Thu)', 'Thứ 6 (Fri)', 'Thứ 7 (Sat)', 'CN (Sun)'];
+  const weekHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const todayStr = getTodayDateString();
 
   return (
@@ -188,14 +189,14 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ onSelectDa
               className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold hover:bg-muted/80 transition-colors flex items-center gap-1.5"
             >
               <Clock className="w-3.5 h-3.5 text-primary" />
-              Hôm nay (Today)
+              Today
             </button>
 
             <div className="flex items-center bg-muted/60 rounded-xl p-1 border border-border/50">
               <button
                 onClick={handlePrevMonth}
                 className="p-1.5 hover:bg-card rounded-lg transition-colors text-muted-foreground hover:text-foreground"
-                title="Tháng trước"
+                title="Previous Month"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -205,7 +206,7 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ onSelectDa
               <button
                 onClick={handleNextMonth}
                 className="p-1.5 hover:bg-card rounded-lg transition-colors text-muted-foreground hover:text-foreground"
-                title="Tháng sau"
+                title="Next Month"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -216,17 +217,17 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ onSelectDa
               className="px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20"
             >
               <Settings2 className="w-3.5 h-3.5" />
-              Thời khóa biểu tuần (Routine)
+              Weekly Routines
             </button>
 
             <button
               onClick={() => {
-                if (window.confirm('Bạn có chắc muốn xóa sạch toàn bộ các block tùy chỉnh để bắt đầu mới hoàn toàn?')) {
+                if (window.confirm('Are you sure you want to wipe all custom timeblocks and start fresh?')) {
                   purgeMutation.mutate();
                 }
               }}
               className="p-2 rounded-xl border border-destructive/20 text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-colors text-xs"
-              title="Dọn sạch lịch tùy chỉnh (Wipe Custom Timeblocks)"
+              title="Wipe Custom Timeblocks"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -347,18 +348,18 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ onSelectDa
                           setActiveCheckinDate(dateStr);
                         }}
                         className="px-1.5 py-0.5 rounded-md bg-rose-500 text-white text-[10px] font-bold shadow-2xs flex items-center gap-0.5 hover:opacity-90"
-                        title={`Chu kỳ kinh nguyệt (${checkin?.flowIntensity || 'Đang diễn ra'})`}
+                        title={`Menstrual cycle (${checkin?.flowIntensity || 'Active'})`}
                       >
-                        🩸 <span className="hidden xl:inline text-[9px]">{checkin?.flowIntensity === 'HEAVY' ? 'Nhiều' : 'Kỳ'}</span>
+                        🩸 <span className="hidden xl:inline text-[9px]">{checkin?.flowIntensity === 'HEAVY' ? 'Heavy' : 'Flow'}</span>
                       </span>
                     )}
 
                     {isPredictedPeriod && (
                       <span
                         className="px-1.5 py-0.5 rounded-md bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-dashed border-rose-500/30 text-[9px] font-semibold hidden xl:inline-flex items-center gap-0.5"
-                        title="Dự kiến chu kỳ kinh nguyệt"
+                        title="Predicted menstrual window"
                       >
-                        🩸 Dự kiến
+                        🩸 Predicted
                       </span>
                     )}
 
@@ -380,7 +381,7 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ onSelectDa
                           setActiveCheckinDate(dateStr);
                         }}
                         className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all flex items-center justify-center text-xs"
-                        title="Check-in cảm xúc & chu kỳ ngày này"
+                        title="Log mood & cycle for this day"
                       >
                         +
                       </button>
@@ -400,7 +401,7 @@ export const MonthCalendarView: React.FC<MonthCalendarViewProps> = ({ onSelectDa
                   <div className="flex items-center gap-1">
                     {totalTasks === 0 ? (
                       <span className="text-[10px] text-muted-foreground/60 italic group-hover:text-primary">
-                        + Thêm lịch
+                        + Add task
                       </span>
                     ) : (
                       <>
@@ -553,7 +554,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-foreground">
-                  {formatDateVietnamese(dateStr)}
+                  {formatDateEnglish(dateStr)}
                 </h3>
                 {holidayData?.isStatutory && (
                   <span className="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xs font-bold border border-rose-500/20">
@@ -567,10 +568,10 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
             <button
               onClick={onOpenFullTimeline}
               className="px-2.5 py-1.5 rounded-xl border border-border hover:bg-muted text-xs font-semibold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-              title="Mở toàn bộ ngày trên Day Timeline"
+              title="Open full day on Day Timeline"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Mở Timeline</span>
+              <span className="hidden sm:inline">Open Timeline</span>
             </button>
             <button
               onClick={onClose}
@@ -592,11 +593,11 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-foreground">
-                    {checkin ? checkin.moodLabel || 'Đã Check-in' : 'Chưa Check-in ngày này'}
+                    {checkin ? checkin.moodLabel || 'Checked In' : 'Not Checked In yet'}
                   </span>
                   {checkin?.isPeriodDay && (
                     <span className="px-1.5 py-0.5 rounded-md bg-rose-500 text-white text-[10px] font-bold">
-                      🩸 Chu kỳ ({checkin.flowIntensity})
+                      🩸 Period ({checkin.flowIntensity})
                     </span>
                   )}
                   {checkin?.energyLevel && (
@@ -606,7 +607,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                   )}
                 </div>
                 <p className="text-[11px] text-muted-foreground line-clamp-1">
-                  {checkin?.note ? `"${checkin.note}"` : 'Ghi nhận cảm xúc, mức năng lượng và sức khỏe'}
+                  {checkin?.note ? `"${checkin.note}"` : 'Log mood, energy level, and wellness'}
                 </p>
               </div>
             </div>
@@ -616,7 +617,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
               onClick={onOpenCheckin}
               className="px-3 py-1.5 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 text-xs font-bold transition-colors shrink-0"
             >
-              {checkin ? 'Sửa Check-in' : '+ Check-in ngay'}
+              {checkin ? 'Edit Check-in' : '+ Check-in Now'}
             </button>
           </div>
 
@@ -624,9 +625,9 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
             <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
               <div>
-                <p className="font-bold text-amber-800 dark:text-amber-300">Ngày trong quá khứ</p>
+                <p className="font-bold text-amber-800 dark:text-amber-300">Past Date</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  Không thể tạo mới lịch trình cho những ngày đã qua. Bạn chỉ có thể xem lại lịch sử các hoạt động đã diễn ra.
+                  Cannot schedule events on dates in the past. You can review past activity history.
                 </p>
               </div>
             </div>
@@ -637,7 +638,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-primary" />
-                    Gợi ý lên lịch nhanh (Đi chơi, Cafe, Thư giãn)
+                    Quick Planning Ideas (Hangout, Coffee, Rest)
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -645,8 +646,8 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     type="button"
                     onClick={() =>
                       handleQuickPreset({
-                        title: '☕ Cà phê & Gặp gỡ bạn bè',
-                        detail: 'Trò chuyện thư giãn cuối tuần',
+                        title: '☕ Coffee & Friends Catchup',
+                        detail: 'Weekend relaxation & talk',
                         startTime: '09:00',
                         endTime: '11:30',
                         category: 'social',
@@ -655,7 +656,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     }
                     className="p-2.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 text-left text-xs transition-all flex flex-col justify-between group"
                   >
-                    <span className="font-bold text-foreground group-hover:text-primary">☕ Cà phê bạn bè</span>
+                    <span className="font-bold text-foreground group-hover:text-primary">☕ Coffee Catchup</span>
                     <span className="text-[10px] text-muted-foreground font-mono mt-1">09:00 – 11:30</span>
                   </button>
 
@@ -663,7 +664,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     type="button"
                     onClick={() =>
                       handleQuickPreset({
-                        title: '🚗 Đi chơi / Dã ngoại ngoài trời',
+                        title: '🚗 Outdoor Picnic & Hangout',
                         detail: 'Outdoor hangout & food trip',
                         startTime: '14:00',
                         endTime: '18:00',
@@ -673,7 +674,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     }
                     className="p-2.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 text-left text-xs transition-all flex flex-col justify-between group"
                   >
-                    <span className="font-bold text-foreground group-hover:text-primary">🚗 Dã ngoại / Đi chơi</span>
+                    <span className="font-bold text-foreground group-hover:text-primary">🚗 Outdoor Picnic</span>
                     <span className="text-[10px] text-muted-foreground font-mono mt-1">14:00 – 18:00</span>
                   </button>
 
@@ -681,7 +682,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     type="button"
                     onClick={() =>
                       handleQuickPreset({
-                        title: '🎬 Xem phim & Ăn tối',
+                        title: '🎬 Movie & Dinner Date',
                         detail: 'Cinema & dinner relaxation',
                         startTime: '19:00',
                         endTime: '22:00',
@@ -691,7 +692,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     }
                     className="p-2.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 text-left text-xs transition-all flex flex-col justify-between group"
                   >
-                    <span className="font-bold text-foreground group-hover:text-primary">🎬 Xem phim & Ăn tối</span>
+                    <span className="font-bold text-foreground group-hover:text-primary">🎬 Movie & Dinner</span>
                     <span className="text-[10px] text-muted-foreground font-mono mt-1">19:00 – 22:00</span>
                   </button>
 
@@ -699,7 +700,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     type="button"
                     onClick={() =>
                       handleQuickPreset({
-                        title: '🏃 Thể thao & Chạy bộ',
+                        title: '🏃 Sports & Cardio Jogging',
                         detail: 'Cardio & recharge',
                         startTime: '06:30',
                         endTime: '08:00',
@@ -709,7 +710,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     }
                     className="p-2.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 text-left text-xs transition-all flex flex-col justify-between group"
                   >
-                    <span className="font-bold text-foreground group-hover:text-primary">🏃 Chạy bộ / Thể thao</span>
+                    <span className="font-bold text-foreground group-hover:text-primary">🏃 Jogging & Cardio</span>
                     <span className="text-[10px] text-muted-foreground font-mono mt-1">06:30 – 08:00</span>
                   </button>
                 </div>
@@ -720,7 +721,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                     <Plus className="w-4 h-4 text-primary" />
-                    Thêm khung giờ riêng cho ngày này
+                    Add custom timeblock for this day
                   </span>
                   {!isAddingOpen && (
                     <button
@@ -728,7 +729,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                       onClick={() => setIsAddingOpen(true)}
                       className="text-xs font-semibold text-primary hover:underline"
                     >
-                      + Mở form nhập
+                      + Open Form
                     </button>
                   )}
                 </div>
@@ -738,12 +739,12 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="text-xs font-medium text-muted-foreground block mb-1">
-                          Tên hoạt động *
+                          Activity Title *
                         </label>
                         <input
                           type="text"
                           required
-                          placeholder="Ví dụ: Đi chơi Đà Lạt, Họp nhóm, Ăn tối..."
+                          placeholder="e.g. Team Meeting, Dinner, Workout..."
                           value={newTitle}
                           onChange={(e) => setNewTitle(e.target.value)}
                           className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -751,11 +752,11 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                       </div>
                       <div>
                         <label className="text-xs font-medium text-muted-foreground block mb-1">
-                          Địa điểm / Ghi chú
+                          Location / Notes
                         </label>
                         <input
                           type="text"
-                          placeholder="Ví dụ: The Coffee House, Landmark..."
+                          placeholder="e.g. The Coffee House, Central Hall..."
                           value={newDetail}
                           onChange={(e) => setNewDetail(e.target.value)}
                           className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -766,7 +767,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div>
                         <label className="text-xs font-medium text-muted-foreground block mb-1">
-                          Giờ bắt đầu
+                          Start Time
                         </label>
                         <input
                           type="time"
@@ -778,7 +779,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                       </div>
                       <div>
                         <label className="text-xs font-medium text-muted-foreground block mb-1">
-                          Giờ kết thúc
+                          End Time
                         </label>
                         <input
                           type="time"
@@ -792,23 +793,23 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                       </div>
                       <div>
                         <label className="text-xs font-medium text-muted-foreground block mb-1">
-                          Phân loại
+                          Category
                         </label>
                         <select
                           value={newCategory}
                           onChange={(e) => setNewCategory(e.target.value as BlockCategory)}
                           className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
                         >
-                          <option value="social">Xã hội & Đi chơi (Social)</option>
-                          <option value="rest">Thư giãn (Rest)</option>
-                          <option value="health">Sức khỏe (Health)</option>
-                          <option value="work">Công việc (Work)</option>
-                          <option value="transition">Chuyển tiếp (Buffer)</option>
+                          <option value="social">Social & Outing</option>
+                          <option value="rest">Rest & Recovery</option>
+                          <option value="health">Health & Fitness</option>
+                          <option value="work">Work & Focus</option>
+                          <option value="transition">Buffer & Commute</option>
                         </select>
                       </div>
                       <div>
                         <label className="text-xs font-medium text-muted-foreground block mb-1">
-                          Năng lượng
+                          Energy Level
                         </label>
                         <select
                           value={newEnergyLevel}
@@ -825,7 +826,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                     {!isTimeOrderValid && (
                       <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4 shrink-0" />
-                        <span>Giờ kết thúc ({newEndTime}) phải sau giờ bắt đầu ({newStartTime}).</span>
+                        <span>End time ({newEndTime}) must be after start time ({newStartTime}).</span>
                       </div>
                     )}
 
@@ -835,7 +836,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                         onClick={() => setIsAddingOpen(false)}
                         className="px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted rounded-xl"
                       >
-                        Đóng form
+                        Cancel
                       </button>
                       <button
                         type="submit"
@@ -843,7 +844,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                         className="px-4 py-1.5 bg-primary text-primary-foreground text-xs font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 flex items-center gap-1.5 shadow-xs shadow-primary/20"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        Thêm vào ngày này
+                        Add to this day
                       </button>
                     </div>
                   </form>
@@ -856,19 +857,19 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Lịch trình của ngày ({blocks.length} hoạt động)
+                Schedule for this day ({blocks.length} activities)
               </span>
             </div>
 
             {isLoading ? (
               <div className="text-center py-8 text-xs text-muted-foreground">
-                Đang tải thời khóa biểu...
+                Loading schedule...
               </div>
             ) : blocks.length === 0 ? (
               <div className="text-center py-8 px-4 border border-dashed border-border/80 rounded-2xl bg-muted/10 space-y-2">
                 <Coffee className="w-8 h-8 text-muted-foreground/60 mx-auto" />
                 <p className="text-xs font-semibold text-muted-foreground">
-                  Chưa có lịch trình cho ngày này
+                  No activities scheduled for this day
                 </p>
               </div>
             ) : (
@@ -896,7 +897,7 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                             )}
                             {block.sourceType === 'CUSTOM' && (
                               <span className="px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-mono text-[9px] font-bold">
-                                LỊCH RIÊNG
+                                CUSTOM
                               </span>
                             )}
                           </div>
@@ -914,8 +915,8 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                           type="button"
                           onClick={() => setEditingBlock(block)}
                           className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all focus:opacity-100"
-                          title="Chỉnh sửa hoạt động này"
-                          aria-label="Chỉnh sửa"
+                          title="Edit this activity"
+                          aria-label="Edit"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
@@ -932,8 +933,8 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
                             }
                           }}
                           className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all focus:opacity-100"
-                          title={isRoutine ? "Hủy hoạt động này cho riêng ngày hôm nay" : "Xóa hoạt động này"}
-                          aria-label={isRoutine ? "Hủy ngày này" : "Xóa"}
+                          title={isRoutine ? "Cancel this activity for today only" : "Delete activity"}
+                          aria-label={isRoutine ? "Cancel today" : "Delete"}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -954,14 +955,14 @@ const DayDetailPopupModal: React.FC<DayDetailPopupModalProps> = ({
             className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            Xem toàn bộ ngày trên Day Timeline
+            View full day on Day Timeline
           </button>
           <button
             type="button"
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-foreground text-background text-xs font-bold hover:bg-foreground/90 transition-all"
           >
-            Đóng
+            Close
           </button>
         </div>
       </div>

@@ -38,30 +38,47 @@ public class AiPlannerService {
         try {
             String todayStr = java.time.LocalDate.now().toString();
             String systemPrompt = """
-                You are Adaptive Planner AI, an empathetic time management assistant for neurodivergent individuals.
+                You are Modo, an empathetic AI companion and intelligent daily planner for neurodivergent individuals.
                 Today's date reference is: %s (%s).
-                Your task is to parse the user's natural language request (in English or Vietnamese) into a single TimeBlock JSON object.
-                Schema format:
-                {
-                  "title": "string",
-                  "detail": "string",
-                  "date": "YYYY-MM-DD",
-                  "startTime": "HH:mm",
-                  "endTime": "HH:mm",
-                  "durationMinutes": 60,
-                  "missingFields": ["TIME" | "DURATION"],
-                  "confidence": 0.95,
-                  "category": "work" | "social" | "health" | "rest" | "urgent" | "transition",
-                  "energyLevel": "high" | "medium" | "low",
-                  "priority": "High" | "Normal" | "Protected" | "Flexible",
-                  "reminderMinutesBefore": [30, 10, 0],
-                  "isBufferBlock": false,
-                  "microSteps": [
-                    {"id": "1", "text": "Step 1", "done": false},
-                    {"id": "2", "text": "Step 2", "done": false}
-                  ]
-                }
-                CRITICAL RULES FOR DATE & TIME PARSING:
+                The user prompt may be in English or Vietnamese.
+
+                STEP 1: INTENT CLASSIFICATION
+                Classify the user's input into one of two intents:
+
+                Case A: "CONVERSATION" / Emotional Support / General Inquiry / Chatting / Confiding
+                - Triggered when the user is confiding, venting feelings, expressing exhaustion/stress/burnout/anxiety, saying greetings, asking general questions, seeking advice, or just wanting a friendly chat (e.g. "mệt quá", "chán nản", "stress quá", "hôm nay áp lực quá", "tôi không muốn làm gì cả", "chào bạn", "hello", "tâm sự với tôi đi", "làm sao để bớt lo lắng?", "cảm ơn bạn").
+                - Response schema:
+                  {
+                    "intentType": "CONVERSATION",
+                    "replyMessage": "A warm, deeply empathetic, supportive response in English that validates their feelings like a caring friend, offers gentle comfort or practical micro-grounding advice without forcing a schedule, and reminds them that they are doing their best.",
+                    "title": null
+                  }
+
+                Case B: "SCHEDULE_EVENT" / Task Creation / Calendar Planning
+                - Triggered when the user explicitly wants to add, create, or schedule a task, event, appointment, or meeting with a clear time/action (e.g. "mai 19h họp", "15:00 cafe", "đi dạo tối nay", "21/9 khám răng", "schedule gym at 6pm").
+                - Response schema:
+                  {
+                    "intentType": "SCHEDULE_EVENT",
+                    "title": "Clean concise task title in English",
+                    "detail": "Descriptive detail in English",
+                    "date": "YYYY-MM-DD",
+                    "startTime": "HH:mm",
+                    "endTime": "HH:mm",
+                    "durationMinutes": 60,
+                    "missingFields": ["TIME" | "DURATION"],
+                    "confidence": 0.95,
+                    "category": "work" | "social" | "health" | "rest" | "urgent" | "transition",
+                    "energyLevel": "high" | "medium" | "low",
+                    "priority": "High" | "Normal" | "Protected" | "Flexible",
+                    "reminderMinutesBefore": [30, 10, 0],
+                    "isBufferBlock": false,
+                    "microSteps": [
+                      {"id": "1", "text": "Step 1", "done": false},
+                      {"id": "2", "text": "Step 2", "done": false}
+                    ]
+                  }
+
+                CRITICAL RULES FOR DATE & TIME PARSING (When Case B):
                 1. Date resolution:
                    - If user mentions 'ngày 21', 'hôm 21', '21/9', 'ngày 21 tháng 9', resolve 'date' to the 21st of this month (e.g. '2026-09-21').
                    - If 'mai' or 'tomorrow', use tomorrow's date.
@@ -88,7 +105,7 @@ public class AiPlannerService {
                             Map.of("role", "system", "content", systemPrompt),
                             Map.of("role", "user", "content", userPrompt)
                     ),
-                    "temperature", 0.2
+                    "temperature", 0.3
             );
 
             String responseJson = groqWebClient.post()
@@ -131,46 +148,46 @@ public class AiPlannerService {
                    - Insert 15-minute transition buffers between adjusted blocks.
                    - If evening schedule is full (reaching 22:30/23:00), defer non-urgent tasks to Tomorrow Inbox (status: "DEFERRED") instead of cramming into bedtime.
                 
-                Generate a single best "recommendedScenario" along with 2 "alternativeScenarios" and structured "explanation" in Vietnamese.
+                Generate a single best "recommendedScenario" along with 2 "alternativeScenarios" and structured "explanation" in English.
                 
                 Schema format:
                 {
-                  "analysis": "Giải thích ngắn gọn, đồng cảm về sự kiện trùng lịch và cách giải quyết tối ưu.",
+                  "analysis": "Empathetic, concise explanation of the conflict and optimal resolution.",
                   "explanation": {
-                    "whatChanged": "Sự kiện X (HH:mm–HH:mm) gây trùng với task Y.",
-                    "whatWillHappen": "Task Y được chuyển sang slot phù hợp/ngày mai, bảo toàn các khung giờ quan trọng.",
+                    "whatChanged": "Event X (HH:mm–HH:mm) overlaps with task Y.",
+                    "whatWillHappen": "Task Y is shifted to a suitable slot or deferred, preserving core boundaries.",
                     "reasons": [
-                      "Bảo vệ tuyệt đối khung giờ nghỉ ngơi/ngủ (23:00–07:00)",
-                      "Ưu tiên hoàn thành các task có hạn chót trong ngày",
-                      "Tự động chèn 15 phút đệm chuyển tiếp để tránh quá tải não bộ"
+                      "Strictly protect bedtime and rest hours (23:00–07:00)",
+                      "Prioritize tasks with today's deadlines",
+                      "Insert 15-minute transition buffers to avoid mental fatigue"
                     ],
                     "confidenceLevel": 0.95
                   },
                   "recommendedScenario": {
                     "id": "recommended",
-                    "title": "✦ Điều chỉnh thông minh (Khuyến nghị)",
-                    "description": "Phương án cân bằng nhất, tối thiểu hóa xáo trộn lịch trình.",
+                    "title": "✦ Smart Adaptive Shift (Recommended)",
+                    "description": "Most balanced plan: minimizes schedule disruption and defends focus.",
                     "energyImpact": "medium",
-                    "highlightText": "Bảo toàn deadline và thời gian nghỉ ngơi.",
+                    "highlightText": "Protects deadlines and rest hours.",
                     "tag": "Optimized",
                     "blocks": [ /* array of TimeBlockDto objects */ ]
                   },
                   "alternativeScenarios": [
                     {
                       "id": "alt_cascade",
-                      "title": "Dời toàn bộ về sau (Cascade Shift)",
-                      "description": "Trượt toàn bộ lịch phía sau kèm 15m đệm.",
+                      "title": "Cascade Shift",
+                      "description": "Shift all subsequent tasks later with 15m buffers.",
                       "energyImpact": "medium",
-                      "highlightText": "Giữ nguyên mọi việc trong ngày.",
+                      "highlightText": "Preserves all tasks within today.",
                       "tag": "Alternative",
                       "blocks": [ /* array of TimeBlockDto objects */ ]
                     },
                     {
                       "id": "alt_defer",
-                      "title": "Zero-Guilt / Tạm hoãn sang ngày mai",
-                      "description": "Chuyển các việc không khẩn sang Tomorrow Inbox.",
+                      "title": "Zero-Guilt / Defer to Tomorrow",
+                      "description": "Move non-urgent overlapping tasks into Tomorrow Inbox.",
                       "energyImpact": "low",
-                      "highlightText": "Giảm tải tối đa cho não bộ.",
+                      "highlightText": "Maximum cognitive relief.",
                       "tag": "Low-Demand",
                       "blocks": [ /* array of TimeBlockDto objects */ ]
                     }
@@ -217,8 +234,8 @@ public class AiPlannerService {
                 notificationService.createNotification(CreateNotificationRequest.builder()
                         .type("SCHEDULE_CONFLICT")
                         .priority("HIGH")
-                        .title("Phát hiện xung đột lịch trình")
-                        .message("Có sự kiện phát sinh (" + request.getUrgentEvent() + ") gây trùng lịch. AI đã chuẩn bị 3 phương án điều chỉnh thích ứng.")
+                        .title("Schedule Conflict Detected")
+                        .message("A new event (" + request.getUrgentEvent() + ") caused a schedule overlap. AI prepared 3 adaptive scenarios.")
                         .actionType("VIEW_SCHEDULE")
                         .eventKey("schedule_conflict:" + System.currentTimeMillis() / 60000)
                         .build());
@@ -235,8 +252,8 @@ public class AiPlannerService {
                 notificationService.createNotification(CreateNotificationRequest.builder()
                         .type("SCHEDULE_CONFLICT")
                         .priority("HIGH")
-                        .title("Phát hiện xung đột lịch trình")
-                        .message("Có sự kiện phát sinh (" + request.getUrgentEvent() + ") gây trùng lịch. AI đã chuẩn bị 3 phương án điều chỉnh thích ứng.")
+                        .title("Schedule Conflict Detected")
+                        .message("A new event (" + request.getUrgentEvent() + ") caused a schedule overlap. AI prepared 3 adaptive scenarios.")
                         .actionType("VIEW_SCHEDULE")
                         .eventKey("schedule_conflict:" + System.currentTimeMillis() / 60000)
                         .build());
@@ -294,7 +311,51 @@ public class AiPlannerService {
 
     // Fallbacks
     private TimeBlockDto fallbackParseIntent(String prompt) {
-        String lower = prompt.toLowerCase();
+        String lower = prompt.toLowerCase().trim();
+
+        // 0. Detect Conversation / Emotional support vs Schedule Event
+        boolean isGreeting = lower.matches("^(hi|hello|hey|chào|chào bạn|chao|alo|alo modo|modo ơi|modo oi|ê|helo|hi modo|hello modo)[.!?~]*$")
+                || lower.contains("chào bạn") || lower.contains("chào modo") || lower.contains("hello modo");
+
+        boolean isEmotionalOrChat = lower.contains("mệt") || lower.contains("tired") || lower.contains("chán")
+                || lower.contains("áp lực") || lower.contains("stress") || lower.contains("quá tải")
+                || lower.contains("overwhelm") || lower.contains("lo lắng") || lower.contains("anxious")
+                || lower.contains("tâm sự") || lower.contains("nói chuyện") || lower.contains("chat")
+                || lower.contains("buồn") || lower.contains("sad") || lower.contains("mất tập trung")
+                || lower.contains("không muốn làm") || lower.contains("bạn là ai") || lower.contains("who are you")
+                || lower.contains("cảm ơn") || lower.contains("thank") || lower.contains("làm sao để")
+                || lower.contains("lời khuyên") || lower.contains("advice") || lower.contains("bạn khoẻ không")
+                || lower.contains("how are you");
+
+        // Check if there are explicit schedule indicators (hours, minutes, time ranges, task creation words)
+        boolean hasTimeIndicator = lower.matches(".*\\b(\\d{1,2}h|\\d{1,2}:\\d{2}|\\d{1,2}g|sáng|chiều|tối|đêm|am|pm|mai|mốt|tomorrow|yesterday|ngày \\d{1,2}|hôm \\d{1,2})\\b.*");
+        boolean hasTaskKeywords = lower.contains("họp") || lower.contains("meeting") || lower.contains("khám")
+                || lower.contains("gym") || lower.contains("tập") || lower.contains("chạy bộ")
+                || lower.contains("học") || lower.contains("deadline") || lower.contains("nộp")
+                || lower.contains("cafe") || lower.contains("cà phê") || lower.contains("ăn tối") || lower.contains("dinner")
+                || lower.contains("thêm việc") || lower.contains("add task");
+
+        if ((isGreeting || isEmotionalOrChat) && !hasTimeIndicator && !hasTaskKeywords) {
+            String reply;
+            if (isGreeting) {
+                reply = "Hello! I'm Modo, your calm companion. How are you feeling today? You can share anything on your mind, or let me know if you'd like to plan your schedule.";
+            } else if (lower.contains("mệt") || lower.contains("tired") || lower.contains("quá tải") || lower.contains("overwhelm")) {
+                reply = "I hear you, and it is completely okay to feel exhausted. Take a deep breath, drop your shoulders, and give yourself permission to rest. You don't have to push through everything right now. I'm right here with you.";
+            } else if (lower.contains("stress") || lower.contains("áp lực") || lower.contains("lo lắng") || lower.contains("anxious")) {
+                reply = "It's completely normal to feel stressed when things pile up. Let's take it one small step at a time. Sip some cool water, unclench your jaw, and let's protect your calm together.";
+            } else if (lower.contains("tâm sự") || lower.contains("nói chuyện")) {
+                reply = "I'm always here to listen. Tell me what's on your mind—whether it's thoughts about your day, challenges you're facing, or just wanting a friendly chat.";
+            } else if (lower.contains("cảm ơn") || lower.contains("thank")) {
+                reply = "You're very welcome! I'm glad I could be here for you. Take care of yourself today!";
+            } else {
+                reply = "I'm listening. Remember to be gentle with yourself today. Whenever you're ready, we can tackle things together in small, manageable pieces.";
+            }
+
+            return TimeBlockDto.builder()
+                    .intentType("CONVERSATION")
+                    .replyMessage(reply)
+                    .build();
+        }
 
         // 1. Parse Date
         java.time.LocalDate now = java.time.LocalDate.now();
@@ -532,95 +593,95 @@ public class AiPlannerService {
         }
 
         // 4. Parse Title, Category, Energy Level, Priority
-        String title = "Hoạt động theo lịch";
-        String detail = "Kế hoạch cá nhân được sắp xếp";
+        String title = "Scheduled Focus Session";
+        String detail = "Personal focus time block";
         String category = "work";
         String energyLevel = "medium";
         String priority = "Normal";
         List<TimeBlockDto.MicroStepDto> microSteps = new ArrayList<>();
 
         if (containsAny(lower, "công viên", "park")) {
-            title = "Đi dạo công viên";
-            detail = "Thư giãn ngoài trời & hít thở không khí tự nhiên";
+            title = "Park Walk";
+            detail = "Outdoor walk & fresh air";
             category = "rest";
             energyLevel = "low";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Chuẩn bị trang phục thoải mái và nước uống", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Di chuyển đến công viên và thư giãn", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Grab comfortable shoes and water bottle", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Head out to the park and recharge", false));
         } else if (containsAny(lower, "cafe", "coffee", "cà phê", "caphe")) {
-            title = "Đi cà phê";
-            detail = "The Workshop Cafe · Nạp lại năng lượng xã hội";
+            title = "Coffee Break";
+            detail = "The Workshop Cafe · Social recharge",
             category = "social";
             energyLevel = "low";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Chuẩn bị đồ dùng cá nhân và xác nhận địa điểm", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Gặp gỡ bạn bè và tận hưởng cuộc trò chuyện", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Check location and gather personal belongings", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Enjoy a mindful coffee and conversation", false));
         } else if (containsAny(lower, "gym", "workout", "chạy bộ", "thể dục", "fitness")) {
-            title = "Tập gym / Thể dục";
-            detail = "Rèn luyện thể lực & duy trì sức khỏe";
+            title = "Gym Workout";
+            detail = "Physical exercise & wellness";
             category = "health";
             energyLevel = "medium";
             priority = "Protected";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Thay đồ tập và chuẩn bị bình nước", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Khởi động nhẹ nhàng và hoàn thành bài tập", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Change into workout clothes and grab water", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Warm up gently and complete workout sets", false));
         } else if (containsAny(lower, "bơi", "swimming")) {
-            title = "Đi bơi / Thể thao dưới nước";
-            detail = "Rèn luyện sức bền & giải tỏa căng thẳng";
+            title = "Swimming Session";
+            detail = "Cardio workout & sensory relief";
             category = "health";
             energyLevel = "medium";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Chuẩn bị đồ bơi và kính bơi", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Khởi động kỹ trước khi xuống nước", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Pack swimsuit and goggles", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Warm up stretches before pool entry", false));
         } else if (containsAny(lower, "họp", "hop", "meeting", "sync")) {
             boolean isUrgent = lower.contains("đột xuất") || lower.contains("khẩn") || lower.contains("gấp") || lower.contains("emergency") || lower.contains("urgent");
-            title = isUrgent ? "Cuộc họp đột xuất" : "Cuộc họp / Trao đổi";
-            detail = isUrgent ? "Cuộc họp phát sinh khẩn cấp cần ưu tiên xử lý" : "Trao đổi công việc & căn chỉnh mục tiêu";
+            title = isUrgent ? "Urgent Meeting" : "Team Meeting";
+            detail = isUrgent ? "Urgent unscheduled priority meeting" : "Work alignment & sync session";
             category = isUrgent ? "urgent" : "work";
             energyLevel = "high";
             priority = isUrgent ? "High" : "Normal";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Chuẩn bị tài liệu & ghi chú cần trao đổi", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Tham gia thảo luận và tổng kết action items", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Review meeting agenda & open notes", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Join call and note key action items", false));
         } else if (containsAny(lower, "java", "python", "coding", "lập trình", "code")) {
-            title = "Học Java / Lập trình";
-            detail = "Thực hành lập trình & rèn luyện tư duy kỹ thuật";
+            title = "Coding / Dev Session";
+            detail = "Hands-on software development";
             category = "work";
             energyLevel = "medium";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Mở IDE và xem lại mục tiêu bài tập", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Tập trung code từng module nhỏ", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Open IDE and review task requirements", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Focus on implementing single module/test", false));
         } else if (containsAny(lower, "ngủ", "ngu", "wind down", "sleep")) {
-            title = "Nghỉ ngơi / Đi ngủ";
-            detail = "Thư giãn tâm trí và nạp lại năng lượng";
+            title = "Bedtime & Sleep";
+            detail = "Wind down and rest to restore energy";
             category = "rest";
             energyLevel = "low";
             priority = "Protected";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Tắt các thiết bị điện tử", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Nghỉ ngơi thư giãn", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Dim lights and disconnect devices", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Relaxing breathing and wind down", false));
         } else if (containsAny(lower, "dentist", "nha sĩ", "nha si", "khám răng", "bác sĩ", "doctor")) {
-            title = "Khám nha sĩ / Bác sĩ";
-            detail = "Khám và chăm sóc sức khỏe theo lịch hẹn";
+            title = "Doctor / Dentist Appointment";
+            detail = "Scheduled health and wellness checkup";
             category = "health";
             energyLevel = "high";
             priority = "High";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Chuẩn bị sổ khám & đúng giờ hẹn", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Hoàn thành buổi khám", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Prepare appointment info & depart on time", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Complete the checkup session", false));
         } else if (containsAny(lower, "học", "hoc", "study", "đọc sách", "doc sach", "research", "bài tập", "assignment")) {
-            title = "Học tập / Nghiên cứu";
-            detail = "Tập trung nâng cao kiến thức";
+            title = "Study & Research";
+            detail = "Deep focused learning session";
             category = "work";
             energyLevel = "medium";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Mở tài liệu học và loại bỏ yếu tố gây xao nhãng", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Học tập tập trung theo từng phiên 25 phút", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Open study material and minimize distractions", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Focus on first 25-minute study sprint", false));
         } else if (containsAny(lower, "xem phim", "movie", "cinema", "netflix")) {
-            title = "Xem phim giải trí";
-            detail = "Thư giãn đầu óc & thưởng thức bộ phim yêu thích";
+            title = "Movie & Downtime";
+            detail = "Relax and enjoy favorite entertainment";
             category = "rest";
             energyLevel = "low";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Chọn phim và chuẩn bị chỗ ngồi thoải mái", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Thưởng thức trọn vẹn bộ phim", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Pick movie and prepare cozy space", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Unwind and enjoy the show", false));
         } else if (containsAny(lower, "ăn tối", "ăn trưa", "dinner", "lunch", "ăn")) {
-            title = "Bữa ăn & Thư giãn";
-            detail = "Thưởng thức bữa ăn & nạp năng lượng";
+            title = "Meal & Nourishment";
+            detail = "Mindful meal break & hydration";
             category = "rest";
             energyLevel = "low";
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Chuẩn bị bữa ăn", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Ăn uống thư thái", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Prepare meal and step away from screens", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Eat mindfully and hydrate", false));
         } else {
             // General clean title
             String cleaned = prompt.replaceAll("(?i)(tôi sẽ|tôi muốn|hãy lên lịch|lên lịch|đặt lịch|nhắc tôi|vào ngày|ngày|từ|đến|tới|-|\\d{1,2}[/.-]\\d{1,2}(?:[/.-]\\d{4})?|\\d{1,2}h(?:\\d{2})?|t[2-7]|cn|mai|mốt|hôm nay)", "").trim();
@@ -629,8 +690,8 @@ public class AiPlannerService {
             } else {
                 title = "Focused Work Session";
             }
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Chuẩn bị công việc và không gian", false));
-            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Bắt đầu từng bước nhỏ", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Set up workspace and clarify goals", false));
+            microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Start with the first tiny micro-step", false));
         }
 
         return TimeBlockDto.builder()
@@ -666,13 +727,13 @@ public class AiPlannerService {
         int endTotalMin = urgentStartMin + dur;
         String endTime = String.format("%02d:%02d", (endTotalMin / 60) % 24, endTotalMin % 60);
 
-        String eventTitle = request.getUrgentEvent() != null ? request.getUrgentEvent() : "Cuộc họp đột xuất";
+        String eventTitle = request.getUrgentEvent() != null ? request.getUrgentEvent() : "Urgent Meeting";
         java.time.LocalDate today = java.time.LocalDate.now();
 
         TimeBlockDto urgentBlock = TimeBlockDto.builder()
                 .id("block-urgent-" + System.currentTimeMillis())
                 .title(eventTitle)
-                .detail("Sự kiện khẩn cấp được ưu tiên xếp vào lịch")
+                .detail("Urgent high-priority schedule item")
                 .startTime(startTime)
                 .endTime(endTime)
                 .category("urgent")
@@ -723,7 +784,7 @@ public class AiPlannerService {
 
                 if (isProtected) {
                     recommendedBlocks.add(b);
-                    reasons.add("Bảo vệ tuyệt đối khung giờ cố định/nghỉ ngơi: " + b.getTitle());
+                    reasons.add("Strictly protect fixed/rest boundary: " + b.getTitle());
                     continue;
                 }
 
@@ -787,27 +848,27 @@ public class AiPlannerService {
         recommendedBlocks.sort((a, b) -> a.getStartTime().compareTo(b.getStartTime()));
 
         // Assemble Smart Reasons
-        reasons.add("Bảo vệ tuyệt đối giờ ngủ (23:00–07:00) và các block Protected.");
+        reasons.add("Strictly protect sleep hours (23:00–07:00) and Protected blocks.");
         if (!shiftedTitles.isEmpty()) {
-            reasons.add("Tự động dời " + String.join(", ", shiftedTitles) + " kèm 15m đệm chuyển tiếp.");
+            reasons.add("Shifted " + String.join(", ", shiftedTitles) + " with 15m buffers.");
         }
         if (!deferredTitles.isEmpty()) {
-            reasons.add("Hoãn " + String.join(", ", deferredTitles) + " sang Tomorrow Inbox để không làm việc đêm muộn.");
+            reasons.add("Deferred " + String.join(", ", deferredTitles) + " to Tomorrow Inbox to avoid late-night fatigue.");
         }
 
         ExplanationDetailsDto explanation = ExplanationDetailsDto.builder()
-                .whatChanged(eventTitle + " (" + startTime + "–" + endTime + ") gây trùng lặp với lịch trình buổi tối.")
-                .whatWillHappen(!shiftedTitles.isEmpty() ? "Dời các hoạt động linh hoạt sang slot sau " + endTime + " và chèn 15m đệm." : "Tối ưu hóa lịch trình và bảo toàn giờ nghỉ ngơi.")
+                .whatChanged(eventTitle + " (" + startTime + "–" + endTime + ") overlaps with your evening schedule.")
+                .whatWillHappen(!shiftedTitles.isEmpty() ? "Shift flexible activities to slots after " + endTime + " with 15m buffers." : "Optimize schedule and protect rest hours.")
                 .reasons(reasons)
                 .confidenceLevel(0.96)
                 .build();
 
         ScenarioDto recommended = ScenarioDto.builder()
                 .id("recommended")
-                .title("✦ Điều chỉnh thông minh (Khuyến nghị)")
-                .description("Phương án tối ưu: xếp " + eventTitle + ", trượt các task liên quan và giữ vững giờ ngủ.")
+                .title("✦ Smart Adaptive Shift (Recommended)")
+                .description("Optimal strategy: schedule " + eventTitle + ", shift impacted tasks, and protect sleep boundaries.")
                 .energyImpact("medium")
-                .highlightText("Bảo toàn năng lượng và hạn chót mà không gây quá tải.")
+                .highlightText("Defends energy and deadlines without cognitive overload.")
                 .tag("Optimized")
                 .blocks(recommendedBlocks)
                 .build();
@@ -859,10 +920,10 @@ public class AiPlannerService {
 
         ScenarioDto altCascade = ScenarioDto.builder()
                 .id("alt_cascade")
-                .title("Dời toàn bộ về sau (Cascade Shift)")
-                .description("Trượt toàn bộ công việc bị trùng sang khung giờ muộn hơn kèm 15m đệm.")
+                .title("Cascade Shift")
+                .description("Shift all overlapping tasks to later slots with 15m buffers.")
                 .energyImpact("medium")
-                .highlightText("Giữ trọn vẹn 100% công việc trong ngày.")
+                .highlightText("Keeps 100% of tasks within today.")
                 .tag("Alternative")
                 .blocks(altCascadeBlocks)
                 .build();
@@ -888,16 +949,16 @@ public class AiPlannerService {
 
         ScenarioDto altDefer = ScenarioDto.builder()
                 .id("alt_defer")
-                .title("Zero-Guilt / Tạm hoãn sang ngày mai")
-                .description("Tạm hoãn các hoạt động bị trùng sang Tomorrow Inbox để dồn tâm trí cho " + eventTitle + ".")
+                .title("Zero-Guilt / Defer to Tomorrow")
+                .description("Defer overlapping tasks into Tomorrow Inbox to focus solely on " + eventTitle + ".")
                 .energyImpact("low")
-                .highlightText("Bảo vệ năng lượng nhận thức, không cảm thấy có lỗi.")
+                .highlightText("Guilt-free cognitive recovery.",
                 .tag("Low-Demand")
                 .blocks(altDeferBlocks)
                 .build();
 
         return RescheduleResponseDto.builder()
-                .analysis("Sự kiện " + eventTitle + " (" + startTime + "–" + endTime + ") gây trùng lặp với lịch trình hiện tại. Hệ thống đã chuẩn bị phương án điều chỉnh tối ưu nhất:")
+                .analysis("Event " + eventTitle + " (" + startTime + "–" + endTime + ") causes an overlap with your timetable. The system calculated the following optimal adaptations:")
                 .recommendedScenario(recommended)
                 .alternativeScenarios(List.of(altCascade, altDefer))
                 .explanation(explanation)
@@ -911,33 +972,33 @@ public class AiPlannerService {
 
         if (containsAny(lower, "gym", "tập", "thể thao", "chạy", "workout")) {
             steps = List.of(
-                    new TimeBlockDto.MicroStepDto("ms-1", "Uống một cốc nước và thay trang phục thể thao (2 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-2", "Chuẩn bị bình nước và giày tập (1 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-3", "Khởi động nhẹ xoay khớp 3 phút", false)
+                    new TimeBlockDto.MicroStepDto("ms-1", "Drink a glass of water and change into workout clothes (2 mins)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Prepare water bottle and workout shoes (1 min)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Light joint warmup for 3 minutes", false)
             );
         } else if (containsAny(lower, "báo cáo", "report", "viết", "write", "doc", "tài liệu")) {
             steps = List.of(
-                    new TimeBlockDto.MicroStepDto("ms-1", "Mở tài liệu và ghi tiêu đề cho \"" + taskTitle + "\" (1 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-2", "Gạch 3 ý chính cần trình bày (3 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-3", "Viết 2 câu tóm tắt mở đầu (5 phút)", false)
+                    new TimeBlockDto.MicroStepDto("ms-1", "Open document and write title for \"" + taskTitle + "\" (1 min)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Outline 3 key points to cover (3 mins)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Draft a 2-sentence opening summary (5 mins)", false)
             );
         } else if (containsAny(lower, "học", "study", "ôn", "đọc", "read", "sách")) {
             steps = List.of(
-                    new TimeBlockDto.MicroStepDto("ms-1", "Dọn gọn bàn học và mở trang tài liệu đầu tiên (2 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-2", "Đọc lướt qua tiêu đề và mục lục (3 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-3", "Đọc tập trung phần mở đầu trong 5 phút", false)
+                    new TimeBlockDto.MicroStepDto("ms-1", "Clear desk and open first reading page (2 mins)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Skim headings and table of contents (3 mins)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Deep focus reading sprint for 5 minutes", false)
             );
         } else if (containsAny(lower, "code", "java", "dev", "bug", "fix", "lập trình", "web")) {
             steps = List.of(
-                    new TimeBlockDto.MicroStepDto("ms-1", "Mở IDE và chuẩn bị workspace cho \"" + taskTitle + "\" (2 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-2", "Xác định file code hoặc hàm cần xử lý đầu tiên (2 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-3", "Viết 5 dòng code hoặc test case đầu tiên (5 phút)", false)
+                    new TimeBlockDto.MicroStepDto("ms-1", "Open IDE and set up workspace for \"" + taskTitle + "\" (2 mins)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Identify target file or function to edit (2 mins)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Write first 5 lines of code or test case (5 mins)", false)
             );
         } else {
             steps = List.of(
-                    new TimeBlockDto.MicroStepDto("ms-1", "Mở không gian làm việc và chuẩn bị cho \"" + taskTitle + "\" (2 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-2", "Gạch đầu dòng 3 việc nhỏ cần làm (2 phút)", false),
-                    new TimeBlockDto.MicroStepDto("ms-3", "Bắt đầu làm việc nhỏ nhất trong 5 phút đầu tiên", false)
+                    new TimeBlockDto.MicroStepDto("ms-1", "Open workspace and prepare materials for \"" + taskTitle + "\" (2 mins)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "List 3 small actionable bullets (2 mins)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Complete the smallest task in the first 5 minutes", false)
             );
         }
 

@@ -86,7 +86,14 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`API error (${response.status}): ${errorText || response.statusText}`);
+    let errorMessage = response.statusText || `Request error (${response.status})`;
+    try {
+      const parsed = JSON.parse(errorText);
+      errorMessage = parsed.detail || parsed.title || parsed.message || errorText;
+    } catch {
+      errorMessage = errorText || errorMessage;
+    }
+    throw new Error(errorMessage);
   }
 
   if (response.status === 204) {
@@ -294,6 +301,10 @@ export const api = {
     }),
   deleteNotification: (id: number) =>
     request<void>(`/notifications/${id}`, {
+      method: 'DELETE',
+    }),
+  deleteAllReadNotifications: () =>
+    request<{ message: string }>('/notifications/read', {
       method: 'DELETE',
     }),
   createNotification: (payload: Partial<NotificationItem>) =>
