@@ -1085,7 +1085,7 @@ export function AdaptiveApp() {
               onUpdatePending={setPendingActivity}
             />
           )}
-          {view === "interview" && <InterviewLab />}
+          {view === "interview" && <InterviewLab onExit={() => navigate("today")} />}
           {view === "insights" && <InsightsView />}
           {view === "notifications" && <NotificationsView read={readNotifications} setRead={setReadNotifications} transitionOn={transitionOn} setTransitionOn={setTransitionOn} importantOn={importantOn} setImportantOn={setImportantOn} />}
           {view === "settings" && <SettingsView onNavigate={navigate} />}
