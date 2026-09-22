@@ -60,10 +60,6 @@ export const LastWeekReflectionCard: React.FC<LastWeekReflectionCardProps> = ({
             Nhìn lại & Đúc kết
           </h2>
         </div>
-
-        <div className="text-xs text-muted-foreground italic">
-          Không áp lực hiệu suất · Nhận diện mẫu hình lặp lại
-        </div>
       </div>
 
       {/* Retrospective Metrics */}

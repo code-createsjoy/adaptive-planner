@@ -47,26 +47,21 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header card with Universal Design Ethos */}
       <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-br from-primary/10 via-background to-accent/10 border border-primary/20 relative overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="size-11 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
+          <div className="flex items-center gap-3.5">
+            <div className="size-10 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
               <Sparkles className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-extrabold text-foreground">
-                  Hồ sơ Thích ứng & Trải nghiệm Tiếp cận
-                </h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
-                  Universal Design
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1 max-w-xl leading-relaxed">
-                Modo được xây dựng dựa trên 7 nguyên tắc Universal Design. Giao diện tự động cân bằng theo nhịp sinh học và phong cách xử lý thông tin cá nhân của bạn.
-              </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-base sm:text-lg font-extrabold text-foreground">
+                Hồ sơ Thích ứng & Trải nghiệm Tiếp cận
+              </h3>
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                Universal Design
+              </span>
             </div>
           </div>
 
@@ -89,10 +84,7 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
             <div className="size-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <Eye className="w-4 h-4" />
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-foreground">Mật độ hiển thị thông tin</h4>
-              <p className="text-[11px] text-muted-foreground">Mức độ chi tiết đồ họa & số lượng widget</p>
-            </div>
+            <h4 className="text-sm font-bold text-foreground">Mật độ hiển thị thông tin</h4>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
@@ -127,16 +119,13 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
             <div className="size-8 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
               <Zap className="w-4 h-4" />
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-foreground">Mức độ nhạy cảm thị giác & âm thanh</h4>
-              <p className="text-[11px] text-muted-foreground">Tự động giảm tải animation & màu rực</p>
-            </div>
+            <h4 className="text-sm font-bold text-foreground">Mức độ nhạy cảm thị giác & âm thanh</h4>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
             {[
               { id: 'LOW', label: 'Tiêu chuẩn', desc: 'Hiệu ứng đầy đủ' },
-              { id: 'MEDIUM', label: 'Vừa phải', desc: 'Giảm chuyển động phụ' },
+              { id: 'MEDIUM', label: 'Vừa phải', desc: 'Giảm chuyển động' },
               { id: 'HIGH', label: 'Cao (Calm)', desc: 'Tĩnh lặng & êm dịu' },
             ].map((item) => {
               const isSelected = profile.sensorySensitivity === item.id;
@@ -170,10 +159,7 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
             <div className="size-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
               <Volume2 className="w-4 h-4" />
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-foreground">Âm thanh chuông thông báo</h4>
-              <p className="text-[11px] text-muted-foreground">Tần số chuông sóng Sin 432Hz êm ái</p>
-            </div>
+            <h4 className="text-sm font-bold text-foreground">Âm thanh chuông thông báo</h4>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
@@ -208,10 +194,7 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
             <div className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
-            <div>
-              <h4 className="text-sm font-bold text-foreground">Khoảng đệm chuyển tiếp (Buffer)</h4>
-              <p className="text-[11px] text-muted-foreground">Tự động chèn giữa các khối công việc</p>
-            </div>
+            <h4 className="text-sm font-bold text-foreground">Khoảng đệm chuyển tiếp (Buffer)</h4>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
@@ -242,15 +225,10 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
       </div>
 
       {/* Reduced Motion & Feedback Strip */}
-      <div className="p-4 rounded-2xl bg-muted/40 border border-border/70 flex items-center justify-between">
+      <div className="p-4.5 rounded-2xl bg-muted/40 border border-border/70 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Layers className="size-4 text-muted-foreground" />
-          <div>
-            <p className="text-xs font-bold text-foreground">Giảm chuyển động (Reduced Motion)</p>
-            <p className="text-[11px] text-muted-foreground">
-              Tắt hiệu ứng chuyển cảnh bay lượn để tiết kiệm năng lượng nhận thức
-            </p>
-          </div>
+          <p className="text-xs font-bold text-foreground">Giảm chuyển động (Reduced Motion)</p>
         </div>
 
         <button

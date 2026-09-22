@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button';
 import { useWeeklyInsights, useProgressiveInsights, useSaveExperimentMutation, useDismissExperimentMutation } from './hooks';
 import { ThisWeekProgressCard } from './components/ThisWeekProgressCard';
 import { LastWeekReflectionCard } from './components/LastWeekReflectionCard';
-import { FirstUseTip } from '@/components/adaptive/guidance/FirstUseTip';
 
 interface InsightsViewProps {
   onNavigateToWeek?: (weekStart: string) => void;
@@ -84,15 +83,6 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 animate-fadeIn">
-      {/* Contextual First-Use Guidance */}
-      <FirstUseTip
-        tipId="insights"
-        icon={<Lightbulb className="size-4 text-teal-600 dark:text-teal-400" />}
-        title="Patterns, not grades."
-        description="Modo looks for patterns that may help you plan future days."
-        actionLabel="Got it"
-      />
-
       {/* Toast notification */}
       {appliedToast && (
         <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-foreground text-background shadow-2xl flex items-center gap-3 border border-border animate-in slide-in-from-bottom-5 duration-300">
@@ -120,9 +110,6 @@ export const InsightsView: React.FC<InsightsViewProps> = () => {
               Insights & Nhịp điệu cá nhân
             </h2>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Your patterns, not your performance · Nhận diện nhịp điệu thực tế để nâng đỡ lịch trình mà không tạo áp lực.
-          </p>
         </div>
 
         {/* Week Navigator */}

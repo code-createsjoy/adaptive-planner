@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Clock;
 import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -202,6 +204,20 @@ public class TimeBlockService {
         if ("CANCELLED".equalsIgnoreCase(existing.getOverrideType())) {
             throw new ConflictException("A cancelled occurrence cannot be completed");
         }
+        if (completed) {
+            LocalDate today = LocalDate.now(clock);
+            LocalTime nowTime = LocalTime.now(clock);
+            if (existing.getDate() != null) {
+                if (existing.getDate().isAfter(today)) {
+                    throw new IllegalArgumentException("Không thể đánh dấu hoàn thành cho ca làm việc trong tương lai (" + existing.getDate() + ").");
+                } else if (existing.getDate().isEqual(today) && existing.getStartTime() != null) {
+                    LocalTime start = parseTimeSafely(existing.getStartTime());
+                    if (start != null && start.isAfter(nowTime)) {
+                        throw new IllegalArgumentException("Không thể đánh dấu hoàn thành trước giờ bắt đầu ca làm việc (" + existing.getStartTime() + ").");
+                    }
+                }
+            }
+        }
         existing.setIsCompleted(completed);
         return toDto(repository.save(existing));
     }
@@ -224,11 +240,45 @@ public class TimeBlockService {
             throw new ConflictException("A cancelled occurrence cannot be completed");
         }
 
+        if (completed) {
+            LocalDate today = LocalDate.now(clock);
+            LocalTime nowTime = LocalTime.now(clock);
+            if (date.isAfter(today)) {
+                throw new IllegalArgumentException("Không thể đánh dấu hoàn thành cho ca làm việc trong tương lai (" + date + ").");
+            } else if (date.isEqual(today) && routine.getStartTime() != null) {
+                LocalTime start = parseTimeSafely(routine.getStartTime());
+                if (start != null && start.isAfter(nowTime)) {
+                    throw new IllegalArgumentException("Không thể đánh dấu hoàn thành trước giờ bắt đầu ca làm việc (" + routine.getStartTime() + ").");
+                }
+            }
+        }
+
         occurrence.setIsCompleted(completed);
         occurrence.setSourceType("ROUTINE");
         occurrence.setSourceRoutineId(routineId);
         occurrence.setOverrideType("MODIFIED");
         return toDto(repository.saveAndFlush(occurrence));
+    }
+
+    private LocalTime parseTimeSafely(String timeStr) {
+        if (timeStr == null || timeStr.isBlank()) {
+            return null;
+        }
+        try {
+            if (timeStr.length() == 4 && timeStr.charAt(1) == ':') {
+                return LocalTime.parse("0" + timeStr);
+            }
+            return LocalTime.parse(timeStr);
+        } catch (DateTimeParseException e) {
+            try {
+                if (timeStr.length() >= 5) {
+                    return LocalTime.parse(timeStr.substring(0, 5));
+                }
+                return null;
+            } catch (Exception ignored) {
+                return null;
+            }
+        }
     }
 
     private TimeBlockEntity materializeRoutineOccurrence(WeeklyRoutineEntity routine, LocalDate date) {

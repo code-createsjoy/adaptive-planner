@@ -105,7 +105,6 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useGuidanceStore } from "@/store/useGuidanceStore";
 import { DashboardTourController } from "./guidance/DashboardTourController";
 import { HelpDrawer } from "./guidance/HelpDrawer";
-import { HelpAndGuidanceSettingsCard } from "./guidance/HelpAndGuidanceSettingsCard";
 import { OnboardingWizard } from "@/features/onboarding/OnboardingWizard";
 import {
   useProjectGoals,
@@ -726,6 +725,36 @@ export function AdaptiveApp() {
 
   const handleToggleComplete = async (block: TimeBlock) => {
     const completed = !block.isCompleted;
+
+    // Validation: Prevent marking future time block as completed
+    if (completed) {
+      const today = getTodayDateString();
+      const isFutureDate = selectedDate > today;
+      let isFutureTimeToday = false;
+      if (selectedDate === today && block.startTime) {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const startMinutes = timeStringToMinutes(block.startTime);
+        if (startMinutes > currentMinutes) {
+          isFutureTimeToday = true;
+        }
+      }
+
+      if (isFutureDate || isFutureTimeToday) {
+        handleShowToast({
+          id: `future-block-${block.id}-${Date.now()}`,
+          type: 'FUTURE_COMPLETION_PREVENTED',
+          priority: 'NORMAL',
+          title: 'Chưa thể đánh dấu hoàn thành',
+          message: `Ca làm việc "${block.title}" bắt đầu lúc ${block.startTime} trong tương lai. Bạn chỉ có thể đánh dấu hoàn thành khi ca làm việc đã bắt đầu hoặc đã qua.`,
+          actionLabel: 'Đã hiểu',
+          onAction: () => {},
+          createdAt: Date.now(),
+        });
+        return;
+      }
+    }
+
     try {
       await completionMutation.mutateAsync({ block, date: selectedDate, completed });
     } catch (error) {
@@ -1586,9 +1615,6 @@ export function AdaptiveApp() {
               </Button>
               <div className="rise">
                 <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{title}</h1>
-                {subtitleFor(view) && (
-                  <p className="mt-1.5 text-sm text-muted-foreground">{subtitleFor(view)}</p>
-                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -4116,8 +4142,6 @@ function SettingsView({ onNavigate }: { onNavigate: (id: ViewId) => void }) {
         <SettingsCard icon={Bell} title="Notifications" copy="Choose the updates that deserve your attention." onClick={() => onNavigate("notifications")} />
         <SettingsCard icon={CircleUserRound} title="Profile" copy="Your name, timezone, and daily rhythm." onClick={() => onNavigate("profile")} />
       </div>
-
-      <HelpAndGuidanceSettingsCard onReplayTour={() => onNavigate("today")} />
     </div>
   );
 }
@@ -4273,37 +4297,38 @@ function ProfileView({ onRetakeOnboarding }: { onRetakeOnboarding: () => void })
   const { user } = useAuthStore();
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div className="glass-panel rounded-2xl p-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="size-20 rounded-2xl bg-teal-600 text-white font-bold text-2xl flex items-center justify-center shadow-md">
+    <div className="space-y-6 w-full">
+      <div className="glass-panel rounded-3xl p-6 border border-border/80 shadow-xs">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="size-16 sm:size-18 rounded-2xl bg-teal-600 text-white font-bold text-2xl sm:text-3xl flex items-center justify-center shadow-md shrink-0">
               {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-display text-2xl font-extrabold">{user?.name || "Modo User"}</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-900">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="font-display text-xl sm:text-2xl font-extrabold text-foreground">{user?.name || "Modo User"}</h2>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-900 font-mono">
                   {user?.platformRole || "INDIVIDUAL"}
                 </span>
               </div>
-              <p className="mt-0.5 text-sm text-muted-foreground">{user?.email}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
               {user?.journeyStage && (
-                <p className="mt-1 text-xs text-teal-600 dark:text-teal-400 font-medium">
+                <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">
                   Journey: {user.journeyStage.replace(/_/g, ' ')}
                 </p>
               )}
             </div>
           </div>
-        </div>
-        <div className="mt-7 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl bg-muted p-4">
-            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Typical focus window</p>
-            <p className="mt-2 font-semibold">90 minutes</p>
-          </div>
-          <div className="rounded-xl bg-muted p-4">
-            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Preferred transition</p>
-            <p className="mt-2 font-semibold">15–30 minutes</p>
+
+          <div className="grid grid-cols-2 gap-3 w-full lg:w-auto shrink-0">
+            <div className="rounded-2xl bg-muted/60 border border-border/60 p-3.5 min-w-[150px]">
+              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Typical focus window</p>
+              <p className="mt-1 font-bold text-sm text-foreground">90 minutes</p>
+            </div>
+            <div className="rounded-2xl bg-muted/60 border border-border/60 p-3.5 min-w-[150px]">
+              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground font-semibold">Preferred transition</p>
+              <p className="mt-1 font-bold text-sm text-foreground">15–30 minutes</p>
+            </div>
           </div>
         </div>
       </div>
@@ -4435,20 +4460,4 @@ function TransitionDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
       </DialogContent>
     </Dialog>
   );
-}
-
-function subtitleFor(view: ViewId) {
-  const subtitles: Record<ViewId, string> = {
-    today: "",
-    calendar: "Browse your schedule without losing the day view.",
-    planner: "Add or adjust plans in the words that come naturally.",
-    interview: "A simple candidate flow and a structured review space for interviewers.",
-    insights: "A calm summary, without scores or pressure.",
-    notifications: "Useful updates only—grouped so they do not interrupt your day.",
-    settings: "A few clear ways to make Adaptive work for you.",
-    profile: "Your planning context and daily rhythm.",
-    preferences: "Personalize support without assumptions.",
-    companion: "Optional voice support, right where you work.",
-  };
-  return subtitles[view];
 }

@@ -213,9 +213,6 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
             </div>
             <div>
               <h4 className="text-sm font-bold text-foreground">Không có thông báo nào</h4>
-              <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto leading-relaxed">
-                Mọi nhắc nhở ca làm việc, cảnh báo tiến độ dự án và gợi ý từ AI sẽ xuất hiện tại đây khi phát sinh.
-              </p>
               {onCreateTestNotification && (
                 <div className="mt-4">
                   <Button

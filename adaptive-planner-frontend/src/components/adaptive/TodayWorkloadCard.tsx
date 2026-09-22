@@ -15,7 +15,6 @@ import {
   Scale,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FirstUseTip } from './guidance/FirstUseTip';
 
 interface TodayWorkloadCardProps {
   assessment?: CognitiveLoadAssessment | null;
@@ -75,18 +74,9 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
   };
 
   return (
-    <div className="space-y-3">
-      <FirstUseTip
-        tipId="workload"
-        icon={<Brain className="size-4 text-teal-600 dark:text-teal-400" />}
-        title="Hôm nay có quá tải không?"
-        description="Modo phân tích công việc tập trung, cuộc họp, khoảng chuyển tiếp và giờ nghỉ sẵn có để cảnh báo bạn."
-        actionLabel="Đã hiểu"
-      />
-
-      <div
-        className={`p-4 sm:p-4.5 rounded-3xl bg-gradient-to-br ${levelConfig.bgGradient} border ${levelConfig.borderClass} shadow-xs space-y-3.5 transition-all`}
-      >
+    <div
+      className={`p-4 sm:p-4.5 rounded-3xl bg-gradient-to-br ${levelConfig.bgGradient} border ${levelConfig.borderClass} shadow-xs space-y-3.5 transition-all`}
+    >
       {/* Top Header: Title & Level Badge */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -191,7 +181,6 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
           Tối ưu lịch <ArrowRight className="w-3 h-3" />
         </button>
       </div>
-    </div>
     </div>
   );
 };
