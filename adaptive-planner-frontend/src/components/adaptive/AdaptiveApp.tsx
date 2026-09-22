@@ -143,6 +143,7 @@ import {
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
   useDeleteNotificationMutation,
+  useDeleteAllReadNotificationsMutation,
   useCreateNotificationMutation,
 } from "@/hooks/useNotifications";
 import { DailyCheckinPopover } from "./DailyCheckinPopover";
@@ -748,6 +749,7 @@ export function AdaptiveApp() {
   const markNotificationReadMutation = useMarkNotificationAsReadMutation();
   const markAllNotificationsReadMutation = useMarkAllNotificationsAsReadMutation();
   const deleteNotificationMutation = useDeleteNotificationMutation();
+  const deleteAllReadNotificationsMutation = useDeleteAllReadNotificationsMutation();
   const createNotificationMutation = useCreateNotificationMutation();
 
   const handleCreateTestNotification = () => {
@@ -1768,6 +1770,7 @@ export function AdaptiveApp() {
               onMarkAsRead={(id) => markNotificationReadMutation.mutate(id)}
               onMarkAllAsRead={() => markAllNotificationsReadMutation.mutate()}
               onDeleteNotification={(id) => deleteNotificationMutation.mutate(id)}
+              onDeleteAllRead={() => deleteAllReadNotificationsMutation.mutate()}
               preferences={notificationPreferences}
               onUpdatePreferences={(newPref) => {
                 setNotificationPreferences((prev) => {

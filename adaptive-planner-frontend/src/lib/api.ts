@@ -296,6 +296,10 @@ export const api = {
     request<void>(`/notifications/${id}`, {
       method: 'DELETE',
     }),
+  deleteAllReadNotifications: () =>
+    request<{ message: string }>('/notifications/read', {
+      method: 'DELETE',
+    }),
   createNotification: (payload: Partial<NotificationItem>) =>
     request<NotificationItem>('/notifications', {
       method: 'POST',

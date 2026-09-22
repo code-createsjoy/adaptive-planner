@@ -17,4 +17,6 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
     Optional<NotificationEntity> findByEventKey(String eventKey);
 
     List<NotificationEntity> findAllByIsReadFalseOrderByCreatedAtDesc();
+
+    void deleteAllByIsReadTrue();
 }

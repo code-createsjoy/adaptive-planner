@@ -24,6 +24,7 @@ interface NotificationsCenterViewProps {
   onMarkAsRead: (id: number) => void;
   onMarkAllAsRead: () => void;
   onDeleteNotification: (id: number) => void;
+  onDeleteAllRead?: () => void;
   preferences: NotificationPreferences;
   onUpdatePreferences: (pref: Partial<NotificationPreferences>) => void;
   onNavigate: (viewId: string) => void;
@@ -78,6 +79,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
   onMarkAsRead,
   onMarkAllAsRead,
   onDeleteNotification,
+  onDeleteAllRead,
   preferences,
   onUpdatePreferences,
   onNavigate,
@@ -91,6 +93,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
     : notifications;
 
   const grouped = groupNotificationsByDate(filteredNotifications);
+  const readCount = notifications.length - unreadCount;
 
   const handleRequestBrowserPermission = async () => {
     if (!('Notification' in window)) {
@@ -178,11 +181,25 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-xl text-xs bg-card/60 hover:bg-card border-border/80"
+                className="rounded-xl text-xs bg-card/60 hover:bg-card border-border/80 font-medium"
                 onClick={onMarkAllAsRead}
+                title="Đánh dấu tất cả thông báo là đã đọc"
               >
                 <Check className="size-3.5 mr-1" />
                 Đọc tất cả
+              </Button>
+            )}
+
+            {readCount > 0 && onDeleteAllRead && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl text-xs bg-destructive/5 hover:bg-destructive/15 text-destructive border-destructive/30 font-medium transition-all"
+                onClick={onDeleteAllRead}
+                title="Xóa tất cả các thông báo đã đọc"
+              >
+                <Trash2 className="size-3.5 mr-1" />
+                Xóa đã đọc ({readCount})
               </Button>
             )}
           </div>

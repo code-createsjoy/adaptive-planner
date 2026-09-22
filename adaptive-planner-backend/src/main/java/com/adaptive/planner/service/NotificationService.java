@@ -66,6 +66,12 @@ public class NotificationService {
     }
 
     @Transactional
+    public void deleteAllReadNotifications() {
+        notificationRepository.deleteAllByIsReadTrue();
+        log.info("All read notifications have been deleted");
+    }
+
+    @Transactional
     public NotificationDto createNotification(CreateNotificationRequest request) {
         // Deduplication & idempotency check via eventKey
         if (request.getEventKey() != null && !request.getEventKey().trim().isEmpty()) {

@@ -56,6 +56,17 @@ export function useDeleteNotificationMutation() {
   });
 }
 
+export function useDeleteAllReadNotificationsMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => api.deleteAllReadNotifications(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
 export function useCreateNotificationMutation() {
   const queryClient = useQueryClient();
 

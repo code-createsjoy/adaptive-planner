@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { TimeBlock, NotificationPreferences } from '@/types/planner';
+import { getTodayDateString } from '@/store/usePlannerStore';
 
 export interface InAppToast {
   id: string;
@@ -86,7 +87,7 @@ export function useNotificationScheduler(params: {
       timerRef.current = null;
     }
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = getTodayDateString();
     // Only schedule proactive timeblock alerts for today's active date
     if (selectedDate !== todayStr) return;
 
