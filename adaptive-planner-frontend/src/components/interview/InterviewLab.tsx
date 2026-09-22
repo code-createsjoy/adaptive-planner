@@ -2,17 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Award,
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   FileText,
-  Globe2,
   Mic,
+  MicOff,
   Pause,
   Play,
   Radio,
   Save,
   ShieldCheck,
+  Sparkles,
   Star,
   UserRound,
   Video,
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 
 type InterviewMode = "interviewee" | "interviewer";
 
@@ -54,60 +55,59 @@ const questions: Question[] = [
   {
     id: "shoes",
     number: 1,
-    title: "Sell this pair of old shoes",
-    prompt: "This is a pair of worn-out shoes. You need to sell them.",
+    title: "Bán đôi giày cũ này",
+    prompt: "Đây là một đôi giày đã qua sử dụng. Bạn hãy tìm cách bán nó cho một khách hàng tiềm năng.",
     helper:
-      "Part 1: Tell me your process. Part 2: Given you have identified your target customer, persuade them to buy it from you.",
-    competency: "Communication",
+      "Phần 1: Nêu quy trình tiếp cận. Phần 2: Xác định khách hàng mục tiêu và thuyết phục họ mua hàng.",
+    competency: "Giao tiếp & Thuyết phục",
   },
   {
     id: "project",
     number: 2,
-    title: "A project you're proud of",
-    prompt: "Tell us about a project you are proud of.",
-    helper: "Walk through the problem, what you owned, and what changed because of your work.",
-    competency: "Ownership & impact",
+    title: "Dự án bạn tự hào nhất",
+    prompt: "Chia sẻ về một dự án kỹ thuật hoặc sản phẩm bạn đã từng thực hiện và thấy tự hào nhất.",
+    helper: "Nêu rõ bài toán, vai trò của bạn và kết quả/tác động thực tế sau khi triển khai.",
+    competency: "Tinh thần trách nhiệm & Tác động",
   },
   {
     id: "tradeoff",
     number: 3,
-    title: "Make a difficult trade-off",
-    prompt: "Describe a time you had to choose between speed and quality.",
-    helper: "Explain how you decided and what you learned afterwards.",
-    competency: "Judgement",
+    title: "Quyết định đánh đổi khó khăn",
+    prompt: "Mô tả một lần bạn phải lựa chọn giữa tốc độ ra mắt sản phẩm và chất lượng kỹ thuật.",
+    helper: "Bạn đã cân nhắc tiêu chí nào để ra quyết định và bài học rút ra là gì?",
+    competency: "Tư duy phán đoán",
   },
   {
     id: "feedback",
     number: 4,
-    title: "Respond to feedback",
-    prompt: "Tell us about a piece of feedback that changed how you work.",
-    helper: "Focus on what you heard, what you changed, and the result.",
-    competency: "Growth mindset",
+    title: "Tiếp nhận phản hồi",
+    prompt: "Kể về một lời góp ý thẳng thắn đã thay đổi tích cực cách bạn làm việc.",
+    helper: "Tập trung vào những gì bạn đã lắng nghe, thay đổi và kết quả đạt được.",
+    competency: "Tư duy phát triển",
   },
   {
     id: "first-month",
     number: 5,
-    title: "Your first 30 days",
-    prompt:
-      "If you joined the team, what would you want to understand or accomplish in your first 30 days?",
-    helper: "Be concrete: people, product, priorities, and one early signal of progress.",
-    competency: "Collaboration",
+    title: "Kế hoạch 30 ngày đầu tiên",
+    prompt: "Nếu gia nhập đội ngũ, bạn dự định tìm hiểu và đạt được những cột mốc nào trong 30 ngày đầu?",
+    helper: "Cụ thể hóa về con người, công nghệ, ưu tiên công việc và kết quả ban đầu.",
+    competency: "Hợp tác & Hòa nhập",
   },
   {
     id: "priorities",
     number: 6,
-    title: "Prioritize urgent work",
-    prompt: "Two important tasks arrive at the same time. How do you decide what to do first?",
-    helper: "Describe the questions you ask before committing to a plan.",
-    competency: "Problem solving",
+    title: "Ưu tiên công việc gấp",
+    prompt: "Khi có hai nhiệm vụ quan trọng cùng xuất hiện bất ngờ, bạn sắp xếp thứ tự xử lý thế nào?",
+    helper: "Mô tả các câu hỏi bạn tự đặt ra trước khi cam kết kế hoạch hành động.",
+    competency: "Giải quyết vấn đề",
   },
   {
     id: "questions",
     number: 7,
-    title: "Your questions for us",
-    prompt: "What would you like to understand about the team, the role, or the way we work?",
-    helper: "There is no minimum or maximum. Ask what would help you make a good decision too.",
-    competency: "Curiosity",
+    title: "Câu hỏi dành cho công ty",
+    prompt: "Bạn có câu hỏi hoặc điều gì muốn tìm hiểu thêm về văn hóa, lộ trình hoặc đội ngũ của chúng tôi?",
+    helper: "Hãy thoải mái chia sẻ những điều giúp bạn đưa ra quyết định phù hợp nhất.",
+    competency: "Sự chủ động & Tò mò",
   },
 ];
 
@@ -117,34 +117,34 @@ const demoCandidates: DemoCandidate[] = [
     name: "Maya Nguyen",
     role: "Senior Backend Engineer",
     initials: "MN",
-    submitted: "Today, 10:32",
+    submitted: "Hôm nay, 10:32",
     duration: "12:48",
     progress: 100,
-    status: "Ready to review",
+    status: "Sẵn sàng đánh giá",
   },
   {
     id: "alex",
     name: "Alex Tran",
     role: "Senior Backend Engineer",
     initials: "AT",
-    submitted: "Yesterday, 16:08",
+    submitted: "Hôm qua, 16:08",
     duration: "13:21",
     progress: 100,
-    status: "Ready to review",
+    status: "Sẵn sàng đánh giá",
   },
   {
     id: "jordan",
     name: "Jordan Lee",
     role: "Senior Backend Engineer",
     initials: "JL",
-    submitted: "Yesterday, 11:42",
+    submitted: "Hôm qua, 11:42",
     duration: "08:06",
     progress: 75,
-    status: "6 of 7 answers",
+    status: "6/7 câu trả lời",
   },
 ];
 
-const scoreLabels = ["Needs work", "Developing", "Solid", "Strong", "Exceptional"];
+const scoreLabels = ["Cần cải thiện", "Đang phát triển", "Đạt yêu cầu", "Tốt", "Xuất sắc"];
 
 function formatDuration(seconds: number) {
   const minutes = Math.floor(seconds / 60)
@@ -156,7 +156,7 @@ function formatDuration(seconds: number) {
   return `${minutes}:${rest}`;
 }
 
-export function InterviewLab({ onExit }: { onExit: () => void }) {
+export function InterviewLab({ onExit: _onExit }: { onExit?: () => void }) {
   const [mode, setMode] = useState<InterviewMode>("interviewee");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [recordings, setRecordings] = useState<Record<string, Recording>>({});
@@ -170,85 +170,71 @@ export function InterviewLab({ onExit }: { onExit: () => void }) {
     "first-month": 4,
   });
   const [notes, setNotes] = useState(
-    "Clear structure and strong ownership. Ask one follow-up about the measurement of impact.",
+    "Cấu trúc trả lời mạch lạc, tư duy ownership tốt. Cần hỏi thêm về cách đo lường hiệu quả thực tế.",
   );
   const [savedEvaluation, setSavedEvaluation] = useState(false);
 
-  if (mode === "interviewee") {
-    return (
-      <IntervieweeFlow
-        recordings={recordings}
-        setRecordings={setRecordings}
-        questionIndex={questionIndex}
-        setQuestionIndex={setQuestionIndex}
-        onModeChange={setMode}
-        onExit={onExit}
-      />
-    );
-  }
-
   return (
-    <div className="space-y-5 px-5 py-5 sm:px-8 sm:py-7">
-      <LabHeader mode={mode} onModeChange={setMode} onExit={onExit} />
-      <InterviewerFlow
-        candidate={reviewCandidate}
-        setCandidate={setReviewCandidate}
-        questionIndex={reviewQuestion}
-        setQuestionIndex={setReviewQuestion}
-        scores={scores}
-        setScores={setScores}
-        notes={notes}
-        setNotes={setNotes}
-        saved={savedEvaluation}
-        setSaved={setSavedEvaluation}
-      />
-    </div>
-  );
-}
-
-function LabHeader({
-  mode,
-  onModeChange,
-  onExit,
-}: {
-  mode: InterviewMode;
-  onModeChange: (mode: InterviewMode) => void;
-  onExit: () => void;
-}) {
-  return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card/75 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-      <button
-        type="button"
-        onClick={onExit}
-        title="Back to home"
-        className="flex items-center gap-3 text-left transition-opacity hover:opacity-80"
-      >
-        <span className="grid size-10 place-items-center rounded-xl bg-primary font-sans text-sm font-bold text-primary-foreground">
-          A
-        </span>
-        <div>
-          <p className="font-sans text-[15px] font-bold">Adaptive Interview</p>
-          <p className="font-sans text-xs text-muted-foreground">
-            Structured review for your hiring panel
-          </p>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Top Mode Segmented Bar */}
+      <div className="glass-panel flex flex-col gap-3 rounded-2xl p-3 sm:flex-row sm:items-center sm:justify-between border border-border bg-card/60 backdrop-blur-md">
+        <div className="flex items-center gap-2.5 px-2">
+          <div className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary">
+            <Sparkles className="size-4" />
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-foreground">Không gian phỏng vấn chuẩn hóa</p>
+            <p className="text-[11px] text-muted-foreground">Vị trí: Backend Engineer · 7 câu hỏi tiêu chuẩn</p>
+          </div>
         </div>
-      </button>
-      <div className="flex rounded-xl border border-border bg-background/70 p-1">
-        <button
-          type="button"
-          onClick={() => onModeChange("interviewee")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-sans text-sm font-semibold ${mode === "interviewee" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-        >
-          <UserRound className="size-4" /> Interviewee
-        </button>
-        <button
-          type="button"
-          onClick={() => onModeChange("interviewer")}
-          className={`flex items-center gap-2 rounded-lg px-3 py-2 font-sans text-sm font-semibold ${mode === "interviewer" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-        >
-          <Award className="size-4" /> Interviewer
-        </button>
+
+        <div className="flex items-center rounded-xl border border-border bg-background/80 p-1">
+          <button
+            type="button"
+            onClick={() => setMode("interviewee")}
+            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              mode === "interviewee"
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <UserRound className="size-3.5" /> Ứng viên
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("interviewer")}
+            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+              mode === "interviewer"
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Award className="size-3.5" /> Người đánh giá
+          </button>
+        </div>
       </div>
+
+      {mode === "interviewee" ? (
+        <IntervieweeFlow
+          recordings={recordings}
+          setRecordings={setRecordings}
+          questionIndex={questionIndex}
+          setQuestionIndex={setQuestionIndex}
+        />
+      ) : (
+        <InterviewerFlow
+          candidate={reviewCandidate}
+          setCandidate={setReviewCandidate}
+          questionIndex={reviewQuestion}
+          setQuestionIndex={setReviewQuestion}
+          scores={scores}
+          setScores={setScores}
+          notes={notes}
+          setNotes={setNotes}
+          saved={savedEvaluation}
+          setSaved={setSavedEvaluation}
+        />
+      )}
     </div>
   );
 }
@@ -258,15 +244,11 @@ function IntervieweeFlow({
   setRecordings,
   questionIndex,
   setQuestionIndex,
-  onModeChange,
-  onExit,
 }: {
   recordings: Record<string, Recording>;
   setRecordings: React.Dispatch<React.SetStateAction<Record<string, Recording>>>;
   questionIndex: number;
   setQuestionIndex: React.Dispatch<React.SetStateAction<number>>;
-  onModeChange: (mode: InterviewMode) => void;
-  onExit: () => void;
 }) {
   const question = questions[questionIndex] ?? questions[0]!;
   const [isRecording, setIsRecording] = useState(false);
@@ -336,7 +318,14 @@ function IntervieweeFlow({
     try {
       if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder)
         throw new Error("Recording is not available in this browser");
-      const stream = await navigator.mediaDevices.getUserMedia({ video: cameraOn, audio: micOn });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      // Apply initial camera and mic toggle state to the tracks
+      stream.getVideoTracks().forEach((t) => {
+        t.enabled = cameraOn;
+      });
+      stream.getAudioTracks().forEach((t) => {
+        t.enabled = micOn;
+      });
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -355,134 +344,156 @@ function IntervieweeFlow({
     }
   };
 
+  const handleToggleCamera = () => {
+    setCameraOn((prev) => {
+      const next = !prev;
+      if (streamRef.current) {
+        streamRef.current.getVideoTracks().forEach((track) => {
+          track.enabled = next;
+        });
+      }
+      return next;
+    });
+  };
+
+  const handleToggleMic = () => {
+    setMicOn((prev) => {
+      const next = !prev;
+      if (streamRef.current) {
+        streamRef.current.getAudioTracks().forEach((track) => {
+          track.enabled = next;
+        });
+      }
+      return next;
+    });
+  };
+
   const recording = recordings[question.id];
   const allDone = questions.every((item) => recordings[item.id]);
 
+  if (!setupComplete) {
+    return (
+      <IntervieweeSetup
+        onComplete={(initialCam, initialMic) => {
+          setCameraOn(initialCam);
+          setMicOn(initialMic);
+          setSetupComplete(true);
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground">
-      <div className="flex h-[70px] items-center bg-primary px-5 text-primary-foreground shadow-sm sm:px-7">
-        <button
-          type="button"
-          onClick={onExit}
-          title="Back to home"
-          className="flex min-w-[210px] items-center gap-2.5 text-left transition-opacity hover:opacity-80"
-        >
-          <span className="grid size-10 place-items-center border border-primary-foreground/30 bg-primary-foreground/10 font-sans text-lg font-bold">
-            A
-          </span>
-          <span className="font-sans text-lg font-semibold tracking-tight">Adaptive</span>
-        </button>
-        <div className="flex-1 text-center font-sans text-xl font-semibold tracking-tight sm:text-2xl">
-          Adaptive Interview
-        </div>
-        <div className="flex min-w-[210px] justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => onModeChange("interviewer")}
-            className="hidden items-center gap-2 rounded-md border border-primary-foreground/25 px-3 py-2 text-xs font-semibold hover:bg-primary-foreground/10 sm:flex"
-          >
-            <Award className="size-3.5" /> Interviewer view
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-1.5 px-2 py-2 text-sm font-medium text-primary-foreground/90"
-          >
-            <Globe2 className="size-4" /> English <ChevronDown className="size-3.5" />
-          </button>
-        </div>
-      </div>
-      {!setupComplete ? (
-        <IntervieweeSetup onComplete={() => setSetupComplete(true)} />
-      ) : (
-        <div className="grid min-h-[calc(100vh-70px)] lg:grid-cols-[230px_minmax(0,1fr)]">
-          <aside className="border-b border-r border-border bg-card lg:border-b-0">
-            <div className="border-b border-border px-6 py-5">
-              <p className="font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                Interview questions
-              </p>
-              <p className="mt-1.5 font-sans text-sm font-medium text-foreground/75">
-                Backend Engineer · 15 min
-              </p>
-            </div>
-            <div className="flex overflow-x-auto lg:block">
-              {questions.map((item, index) => (
+    <div className="space-y-5">
+      <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+        {/* Questions Sidebar */}
+        <aside className="glass-panel flex flex-col rounded-3xl p-4 border border-border bg-card/60 backdrop-blur-md">
+          <div className="border-b border-border/80 px-3 pb-3 pt-1">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Câu hỏi phỏng vấn
+            </p>
+            <p className="mt-1 text-xs font-semibold text-foreground">
+              {Object.keys(recordings).length} / {questions.length} đã hoàn thành
+            </p>
+          </div>
+
+          <div className="mt-3 space-y-1.5 overflow-x-auto lg:overflow-visible">
+            {questions.map((item, index) => {
+              const isDone = Boolean(recordings[item.id]);
+              const isCurrent = index === questionIndex;
+              return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => !isRecording && setQuestionIndex(index)}
-                  className={`group flex min-w-[150px] items-center gap-3 border-b border-border px-5 py-4 text-left transition-colors lg:w-full ${index === questionIndex ? "border-r-[3px] border-r-primary bg-background text-foreground" : "text-muted-foreground hover:bg-background hover:text-foreground"}`}
+                  className={`flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left transition-all ${
+                    isCurrent
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-background/80 hover:text-foreground"
+                  }`}
                 >
                   <span
-                    className={`grid size-5 shrink-0 place-items-center rounded-full text-xs ${recordings[item.id] ? "bg-success text-success-foreground" : index === questionIndex ? "text-primary" : "text-muted-foreground"}`}
+                    className={`grid size-6 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
+                      isDone
+                        ? isCurrent
+                          ? "bg-primary-foreground text-primary"
+                          : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                        : isCurrent
+                        ? "bg-white/20 text-white"
+                        : "bg-muted text-muted-foreground"
+                    }`}
                   >
-                    {recordings[item.id] ? (
-                      <Check className="size-3.5" />
-                    ) : index < questionIndex ? (
-                      <Check className="size-3.5" />
-                    ) : (
-                      <span
-                        className={
-                          index === questionIndex
-                            ? "h-[2px] w-3 bg-primary"
-                            : "h-[2px] w-3 bg-current"
-                        }
-                      />
-                    )}
+                    {isDone ? <Check className="size-3.5" /> : item.number}
                   </span>
-                  <span className="whitespace-nowrap font-sans text-sm font-semibold">
-                    QUESTION {item.number}
-                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className={`truncate text-xs font-semibold ${isCurrent ? "text-primary-foreground" : "text-foreground"}`}>
+                      {item.title}
+                    </p>
+                    <p className={`truncate text-[10px] ${isCurrent ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
+                      {item.competency}
+                    </p>
+                  </div>
                 </button>
-              ))}
-            </div>
-          </aside>
-          <section className="relative min-h-[calc(100vh-70px)] overflow-hidden bg-background">
-            <div className="px-7 pb-8 pt-9 sm:px-12 lg:px-16 lg:pt-12">
-              <div className="max-w-[980px]">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-sans text-xs font-bold uppercase tracking-[0.12em] text-primary">
-                    Question {question.number} of {questions.length}
-                  </span>
-                  <span className="h-1 w-1 rounded-full bg-border" />
-                  <span className="font-sans text-xs font-medium text-muted-foreground">
-                    {question.competency}
-                  </span>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* Question Details and Video Practice */}
+        <div className="space-y-5">
+          <section className="glass-panel rounded-3xl p-6 sm:p-8 border border-border bg-card/60 backdrop-blur-md space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                  Câu hỏi {question.number} / {questions.length}
+                </span>
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                  {question.competency}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-28 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-300"
+                    style={{ width: `${((questionIndex + 1) / questions.length) * 100}%` }}
+                  />
                 </div>
-                <div className="mt-5 flex max-w-[820px] items-center gap-3">
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-border/70">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all"
-                      style={{ width: `${((questionIndex + 1) / questions.length) * 100}%` }}
-                    />
-                  </div>
-                  <span className="shrink-0 font-mono text-[11px] font-semibold text-muted-foreground">
-                    {questionIndex + 1}/{questions.length}
-                  </span>
-                </div>
-                <h1 className="mt-4 font-sans text-3xl font-bold leading-tight tracking-[-0.025em] text-foreground sm:text-[38px]">
-                  {question.title}
-                </h1>
-                <div className="mt-7 max-w-[930px] font-sans text-[17px] leading-8 text-muted-foreground sm:text-[18px]">
-                  <p>{question.prompt}</p>
-                  <p className="mt-3">{question.helper}</p>
-                </div>
-                <div className="mt-8 flex min-h-[310px] max-w-[820px] items-center justify-center border border-border bg-card/60 p-8 sm:min-h-[390px]">
-                  <div className="text-center">
-                    <div className="mx-auto flex items-end justify-center text-[86px] leading-none grayscale-[0.15] drop-shadow-sm sm:text-[110px]">
-                      👟👟
-                    </div>
-                    <p className="mt-6 font-sans text-sm font-semibold text-foreground/70">
-                      Use the visual prompt to guide your answer
-                    </p>
-                    <p className="mt-1 font-sans text-xs text-muted-foreground">
-                      Take a breath, then start when you are ready.
-                    </p>
-                  </div>
-                </div>
+                <span className="font-mono text-xs font-medium text-muted-foreground">
+                  {Math.round(((questionIndex + 1) / questions.length) * 100)}%
+                </span>
               </div>
             </div>
-            <div className="sticky bottom-0 z-20 border-t border-border bg-background/95 px-6 py-3 backdrop-blur sm:px-10 lg:px-16">
-              <div className="mx-auto flex max-w-[1120px] flex-wrap items-end justify-between gap-3">
+
+            <div>
+              <h2 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                {question.title}
+              </h2>
+              <p className="mt-3 text-base leading-relaxed text-foreground/90 sm:text-lg">
+                {question.prompt}
+              </p>
+              <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-xs leading-relaxed text-muted-foreground">
+                <span className="font-semibold text-primary">💡 Gợi ý trả lời: </span>
+                {question.helper}
+              </div>
+            </div>
+
+            {/* Recorder & Video Area */}
+            <div className="rounded-2xl border border-border bg-background/50 p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-foreground">Thu âm / Video câu trả lời của bạn</p>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    {cameraOn ? <Video className="size-3.5 text-emerald-500" /> : <VideoOff className="size-3.5 text-red-500" />}
+                    {cameraOn ? "Cam bật" : "Cam tắt"}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    {micOn ? <Mic className="size-3.5 text-emerald-500" /> : <MicOff className="size-3.5 text-red-500" />}
+                    {micOn ? "Mic bật" : "Mic tắt"}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <RecorderCard
                   videoRef={videoRef}
                   isRecording={isRecording}
@@ -493,56 +504,72 @@ function IntervieweeFlow({
                   hasRecording={Boolean(recording)}
                   realRecording={Boolean(recording?.real)}
                   saveState={saveState}
-                  onToggleCamera={() => setCameraOn((value) => !value)}
-                  onToggleMic={() => setMicOn((value) => !value)}
+                  onToggleCamera={handleToggleCamera}
+                  onToggleMic={handleToggleMic}
                   onStart={startRecording}
                   onStop={finishRecording}
                   recordingUrl={recording?.url}
                 />
-                <div className="flex items-center gap-2 rounded-xl border border-border bg-card p-2 shadow-lg shadow-foreground/10">
-                  <Button
-                    variant="outline"
-                    className="rounded-lg border-input font-sans"
-                    disabled={questionIndex === 0 || isRecording}
-                    onClick={() => setQuestionIndex((index) => index - 1)}
-                  >
-                    <ChevronLeft className="size-4" /> Back
-                  </Button>
-                  <Button
-                    className="rounded-lg bg-primary font-sans text-primary-foreground hover:bg-foreground"
-                    disabled={!recording || isRecording || questionIndex === questions.length - 1}
-                    onClick={() => setQuestionIndex((index) => index + 1)}
-                  >
-                    Next <ChevronRight className="size-4" />
-                  </Button>
+
+                <div className="flex flex-1 flex-col justify-center space-y-3 sm:pl-4">
+                  <div className="rounded-xl border border-border bg-card/60 p-4 space-y-2">
+                    <p className="text-xs font-semibold text-foreground">Điều khiển thiết bị linh hoạt</p>
+                    <p className="text-[11px] leading-relaxed text-muted-foreground">
+                      Bạn có thể bấm nút biểu tượng <span className="font-semibold text-primary">Camera</span> hoặc <span className="font-semibold text-primary">Micro</span> bên dưới để bật/tắt thiết bị theo ý muốn trong suốt quá trình phỏng vấn.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      className="rounded-xl"
+                      disabled={questionIndex === 0 || isRecording}
+                      onClick={() => setQuestionIndex((index) => index - 1)}
+                    >
+                      <ChevronLeft className="size-4" /> Câu trước
+                    </Button>
+                    <Button
+                      className="rounded-xl"
+                      disabled={!recording || isRecording || questionIndex === questions.length - 1}
+                      onClick={() => setQuestionIndex((index) => index + 1)}
+                    >
+                      Câu tiếp theo <ChevronRight className="size-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
+
+          {allDone && (
+            <div className="glass-panel flex items-center justify-between rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-800 dark:text-emerald-200">
+              <div className="flex items-center gap-2.5">
+                <Check className="size-5 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-sm font-semibold">Tất cả câu trả lời đã được ghi lại thành công!</span>
+              </div>
+              <Button
+                size="sm"
+                className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
+                onClick={() => window.alert("Bản thử nghiệm: Toàn bộ câu trả lời đã sẵn sàng gửi hội đồng đánh giá.")}
+              >
+                Nộp bài phỏng vấn
+              </Button>
+            </div>
+          )}
         </div>
-      )}
-      {setupComplete && allDone && (
-        <div className="fixed bottom-5 left-1/2 z-30 flex -translate-x-1/2 items-center gap-4 rounded-xl border border-success/30 bg-card px-4 py-3 font-sans text-sm shadow-xl">
-          <Check className="size-4 text-success" /> All answers saved{" "}
-          <Button
-            size="sm"
-            className="rounded-lg bg-success text-success-foreground hover:bg-success/90"
-            onClick={() => window.alert("Prototype: answers are ready to submit.")}
-          >
-            Submit interview
-          </Button>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
 
-function IntervieweeSetup({ onComplete }: { onComplete: () => void }) {
+function IntervieweeSetup({ onComplete }: { onComplete: (cameraOn: boolean, micOn: boolean) => void }) {
   const previewRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [checkState, setCheckState] = useState<"idle" | "checking" | "ready" | "demo">("idle");
   const [cameraReady, setCameraReady] = useState(false);
   const [micReady, setMicReady] = useState(false);
+  const [cameraEnabled, setCameraEnabled] = useState(true);
+  const [micEnabled, setMicEnabled] = useState(true);
   const [message, setMessage] = useState("");
 
   const stopPreview = () => {
@@ -551,173 +578,216 @@ function IntervieweeSetup({ onComplete }: { onComplete: () => void }) {
     if (previewRef.current) previewRef.current.srcObject = null;
   };
 
-  useEffect(() => stopPreview, []);
-
-  const checkDevices = async () => {
+  const checkDevices = async (desiredCam = cameraEnabled, desiredMic = micEnabled) => {
     setCheckState("checking");
     setMessage("");
     stopPreview();
 
     try {
-      if (!navigator.mediaDevices?.getUserMedia) throw new Error("Media devices unavailable");
+      if (!navigator.mediaDevices?.getUserMedia) throw new Error("Thiết bị không khả dụng");
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      const hasCamera = stream.getVideoTracks().length > 0;
-      const hasMic = stream.getAudioTracks().length > 0;
+      stream.getVideoTracks().forEach((t) => {
+        t.enabled = desiredCam;
+      });
+      stream.getAudioTracks().forEach((t) => {
+        t.enabled = desiredMic;
+      });
       streamRef.current = stream;
-      setCameraReady(hasCamera);
-      setMicReady(hasMic);
+      setCameraReady(stream.getVideoTracks().length > 0);
+      setMicReady(stream.getAudioTracks().length > 0);
       if (previewRef.current) {
         previewRef.current.srcObject = stream;
         await previewRef.current.play().catch(() => undefined);
       }
-      setCheckState(hasCamera && hasMic ? "ready" : "demo");
-      if (!hasCamera || !hasMic) {
-        setMessage("One or more devices are unavailable. You can continue in demo mode.");
-      }
+      setCheckState("ready");
     } catch {
       setCameraReady(false);
       setMicReady(false);
       setCheckState("demo");
-      setMessage("Camera or microphone access was not available. You can continue in demo mode.");
+      setMessage("Không tìm thấy camera/mic hoặc chưa cấp quyền. Hệ thống sẽ tự động chuyển sang chế độ giả lập demo để bạn trải nghiệm.");
     }
   };
 
-  const statusLabel =
-    checkState === "ready"
-      ? "Ready"
-      : checkState === "demo"
-        ? "Demo mode"
-        : checkState === "checking"
-          ? "Checking…"
-          : "Not checked";
+  // Automatically check devices on initial load
+  useEffect(() => {
+    checkDevices(true, true);
+    return stopPreview;
+  }, []);
+
+  const handleToggleCam = (checked: boolean) => {
+    setCameraEnabled(checked);
+    if (streamRef.current && streamRef.current.getVideoTracks().length > 0) {
+      streamRef.current.getVideoTracks().forEach((track) => {
+        track.enabled = checked;
+      });
+    } else if (checked) {
+      checkDevices(true, micEnabled);
+    }
+  };
+
+  const handleToggleMic = (checked: boolean) => {
+    setMicEnabled(checked);
+    if (streamRef.current && streamRef.current.getAudioTracks().length > 0) {
+      streamRef.current.getAudioTracks().forEach((track) => {
+        track.enabled = checked;
+      });
+    } else if (checked) {
+      checkDevices(cameraEnabled, true);
+    }
+  };
 
   return (
-    <div className="min-h-[calc(100vh-70px)] bg-background px-6 py-8 sm:px-10 sm:py-12">
-      <div className="mx-auto max-w-[980px]">
-        <div className="mb-8 max-w-2xl">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-            Before you start
-          </p>
-          <h1 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Check your interview setup
-          </h1>
-          <p className="mt-3 text-base leading-7 text-muted-foreground">
-            Make sure your camera and microphone are ready. You can test them now before answering
-            the first question.
+    <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-border bg-card/60 backdrop-blur-md">
+      <div className="mx-auto max-w-3xl space-y-6">
+        <div>
+          <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
+            Chuẩn bị phỏng vấn
+          </span>
+          <h2 className="mt-3 font-display text-2xl font-bold sm:text-3xl text-foreground">
+            Kiểm tra & Tùy chỉnh Camera & Micro
+          </h2>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Bạn có thể bật hoặc tắt camera và micro bất cứ lúc nào tùy theo nhu cầu phỏng vấn.
           </p>
         </div>
-        <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-            <div className="relative aspect-video bg-foreground">
-              <video ref={previewRef} muted playsInline className="size-full object-cover" />
-              {checkState !== "ready" && (
-                <div className="absolute inset-0 grid place-items-center px-6 text-center text-white/75">
-                  <div>
-                    <div className="mx-auto grid size-16 place-items-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
-                      A
-                    </div>
-                    <p className="mt-3 text-sm font-semibold">
-                      Your camera preview will appear here
-                    </p>
-                    <p className="mt-1 text-xs text-white/55">
-                      Your video is only used for this interview.
-                    </p>
-                  </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="relative aspect-video overflow-hidden rounded-2xl border border-border bg-slate-950/80 shadow-lg">
+            <video
+              ref={previewRef}
+              muted
+              playsInline
+              className={`size-full object-cover ${cameraEnabled && cameraReady ? "" : "hidden"}`}
+            />
+            {(!cameraReady || !cameraEnabled) && (
+              <div className="absolute inset-0 grid place-items-center p-4 text-center text-muted-foreground">
+                <div>
+                  {!cameraEnabled ? (
+                    <>
+                      <VideoOff className="mx-auto size-8 text-amber-500/80" />
+                      <p className="mt-2 text-xs font-semibold text-foreground/80">Camera đang tắt</p>
+                      <p className="mt-0.5 text-[11px] text-muted-foreground">Chế độ chỉ sử dụng Microphone</p>
+                    </>
+                  ) : (
+                    <>
+                      <Video className="mx-auto size-8 opacity-40" />
+                      <p className="mt-2 text-xs">Bấm "Kiểm tra thiết bị" để xem trước</p>
+                    </>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="flex items-center justify-between gap-4 border-t border-border px-4 py-3">
-              <div>
-                <p className="text-sm font-semibold">Device preview</p>
-                <p className="mt-1 text-xs text-muted-foreground">Camera and microphone check</p>
               </div>
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                <span
-                  className={`size-2 rounded-full ${checkState === "ready" ? "bg-success" : "bg-border"}`}
-                />
-                {statusLabel}
-              </span>
-            </div>
+            )}
+            {cameraReady && (
+              <div className="absolute top-2.5 right-2.5 flex items-center gap-2">
+                <span className={`rounded-lg px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md ${
+                  cameraEnabled ? "bg-emerald-500/80 text-white" : "bg-red-500/80 text-white"
+                }`}>
+                  {cameraEnabled ? "Cam: Bật" : "Cam: Tắt"}
+                </span>
+                <span className={`rounded-lg px-2 py-0.5 text-[10px] font-semibold backdrop-blur-md ${
+                  micEnabled ? "bg-emerald-500/80 text-white" : "bg-red-500/80 text-white"
+                }`}>
+                  {micEnabled ? "Mic: Bật" : "Mic: Tắt"}
+                </span>
+              </div>
+            )}
           </div>
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+
+          <div className="flex flex-col justify-between space-y-4">
             <div className="space-y-3">
-              <DeviceCheckRow
-                icon={Video}
-                label="Camera"
-                ready={cameraReady}
-                checked={checkState !== "idle" && checkState !== "checking"}
-              />
-              <DeviceCheckRow
-                icon={Mic}
-                label="Microphone"
-                ready={micReady}
-                checked={checkState !== "idle" && checkState !== "checking"}
-              />
+              <div className="flex items-center justify-between rounded-2xl border border-border bg-background/50 px-4 py-3">
+                <span className="flex items-center gap-3 text-sm font-semibold text-foreground">
+                  <span className={`grid size-8 place-items-center rounded-xl ${cameraEnabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    {cameraEnabled ? <Video className="size-4" /> : <VideoOff className="size-4" />}
+                  </span>
+                  Camera
+                </span>
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`text-xs font-semibold ${
+                      checkState === "checking"
+                        ? "text-muted-foreground"
+                        : cameraReady
+                        ? cameraEnabled
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-amber-600 dark:text-amber-400"
+                        : "text-blue-600 dark:text-blue-400"
+                    }`}
+                  >
+                    {checkState === "checking"
+                      ? "Đang kết nối…"
+                      : cameraReady
+                      ? cameraEnabled
+                        ? "Đang bật"
+                        : "Đã tắt"
+                      : "Chế độ Demo"}
+                  </span>
+                  <Switch checked={cameraEnabled} onCheckedChange={handleToggleCam} aria-label="Bật/tắt camera" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between rounded-2xl border border-border bg-background/50 px-4 py-3">
+                <span className="flex items-center gap-3 text-sm font-semibold text-foreground">
+                  <span className={`grid size-8 place-items-center rounded-xl ${micEnabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    {micEnabled ? <Mic className="size-4" /> : <MicOff className="size-4" />}
+                  </span>
+                  Microphone
+                </span>
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`text-xs font-semibold ${
+                      checkState === "checking"
+                        ? "text-muted-foreground"
+                        : micReady
+                        ? micEnabled
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-amber-600 dark:text-amber-400"
+                        : "text-blue-600 dark:text-blue-400"
+                    }`}
+                  >
+                    {checkState === "checking"
+                      ? "Đang kết nối…"
+                      : micReady
+                      ? micEnabled
+                        ? "Đang bật"
+                        : "Đã tắt"
+                      : "Chế độ Demo"}
+                  </span>
+                  <Switch checked={micEnabled} onCheckedChange={handleToggleMic} aria-label="Bật/tắt mic" />
+                </div>
+              </div>
             </div>
+
             {message && (
-              <p
-                className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/8 px-3 py-2.5 text-xs leading-relaxed text-amber-800 dark:text-amber-200"
-                role="status"
-              >
+              <p className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300">
                 {message}
               </p>
             )}
-            <Button
-              onClick={checkDevices}
-              disabled={checkState === "checking"}
-              className="mt-5 w-full rounded-xl bg-primary text-primary-foreground hover:bg-foreground"
-            >
-              <Radio className="size-4" />{" "}
-              {checkState === "checking" ? "Checking devices…" : "Check camera & microphone"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                stopPreview();
-                onComplete();
-              }}
-              disabled={checkState === "idle" || checkState === "checking"}
-              className="mt-2 w-full rounded-xl"
-            >
-              Continue to interview <ChevronRight className="size-4" />
-            </Button>
-            <div className="mt-5 flex items-start gap-2 text-xs leading-relaxed text-muted-foreground">
-              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" />
-              <p>
-                You can continue in demo mode if your browser blocks camera or microphone access.
-              </p>
+
+            <div className="space-y-2 pt-2">
+              <Button
+                onClick={() => checkDevices(cameraEnabled, micEnabled)}
+                disabled={checkState === "checking"}
+                className="w-full rounded-xl"
+              >
+                <Radio className="size-4" />{" "}
+                {checkState === "checking" ? "Đang kiểm tra thiết bị…" : "Kiểm tra lại thiết bị"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  stopPreview();
+                  onComplete(cameraEnabled, micEnabled);
+                }}
+                disabled={checkState === "checking"}
+                className="w-full rounded-xl"
+              >
+                Bắt đầu phỏng vấn <ChevronRight className="size-4" />
+              </Button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function DeviceCheckRow({
-  icon: Icon,
-  label,
-  ready,
-  checked,
-}: {
-  icon: typeof Video;
-  label: string;
-  ready: boolean;
-  checked: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-border bg-background/50 px-3 py-3">
-      <span className="flex items-center gap-3 text-sm font-semibold">
-        <span className="grid size-9 place-items-center rounded-lg bg-primary/8 text-primary">
-          <Icon className="size-4" />
-        </span>
-        {label}
-      </span>
-      <span
-        className={`text-xs font-semibold ${checked && ready ? "text-success" : checked ? "text-amber-700 dark:text-amber-300" : "text-muted-foreground"}`}
-      >
-        {checked ? (ready ? "Ready" : "Unavailable") : "Not checked"}
-      </span>
     </div>
   );
 }
@@ -754,8 +824,8 @@ function RecorderCard({
   recordingUrl?: string | undefined;
 }) {
   return (
-    <div className="w-[220px] shrink-0 overflow-hidden rounded-xl border border-border bg-card shadow-xl shadow-foreground/15">
-      <div className="relative aspect-[4/3] overflow-hidden bg-foreground">
+    <div className="w-full sm:w-[250px] shrink-0 overflow-hidden rounded-2xl border border-border bg-card shadow-md">
+      <div className="relative aspect-[4/3] overflow-hidden bg-slate-950">
         {recordingUrl ? (
           <video src={recordingUrl} controls className="size-full object-cover" />
         ) : (
@@ -767,84 +837,104 @@ function RecorderCard({
               className={`size-full object-cover ${cameraOn ? "" : "hidden"}`}
             />
             {!cameraOn && (
-              <div className="absolute inset-0 grid place-items-center">
+              <div className="absolute inset-0 grid place-items-center bg-slate-900">
                 <div className="text-center text-white/70">
-                  <VideoOff className="mx-auto size-7" />
-                  <p className="mt-2 font-sans text-xs">Camera off</p>
+                  <VideoOff className="mx-auto size-7 text-red-400" />
+                  <p className="mt-2 font-semibold text-xs text-white">Camera đang tắt</p>
+                  <p className="mt-0.5 text-[10px] text-white/50">Chỉ ghi nhận âm thanh</p>
                 </div>
               </div>
             )}
             {cameraOn && !isRecording && (
               <div className="pointer-events-none absolute inset-0 grid place-items-center">
                 <div className="text-center">
-                  <div className="mx-auto grid size-14 place-items-center rounded-full bg-primary font-sans text-lg font-bold text-primary-foreground">
-                    TN
+                  <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary text-base font-bold text-primary-foreground shadow-lg">
+                    AP
                   </div>
-                  <p className="mt-2 font-sans text-[11px] font-semibold text-white/80">
-                    Camera preview
-                  </p>
+                  <p className="mt-2 text-[11px] font-semibold text-white/80">Khung xem trước</p>
                 </div>
               </div>
             )}
           </>
         )}
-        <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-md bg-black/35 px-2 py-1 font-sans text-[10px] font-semibold text-white backdrop-blur-sm">
-          <span
-            className={`size-1.5 rounded-full ${isRecording ? "animate-pulse bg-red-400" : "bg-emerald-400"}`}
-          />{" "}
-          {isRecording ? "Recording" : hasRecording ? "Saved" : "Ready"}
+
+        <div className="absolute left-2.5 top-2.5 flex items-center gap-1.5 rounded-lg bg-black/60 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
+          <span className={`size-1.5 rounded-full ${isRecording ? "animate-pulse bg-red-400" : "bg-emerald-400"}`} />
+          {isRecording ? "Đang ghi..." : hasRecording ? "Đã lưu" : "Sẵn sàng"}
         </div>
-        <div className="absolute bottom-2 right-2 rounded-md bg-black/35 px-2 py-1 font-mono text-[10px] text-white backdrop-blur-sm">
+
+        {!micOn && (
+          <div className="absolute right-2.5 top-2.5 flex items-center gap-1 rounded-lg bg-red-500/80 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+            <MicOff className="size-3" /> Mic tắt
+          </div>
+        )}
+
+        <div className="absolute bottom-2.5 right-2.5 rounded-lg bg-black/60 px-2 py-1 font-mono text-[10px] text-white backdrop-blur-sm">
           {formatDuration(elapsed)}
         </div>
       </div>
+
       {permissionMessage && (
-        <p className="border-b border-amber-200 bg-amber-50 px-3 py-2 font-sans text-[10px] leading-relaxed text-amber-800">
+        <p className="border-b border-amber-500/20 bg-amber-500/10 px-3 py-2 text-[10px] text-amber-800 dark:text-amber-200">
           {permissionMessage}
         </p>
       )}
-      <div className="flex items-center justify-between gap-2 p-2">
-        <div className="flex gap-1">
+
+      <div className="flex items-center justify-between gap-2 p-2.5">
+        <div className="flex gap-1.5">
           <button
             type="button"
             onClick={onToggleCamera}
-            className={`grid size-8 place-items-center rounded-lg border ${cameraOn ? "border-border text-muted-foreground" : "border-red-200 bg-red-50 text-red-600"}`}
-            aria-label="Toggle camera"
+            title={cameraOn ? "Tắt Camera" : "Bật Camera"}
+            className={`grid size-8 place-items-center rounded-xl border transition-all ${
+              cameraOn
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
+                : "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20"
+            }`}
+            aria-label={cameraOn ? "Tắt camera" : "Bật camera"}
           >
             {cameraOn ? <Video className="size-3.5" /> : <VideoOff className="size-3.5" />}
           </button>
+          
           <button
             type="button"
             onClick={onToggleMic}
-            className={`grid size-8 place-items-center rounded-lg border ${micOn ? "border-border text-muted-foreground" : "border-red-200 bg-red-50 text-red-600"}`}
-            aria-label="Toggle microphone"
+            title={micOn ? "Tắt Micro" : "Bật Micro"}
+            className={`grid size-8 place-items-center rounded-xl border transition-all ${
+              micOn
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20"
+                : "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20"
+            }`}
+            aria-label={micOn ? "Tắt micro" : "Bật micro"}
           >
-            {micOn ? <Mic className="size-3.5" /> : <Volume2 className="size-3.5" />}
+            {micOn ? <Mic className="size-3.5" /> : <MicOff className="size-3.5" />}
           </button>
         </div>
+
         {isRecording ? (
           <Button
             size="sm"
             onClick={onStop}
-            className="rounded-lg bg-red-500 px-3 font-sans text-xs text-white hover:bg-red-600"
+            className="rounded-xl bg-red-500 text-xs text-white hover:bg-red-600"
           >
-            <Pause className="size-3.5" /> Stop
+            <Pause className="size-3.5" /> Dừng
           </Button>
         ) : (
           <Button
             size="sm"
             onClick={onStart}
-            className="rounded-lg bg-primary px-3 font-sans text-xs text-primary-foreground hover:bg-foreground"
+            className="rounded-xl text-xs"
           >
-            <Radio className="size-3.5" /> {hasRecording ? "Again" : "Record"}
+            <Radio className="size-3.5" /> {hasRecording ? "Thu lại" : "Bắt đầu"}
           </Button>
         )}
       </div>
+
       {hasRecording && (
-        <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2 font-sans text-[10px] text-muted-foreground">
-          <span>{realRecording ? "Video answer ready." : "Demo answer saved."}</span>
-          <span className="flex shrink-0 items-center gap-1 font-semibold text-emerald-700 dark:text-emerald-300">
-            <Save className="size-3" /> {saveState === "saving" ? "Saving…" : "Autosaved"}
+        <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2 text-[10px] text-muted-foreground">
+          <span>{realRecording ? (cameraOn ? "Video sẵn sàng." : "Audio sẵn sàng.") : "Bản thu demo đã lưu."}</span>
+          <span className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+            <Save className="size-3" /> {saveState === "saving" ? "Đang lưu…" : "Đã lưu"}
           </span>
         </div>
       )}
@@ -912,171 +1002,179 @@ function InterviewerFlow({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
+      {/* Overview Metric Cards */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <MetricCard label="Candidates" value="3 submissions" icon={UserRound} />
-        <MetricCard label="Currently reviewing" value={candidate.name} icon={Video} />
-        <MetricCard label="Overall score" value={`${average.toFixed(1)} / 5`} icon={Star} />
+        <MetricCard label="Hồ sơ phỏng vấn" value="3 ứng viên" icon={UserRound} />
+        <MetricCard label="Đang đánh giá" value={candidate.name} icon={Video} />
+        <MetricCard label="Điểm trung bình" value={`${average.toFixed(1)} / 5`} icon={Star} />
       </div>
+
       <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="rounded-2xl border border-border bg-card/65 p-3 shadow-sm">
-          <div className="flex items-center justify-between px-3 pb-3 pt-2">
+        {/* Candidates Queue */}
+        <aside className="glass-panel flex flex-col rounded-3xl p-4 border border-border bg-card/60 backdrop-blur-md">
+          <div className="flex items-center justify-between px-3 pb-3 pt-1 border-b border-border/80">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                Submissions
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Hàng chờ duyệt
               </p>
-              <p className="mt-1 text-sm font-semibold">Review queue</p>
+              <p className="mt-0.5 text-xs font-semibold text-foreground">Danh sách ứng viên</p>
             </div>
-            <span className="rounded-full bg-amber-500/12 px-2 py-1 font-mono text-[10px] font-bold text-amber-700 dark:text-amber-300">
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
               3
             </span>
           </div>
-          <div className="space-y-1">
+
+          <div className="mt-3 space-y-2">
             {demoCandidates.map((item) => (
               <button
                 type="button"
                 key={item.id}
                 onClick={() => setCandidate(item)}
-                className={`w-full rounded-xl p-3 text-left transition-colors ${candidate.id === item.id ? "bg-primary text-primary-foreground" : "hover:bg-background/80"}`}
+                className={`w-full rounded-2xl p-3.5 text-left transition-all ${
+                  candidate.id === item.id
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "border border-border/60 bg-background/40 hover:bg-background/80"
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <span
-                    className={`grid size-9 shrink-0 place-items-center rounded-xl text-xs font-bold ${candidate.id === item.id ? "bg-white/15" : "bg-blue-500/10 text-blue-700 dark:text-blue-300"}`}
+                    className={`grid size-9 shrink-0 place-items-center rounded-xl text-xs font-bold ${
+                      candidate.id === item.id ? "bg-white/20 text-white" : "bg-primary/10 text-primary"
+                    }`}
                   >
                     {item.initials}
                   </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold">{item.name}</span>
-                    <span
-                      className={`block truncate text-[11px] ${candidate.id === item.id ? "text-primary-foreground/65" : "text-muted-foreground"}`}
-                    >
+                  <div className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-semibold">{item.name}</span>
+                    <span className={`block truncate text-[11px] ${candidate.id === item.id ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
                       {item.role}
                     </span>
-                  </span>
+                  </div>
                 </div>
-                <div
-                  className={`mt-3 flex items-center justify-between text-[11px] ${candidate.id === item.id ? "text-primary-foreground/65" : "text-muted-foreground"}`}
-                >
+                <div className={`mt-2.5 flex items-center justify-between text-[10px] ${candidate.id === item.id ? "text-primary-foreground/75" : "text-muted-foreground"}`}>
                   <span>{item.submitted}</span>
-                  <span>{item.progress === 100 ? "Complete" : item.status}</span>
+                  <span className="font-medium">{item.progress === 100 ? "Hoàn thành" : item.status}</span>
                 </div>
               </button>
             ))}
           </div>
-          <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/8 p-3">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <ShieldCheck className="size-4 text-emerald-600" /> Structured review
+
+          <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 font-semibold text-primary">
+              <ShieldCheck className="size-4" /> Đánh giá chuẩn hóa
             </div>
-            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-              Use the same rubric for every candidate before making a decision.
+            <p className="mt-1 text-[11px] leading-relaxed">
+              Áp dụng chung bộ tiêu chí rubrics cho mọi ứng viên để đảm bảo tính khách quan.
             </p>
           </div>
         </aside>
+
+        {/* Candidate Active Evaluation */}
         <div className="space-y-5">
-          <section className="rounded-2xl border border-border bg-card/75 p-5 shadow-sm sm:p-6">
+          <section className="glass-panel rounded-3xl p-6 border border-border bg-card/60 backdrop-blur-md space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-2xl bg-primary font-bold text-primary-foreground">
+                <span className="grid size-12 place-items-center rounded-2xl bg-primary font-display text-base font-bold text-primary-foreground shadow-sm">
                   {candidate.initials}
                 </span>
                 <div>
-                  <h3 className="font-display text-xl font-extrabold">{candidate.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {candidate.role} · submitted {candidate.submitted}
+                  <h3 className="font-display text-xl font-bold text-foreground">{candidate.name}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {candidate.role} · nộp bài lúc {candidate.submitted}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/8 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+              <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                 <Check className="size-3.5" /> {candidate.status}
               </div>
             </div>
-            <div className="mt-5 grid gap-2 sm:grid-cols-4">
+
+            {/* Questions Tabs */}
+            <div className="flex flex-wrap gap-1.5 pt-2">
               {questions.map((item, index) => (
                 <button
                   type="button"
                   key={item.id}
                   onClick={() => setQuestionIndex(index)}
-                  className={`rounded-lg border px-3 py-2 text-left text-xs font-semibold transition-colors ${questionIndex === index ? "border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300" : "border-border bg-background/45 text-muted-foreground hover:text-foreground"}`}
+                  className={`rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all ${
+                    questionIndex === index
+                      ? "border-primary bg-primary text-primary-foreground shadow-xs"
+                      : "border-border bg-background/50 text-muted-foreground hover:text-foreground"
+                  }`}
                 >
-                  <span className="font-mono">0{item.number}</span>
-                  <span className="ml-2 hidden xl:inline">{item.competency}</span>
+                  <span>Câu {item.number}</span>
+                  <span className="ml-1.5 hidden sm:inline opacity-80">· {item.competency}</span>
                 </button>
               ))}
             </div>
           </section>
-          <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
-            <section className="overflow-hidden rounded-2xl border border-[#1e293b] bg-[#0f172a] text-white shadow-xl shadow-slate-950/20 xl:sticky xl:top-5">
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+
+          <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+            {/* Playback card */}
+            <section className="glass-panel overflow-hidden rounded-3xl border border-border bg-card/60 backdrop-blur-md shadow-md">
+              <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/45">
-                    Recorded answer
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Video câu trả lời
                   </p>
-                  <p className="mt-1 text-sm font-semibold">{question.title}</p>
+                  <p className="mt-0.5 text-xs font-semibold text-foreground">{question.title}</p>
                 </div>
-                <span className="rounded-full bg-white/10 px-2.5 py-1 font-mono text-[10px] text-white/65">
+                <span className="rounded-full bg-muted px-2.5 py-0.5 font-mono text-[10px] text-muted-foreground">
                   {candidate.duration}
                 </span>
               </div>
-              <div className="relative aspect-video bg-gradient-to-br from-slate-800 via-slate-900 to-indigo-950">
+              <div className="relative aspect-video bg-gradient-to-br from-slate-900 via-slate-950 to-indigo-950">
                 <div className="absolute inset-0 grid place-items-center">
                   <div className="text-center">
-                    <div className="mx-auto grid size-20 place-items-center rounded-full bg-primary text-2xl font-extrabold text-primary-foreground shadow-2xl">
+                    <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-xl">
                       {candidate.initials}
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-white/80">
-                      {candidate.name}'s answer
+                    <p className="mt-2.5 text-xs font-semibold text-white/90">
+                      Câu trả lời của {candidate.name}
                     </p>
-                    <p className="mt-1 text-xs text-white/45">Prototype playback surface</p>
+                    <p className="mt-0.5 text-[10px] text-white/50">Trình phát phỏng vấn</p>
                   </div>
                 </div>
-                <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-md">
+                <div className="absolute bottom-3 left-3 right-3 flex items-center gap-3 rounded-xl border border-white/10 bg-black/40 px-3 py-2 backdrop-blur-md">
                   <button
                     type="button"
                     onClick={() => setPlaying((value) => !value)}
-                    className="grid size-8 place-items-center rounded-lg bg-white text-slate-950"
+                    className="grid size-7 place-items-center rounded-lg bg-white text-slate-950"
                   >
-                    {playing ? (
-                      <Pause className="size-3.5" />
-                    ) : (
-                      <Play className="size-3.5 fill-current" />
-                    )}
+                    {playing ? <Pause className="size-3" /> : <Play className="size-3 fill-current" />}
                   </button>
-                  <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/15">
-                    <div
-                      className={`h-full rounded-full bg-blue-400 ${playing ? "w-2/5" : "w-1/5"}`}
-                    />
+                  <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/20">
+                    <div className={`h-full rounded-full bg-primary ${playing ? "w-2/5" : "w-1/5"}`} />
                   </div>
-                  <span className="font-mono text-[10px] text-white/55">02:18 / 03:00</span>
-                  <Volume2 className="size-3.5 text-white/55" />
+                  <span className="font-mono text-[10px] text-white/60">02:18 / 03:00</span>
+                  <Volume2 className="size-3.5 text-white/60" />
                 </div>
               </div>
-              <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-xs text-white/55">
+              <div className="flex items-center justify-between px-5 py-3 text-xs text-muted-foreground border-t border-border">
                 <span className="flex items-center gap-1.5">
-                  <FileText className="size-3.5" /> Transcript ready in next phase
+                  <FileText className="size-3.5" /> Bản ghi phụ đề tự động (AI Transcript)
                 </span>
-                <button type="button" className="font-semibold text-blue-300 hover:text-white">
-                  Open full screen
-                </button>
               </div>
             </section>
-            <section className="rounded-2xl border border-border bg-card/75 p-5 shadow-sm xl:sticky xl:top-5">
+
+            {/* Rubrics & Score Card */}
+            <section className="glass-panel rounded-3xl p-5 border border-border bg-card/60 backdrop-blur-md space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                    Evaluation
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Tiêu chí chấm điểm
                   </p>
-                  <h3 className="mt-1 font-display text-xl font-extrabold">
+                  <h4 className="mt-0.5 font-display text-base font-bold text-foreground">
                     {question.competency}
-                  </h3>
+                  </h4>
                 </div>
-                <span className="rounded-full bg-amber-500/12 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-300">
-                  {score ? `${score}/5` : "Not scored"}
+                <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-300">
+                  {score ? `${score}/5` : "Chưa chấm"}
                 </span>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                How effectively did this answer demonstrate the competency?
-              </p>
-              <div className="mt-4 grid grid-cols-5 gap-1.5">
+
+              <div className="grid grid-cols-5 gap-1.5">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     type="button"
@@ -1085,63 +1183,71 @@ function InterviewerFlow({
                       setScores((current) => ({ ...current, [question.id]: value }));
                       queueAutosave();
                     }}
-                    className={`grid aspect-square place-items-center rounded-lg border text-sm font-bold transition-colors ${score === value ? "border-amber-500 bg-amber-400 text-amber-950" : "border-border bg-background/60 text-muted-foreground hover:border-amber-400/50 hover:text-foreground"}`}
-                    aria-label={`Score ${value}`}
+                    className={`grid aspect-square place-items-center rounded-xl border text-sm font-bold transition-all ${
+                      score === value
+                        ? "border-amber-500 bg-amber-400 text-amber-950 shadow-xs"
+                        : "border-border bg-background/60 text-muted-foreground hover:border-amber-400/50 hover:text-foreground"
+                    }`}
+                    aria-label={`Điểm ${value}`}
                   >
                     {value}
                   </button>
                 ))}
               </div>
-              <div className="mt-2 flex justify-between text-[10px] text-muted-foreground">
+              <div className="flex justify-between text-[10px] text-muted-foreground">
                 <span>{scoreLabels[0]}</span>
                 <span>{scoreLabels[4]}</span>
               </div>
+
               <Textarea
                 value={notes}
                 onChange={(event) => {
                   setNotes(event.target.value);
                   queueAutosave();
                 }}
-                className="mt-5 min-h-28 resize-none rounded-xl bg-background/50 text-sm"
-                placeholder="Add a concise note for your panel..."
+                className="min-h-24 resize-none rounded-xl bg-background/60 text-xs"
+                placeholder="Ghi chú đánh giá dành cho hội đồng..."
               />
-              <div className="mt-3 flex items-center justify-between gap-3">
+
+              <div className="flex items-center justify-between gap-3 pt-1">
                 <Button
-                  className="rounded-lg"
+                  size="sm"
+                  className="rounded-xl"
                   onClick={() => {
                     setSaved(true);
                     setAutoSaveState("saved");
                   }}
                   disabled={!score}
                 >
-                  <Save className="size-4" /> Save evaluation
+                  <Save className="size-3.5" /> Lưu đánh giá
                 </Button>
-                <span className="flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                  <Check className="size-3.5" />{" "}
-                  {autoSaveState === "saving" ? "Saving…" : saved ? "Autosaved" : "Ready to save"}
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  <Check className="size-3" />{" "}
+                  {autoSaveState === "saving" ? "Đang lưu…" : saved ? "Đã lưu tự động" : "Sẵn sàng lưu"}
                 </span>
               </div>
             </section>
           </div>
-          <section className="flex flex-col gap-4 rounded-2xl border border-blue-500/20 bg-blue-500/6 p-5 sm:flex-row sm:items-center sm:justify-between">
+
+          <section className="glass-panel flex flex-col gap-4 rounded-3xl border border-primary/20 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="font-display text-lg font-bold">Next step: hand off to Adaptive</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Send structured evaluation to the Adaptive hiring workspace.
+              <p className="text-sm font-bold text-foreground">Hoàn tất đánh giá ứng viên</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Đồng bộ kết quả chấm điểm vào không gian tuyển dụng Adaptive.
               </p>
             </div>
             <Button
               variant="outline"
-              className="shrink-0 rounded-lg border-blue-500/30 bg-background/60"
+              className="shrink-0 rounded-xl"
               onClick={() => setSentToAdaptive(true)}
             >
               {sentToAdaptive ? (
                 <>
-                  <Check className="size-4 text-emerald-600" /> Sent
+                  <Check className="size-4 text-emerald-600" /> Đã gửi đánh giá
                 </>
               ) : (
                 <>
-                  Prepare handoff <ChevronRight className="size-4" />
+                  Xác nhận & Chuyển giao <ChevronRight className="size-4" />
                 </>
               )}
             </Button>
@@ -1162,15 +1268,15 @@ function MetricCard({
   icon: typeof FileText;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-4">
-      <span className="grid size-9 place-items-center rounded-xl bg-primary/8 text-primary">
+    <div className="glass-panel flex items-center gap-3.5 rounded-2xl border border-border bg-card/60 p-4">
+      <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary">
         <Icon className="size-4" />
       </span>
       <div className="min-w-0">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-muted-foreground">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           {label}
         </p>
-        <p className="mt-1 truncate text-sm font-semibold">{value}</p>
+        <p className="mt-0.5 truncate text-sm font-semibold text-foreground">{value}</p>
       </div>
     </div>
   );

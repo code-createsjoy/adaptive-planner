@@ -82,11 +82,13 @@ const DASHBOARD_TOUR_STEPS: TourStepConfig[] = [
 interface DashboardTourControllerProps {
   onNavigateTab?: (tab: string) => void;
   onOpenAddTaskModal?: () => void;
+  disabled?: boolean;
 }
 
 export const DashboardTourController: React.FC<DashboardTourControllerProps> = ({
   onNavigateTab,
   onOpenAddTaskModal,
+  disabled = false,
 }) => {
   const {
     isTourActive,
@@ -104,15 +106,16 @@ export const DashboardTourController: React.FC<DashboardTourControllerProps> = (
 
   // First-time auto start: subtle settling delay of 800ms
   useEffect(() => {
+    if (disabled) return;
     if (!tourCompleted && !tourDismissed && !isTourActive) {
       const timer = setTimeout(() => {
         startTour(0);
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [tourCompleted, tourDismissed, isTourActive, startTour]);
+  }, [disabled, tourCompleted, tourDismissed, isTourActive, startTour]);
 
-  if (!isTourActive) {
+  if (disabled || !isTourActive) {
     return null;
   }
 
