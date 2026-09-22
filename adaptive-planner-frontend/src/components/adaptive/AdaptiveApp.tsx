@@ -1972,34 +1972,38 @@ function DesktopSidebar({
 }) {
   return (
     <aside
-      className={`sticky top-4 sm:top-5 self-start hidden h-[calc(100vh-2rem)] shrink-0 flex-col justify-between transition-all duration-300 ease-in-out md:flex z-30 ${
-        collapsed ? "w-18" : "w-56"
+      className={`sticky top-4 sm:top-5 self-start hidden h-[calc(100vh-2.5rem)] shrink-0 flex-col justify-between transition-all duration-300 ease-in-out md:flex z-30 ${
+        collapsed ? "w-16 items-center" : "w-56"
       }`}
     >
-      <div>
-        <div className={`flex items-center justify-between gap-2 ${collapsed ? "flex-col items-center" : ""}`}>
+      <div className="w-full">
+        <div className={collapsed ? "flex items-center justify-center mb-6" : "flex items-center justify-between gap-2 mb-6"}>
           {!collapsed ? (
-            <Brand />
+            <>
+              <Brand />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleCollapse}
+                className="size-8 rounded-xl text-muted-foreground hover:bg-card/80 hover:text-foreground cursor-pointer"
+                title="Thu gọn menu"
+                aria-label="Thu gọn menu"
+              >
+                <Menu className="size-4" />
+              </Button>
+            </>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onToggleCollapse}
+              className="size-10 rounded-xl text-foreground hover:bg-card/80 hover:text-primary transition-colors cursor-pointer"
               title="Mở rộng menu"
-              className="grid size-9 place-items-center rounded-xl bg-primary font-display text-sm font-extrabold text-primary-foreground transition-transform hover:scale-105"
+              aria-label="Mở rộng menu"
             >
-              A
-            </button>
+              <Menu className="size-5" />
+            </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onToggleCollapse}
-            className="size-8 rounded-xl text-muted-foreground hover:bg-card/80 hover:text-foreground"
-            title={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
-            aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
-          >
-            <Menu className="size-4" />
-          </Button>
         </div>
 
         <NavItems
@@ -2007,20 +2011,20 @@ function DesktopSidebar({
           onNavigate={onNavigate}
           unreadCount={unreadCount}
           collapsed={collapsed}
-          className={collapsed ? "mt-6 space-y-2" : "mt-8"}
+          className="space-y-2"
         />
       </div>
 
-      <div>
+      <div className="w-full">
         <button
           type="button"
           onClick={() => onNavigate("profile")}
           title="Thai · Hồ sơ cá nhân"
-          className={`flex w-full items-center gap-2.5 rounded-2xl border text-left transition-all ${
+          className={`flex w-full items-center transition-all cursor-pointer ${
             active === "profile" ? "border-primary/30 bg-primary/10" : "border-border/70 bg-card/45 hover:bg-card/70"
-          } ${collapsed ? "justify-center p-1.5" : "p-2.5"}`}
+          } ${collapsed ? "size-10 justify-center rounded-xl mx-auto border" : "gap-2.5 rounded-2xl border p-2.5 text-left"}`}
         >
-          <img src={avatarImage} alt="Thai" width={512} height={512} className="size-9 rounded-xl object-cover shrink-0" />
+          <img src={avatarImage} alt="Thai" width={512} height={512} className="size-7 rounded-lg object-cover shrink-0" />
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-bold leading-none text-foreground truncate">Thai</p>
@@ -4102,7 +4106,7 @@ function NotificationsView({
 
 function SettingsView({ onNavigate }: { onNavigate: (id: ViewId) => void }) {
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       <div className="grid gap-4 sm:grid-cols-2">
         <SettingsCard icon={SlidersHorizontal} title="Planning preferences" copy="Buffers, breaks, quiet hours, and confirmation rules." onClick={() => onNavigate("preferences")} />
         <SettingsCard icon={Headphones} title="Desk Companion" copy="Voice reminders and physical companion settings." onClick={() => onNavigate("companion")} />
