@@ -955,12 +955,11 @@ export function AdaptiveApp() {
 
   return (
     <div className="app-canvas min-h-screen overflow-x-hidden bg-background text-foreground">
-      <div className="ambient-shape ambient-shape-left" aria-hidden="true" />
-      <div className="ambient-shape ambient-shape-right" aria-hidden="true" />
-      <div className="relative mx-auto flex min-h-screen max-w-[1440px] gap-5 px-4 py-4 sm:px-5 sm:py-5">
-        <DesktopSidebar active={view} onNavigate={navigate} voiceOn={voiceOn} />
+      {view !== "interview" && <><div className="ambient-shape ambient-shape-left" aria-hidden="true" /><div className="ambient-shape ambient-shape-right" aria-hidden="true" /></>}
+      <div className={view === "interview" ? "relative mx-auto min-h-screen max-w-[1440px]" : "relative mx-auto flex min-h-screen max-w-[1440px] gap-5 px-4 py-4 sm:px-5 sm:py-5"}>
+        {view !== "interview" && <DesktopSidebar active={view} onNavigate={navigate} voiceOn={voiceOn} />}
 
-        {mobileOpen && (
+        {mobileOpen && view !== "interview" && (
           <div className="fixed inset-0 z-50 bg-foreground/20 backdrop-blur-sm md:hidden" onClick={() => setMobileOpen(false)}>
             <div className="h-full w-[280px] bg-background p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
               <div className="flex items-center justify-between">
@@ -972,8 +971,8 @@ export function AdaptiveApp() {
           </div>
         )}
 
-        <main className="min-w-0 flex-1 pb-20 md:pb-4">
-          <header className="mb-7 flex items-start justify-between gap-4 pt-1">
+        <main className={view === "interview" ? "min-w-0" : "min-w-0 flex-1 pb-20 md:pb-4"}>
+          {view !== "interview" && <header className="mb-7 flex items-start justify-between gap-4 pt-1">
             <div className="flex items-start gap-3">
               <Button className="mt-0.5 md:hidden" variant="outline" size="icon" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu /></Button>
               <div className="rise">
@@ -1006,7 +1005,7 @@ export function AdaptiveApp() {
                 <img src={avatarImage} alt="Thai" width={512} height={512} className="size-full object-cover" />
               </button>
             </div>
-          </header>
+          </header>}
 
           {view === "today" && (
             <TodayView
@@ -1096,13 +1095,13 @@ export function AdaptiveApp() {
         </main>
       </div>
 
-      <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-border bg-card/90 p-1.5 shadow-xl backdrop-blur-xl md:hidden">
+      {view !== "interview" && <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-border bg-card/90 p-1.5 shadow-xl backdrop-blur-xl md:hidden">
         {navigation.slice(0, 4).map((item) => (
           <button key={item.id} type="button" onClick={() => navigate(item.id)} className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] ${view === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
             <item.icon className="size-4" />{item.label}
           </button>
         ))}
-      </nav>
+      </nav>}
 
       {/* 10-Second Transactional Undo Toast */}
       <AnimatePresence>
