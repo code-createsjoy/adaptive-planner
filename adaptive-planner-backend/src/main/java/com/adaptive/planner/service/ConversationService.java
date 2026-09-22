@@ -31,7 +31,7 @@ public class ConversationService {
     public ConversationDto createConversation(CreateConversationRequest request) {
         String title = request != null && request.getTitle() != null && !request.getTitle().trim().isEmpty()
                 ? request.getTitle().trim()
-                : "Cuộc trò chuyện mới";
+                : "New Conversation";
 
         if (request != null && (request.getTitle() == null || request.getTitle().trim().isEmpty())
                 && request.getInitialMessage() != null && request.getInitialMessage().getContent() != null) {
@@ -104,7 +104,7 @@ public class ConversationService {
         ChatMessageEntity savedMsg = chatMessageRepository.save(msg);
 
         // Update title if it's default and this is first user message
-        if ("Cuộc trò chuyện mới".equalsIgnoreCase(conversation.getTitle()) && "user".equalsIgnoreCase(msg.getRole())) {
+        if (("New Conversation".equalsIgnoreCase(conversation.getTitle()) || "Cuộc trò chuyện mới".equalsIgnoreCase(conversation.getTitle())) && "user".equalsIgnoreCase(msg.getRole())) {
             String snippet = msg.getContent().trim();
             conversation.setTitle(snippet.length() > 40 ? snippet.substring(0, 37) + "..." : snippet);
         }

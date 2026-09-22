@@ -52,7 +52,7 @@ export const SmartRebalanceCompanionModal: React.FC<
               </h3>
             </div>
             <p className="text-xs text-muted-foreground font-medium">
-              Dự án: <strong className="text-foreground">{goal.title}</strong> · Hạn chót: {goal.officialDeadline}
+              Project: <strong className="text-foreground">{goal.title}</strong> · Official Deadline: {goal.officialDeadline}
             </p>
           </div>
 
@@ -69,7 +69,7 @@ export const SmartRebalanceCompanionModal: React.FC<
         <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
           <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 text-xs text-foreground space-y-1.5 leading-relaxed">
             <p className="font-bold text-primary flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-mono">
-              <span>🤖 Trợ lý Adaptive:</span>
+              <span>🤖 Adaptive Companion:</span>
             </p>
             <p className="text-sm font-medium">{rebalanceData.companionMessage}</p>
           </div>
@@ -77,7 +77,7 @@ export const SmartRebalanceCompanionModal: React.FC<
           {/* Option Selector Cards */}
           <div className="space-y-2.5">
             <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-              Chọn phương án phục hồi ({rebalanceData.options.length} phương án)
+              Select Recovery Option ({rebalanceData.options.length} options)
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -101,7 +101,7 @@ export const SmartRebalanceCompanionModal: React.FC<
                         </span>
                         {opt.badge === 'RECOMMENDED' && (
                           <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                            ✨ Tối ưu
+                            ✨ Recommended
                           </span>
                         )}
                       </div>
@@ -123,7 +123,7 @@ export const SmartRebalanceCompanionModal: React.FC<
           {activeOption && activeOption.modifiedDays && activeOption.modifiedDays.length > 0 && (
             <div className="space-y-2.5 pt-2">
               <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-                Xem trước các ngày bị điều chỉnh (Schedule Diff)
+                Preview Adjusted Days (Schedule Diff)
               </p>
 
               <div className="space-y-2">
@@ -138,11 +138,11 @@ export const SmartRebalanceCompanionModal: React.FC<
                       </span>
                       {d.isBufferDay ? (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                          🛡️ Dùng ngày đệm
+                          🛡️ Used Buffer Day
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                          ✓ Bảo vệ giờ nghỉ
+                          ✓ Protected Rest Slots
                         </span>
                       )}
                     </div>
@@ -155,7 +155,7 @@ export const SmartRebalanceCompanionModal: React.FC<
                         <div>
                           <p className="font-bold text-foreground">{b.title}</p>
                           <p className="text-[10px] text-muted-foreground font-mono">
-                            {b.startTime} – {b.endTime} ({b.durationMinutes}p)
+                            {b.startTime} – {b.endTime} ({b.durationMinutes}m)
                           </p>
                         </div>
                         <span className="text-[10px] text-primary italic font-medium">
@@ -177,7 +177,7 @@ export const SmartRebalanceCompanionModal: React.FC<
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
           >
-            Hủy bỏ
+            Cancel
           </button>
           <button
             type="button"
@@ -190,7 +190,7 @@ export const SmartRebalanceCompanionModal: React.FC<
             className="px-5 py-2.5 rounded-xl bg-foreground text-background text-xs font-bold hover:bg-foreground/90 transition-all flex items-center gap-2 shadow-md hover:shadow-lg cursor-pointer"
           >
             <Check className="size-4 text-emerald-400" />
-            <span>Áp dụng tái cân bằng (Apply Rebalance)</span>
+            <span>Apply Rebalance</span>
           </button>
         </div>
       </div>

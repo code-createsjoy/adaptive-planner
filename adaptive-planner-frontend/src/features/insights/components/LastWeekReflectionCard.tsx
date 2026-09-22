@@ -27,16 +27,16 @@ export const LastWeekReflectionCard: React.FC<LastWeekReflectionCardProps> = ({
   const formatHoursMinutes = (mins: number) => {
     const h = Math.floor(mins / 60);
     const m = mins % 60;
-    if (h > 0 && m > 0) return `${h}h ${m}p`;
+    if (h > 0 && m > 0) return `${h}h ${m}m`;
     if (h > 0) return `${h}h`;
-    return `${m}p`;
+    return `${m}m`;
   };
 
   const formatDateRange = (start: string, end: string) => {
     try {
       const s = new Date(start);
       const e = new Date(end);
-      return `${s.getDate()}/${s.getMonth() + 1} – ${e.getDate()}/${e.getMonth() + 1}`;
+      return `${s.getMonth() + 1}/${s.getDate()} – ${e.getMonth() + 1}/${e.getDate()}`;
     } catch {
       return `${start} – ${end}`;
     }
@@ -49,7 +49,7 @@ export const LastWeekReflectionCard: React.FC<LastWeekReflectionCardProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300">
-              Tuần trước (Reflection & Learning)
+              Last Week (Reflection & Learning)
             </span>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <Compass className="w-3.5 h-3.5" />
@@ -57,7 +57,7 @@ export const LastWeekReflectionCard: React.FC<LastWeekReflectionCardProps> = ({
             </span>
           </div>
           <h2 className="text-lg font-bold text-foreground mt-1">
-            Nhìn lại & Đúc kết
+            Weekly Reflection & Insights
           </h2>
         </div>
       </div>
@@ -67,22 +67,22 @@ export const LastWeekReflectionCard: React.FC<LastWeekReflectionCardProps> = ({
         <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <span>Nỗ lực đã hoàn thành tuần trước</span>
+            <span>Tasks Completed Last Week</span>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-foreground">{completedTasks}</span>
-            <span className="text-xs text-muted-foreground">/ {scheduledTasks} việc ({completionRate}%)</span>
+            <span className="text-xs text-muted-foreground">/ {scheduledTasks} tasks ({completionRate}%)</span>
           </div>
         </div>
 
         <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
             <Clock className="w-4 h-4 text-indigo-500" />
-            <span>Tổng thời gian tập trung</span>
+            <span>Total Focus Time</span>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-foreground">{formatHoursMinutes(totalFocusMinutes)}</span>
-            <span className="text-xs text-muted-foreground">trong cả tuần</span>
+            <span className="text-xs text-muted-foreground">across entire week</span>
           </div>
         </div>
       </div>
@@ -92,13 +92,13 @@ export const LastWeekReflectionCard: React.FC<LastWeekReflectionCardProps> = ({
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5" />
-            Mẫu hình nhận thấy
+            Observed Rhythm Pattern
           </span>
           <button
             onClick={() => setShowWhy(!showWhy)}
             className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 font-medium transition-colors"
           >
-            <span>Tại sao Modo nhận thấy điều này?</span>
+            <span>Why did Modo notice this?</span>
             {showWhy ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         </div>
@@ -119,7 +119,7 @@ export const LastWeekReflectionCard: React.FC<LastWeekReflectionCardProps> = ({
         <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 space-y-3">
           <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-semibold text-xs">
             <Lightbulb className="w-4 h-4 text-amber-500" />
-            <span>Gợi ý thích ứng cho tuần tới</span>
+            <span>Suggested Adaptation for Upcoming Week</span>
           </div>
 
           <div>
@@ -134,7 +134,7 @@ export const LastWeekReflectionCard: React.FC<LastWeekReflectionCardProps> = ({
               onClick={() => onApplySuggestion?.(suggestion.id)}
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all shadow-sm active:scale-95"
             >
-              <span>{suggestion.actionLabel || 'Áp dụng mẫu hình này → Xem trước'}</span>
+              <span>{suggestion.actionLabel || 'Apply this pattern → Preview'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>

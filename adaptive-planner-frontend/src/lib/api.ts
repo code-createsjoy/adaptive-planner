@@ -86,7 +86,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (!response.ok) {
     const errorText = await response.text();
-    let errorMessage = response.statusText || `Lỗi yêu cầu (${response.status})`;
+    let errorMessage = response.statusText || `Request error (${response.status})`;
     try {
       const parsed = JSON.parse(errorText);
       errorMessage = parsed.detail || parsed.title || parsed.message || errorText;

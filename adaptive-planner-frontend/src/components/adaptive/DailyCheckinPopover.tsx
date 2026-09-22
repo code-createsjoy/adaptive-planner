@@ -27,28 +27,29 @@ interface DailyCheckinPopoverProps {
 }
 
 const MOOD_PRESETS = [
-  { emoji: '😄', label: 'Vui vẻ / Phấn chấn', color: 'hover:bg-amber-500/15 border-amber-500/30 text-amber-500' },
-  { emoji: '😊', label: 'Ổn định / Bình thường', color: 'hover:bg-emerald-500/15 border-emerald-500/30 text-emerald-500' },
-  { emoji: '🧘', label: 'Bình yên / Thư thái', color: 'hover:bg-teal-500/15 border-teal-500/30 text-teal-500' },
-  { emoji: '🔥', label: 'Tràn đầy năng lượng', color: 'hover:bg-orange-500/15 border-orange-500/30 text-orange-500' },
-  { emoji: '🥱', label: 'Mệt mỏi / Uể oải', color: 'hover:bg-indigo-500/15 border-indigo-500/30 text-indigo-400' },
-  { emoji: '😣', label: 'Kiệt sức / Căng thẳng', color: 'hover:bg-rose-500/15 border-rose-500/30 text-rose-500' },
-  { emoji: '🌧️', label: 'Trầm lắng / Buồn', color: 'hover:bg-blue-500/15 border-blue-500/30 text-blue-400' },
+  { emoji: '😄', label: 'Happy / Uplifted', color: 'hover:bg-amber-500/15 border-amber-500/30 text-amber-500' },
+  { emoji: '😊', label: 'Balanced / Calm', color: 'hover:bg-emerald-500/15 border-emerald-500/30 text-emerald-500' },
+  { emoji: '🧘', label: 'Peaceful / Relaxed', color: 'hover:bg-teal-500/15 border-teal-500/30 text-teal-500' },
+  { emoji: '🔥', label: 'Energetic / Motivated', color: 'hover:bg-orange-500/15 border-orange-500/30 text-orange-500' },
+  { emoji: '🥱', label: 'Tired / Sluggish', color: 'hover:bg-indigo-500/15 border-indigo-500/30 text-indigo-400' },
+  { emoji: '😣', label: 'Exhausted / Stressed', color: 'hover:bg-rose-500/15 border-rose-500/30 text-rose-500' },
+  { emoji: '🌧️', label: 'Low / Sad', color: 'hover:bg-blue-500/15 border-blue-500/30 text-blue-400' },
 ];
 
 const FLOW_OPTIONS: { value: PeriodFlow; label: string; desc: string }[] = [
-  { value: 'SPOTTING', label: 'Đốm nhẹ', desc: 'Rất ít' },
-  { value: 'LIGHT', label: 'Nhẹ', desc: 'Lượng ít' },
-  { value: 'MEDIUM', label: 'Vừa', desc: 'Trung bình' },
-  { value: 'HEAVY', label: 'Nhiều', desc: 'Lượng nhiều / Cần nghỉ' },
+  { value: 'SPOTTING', label: 'Spotting', desc: 'Very light' },
+  { value: 'LIGHT', label: 'Light', desc: 'Low flow' },
+  { value: 'MEDIUM', label: 'Medium', desc: 'Moderate' },
+  { value: 'HEAVY', label: 'Heavy', desc: 'Heavy flow / Rest' },
 ];
 
 function formatDateDisplay(dateStr: string) {
   try {
     const [y, m, d] = dateStr.split('-').map(Number);
     const date = new Date(y, m - 1, d);
-    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-    return `${days[date.getDay()]}, ${d}/${m}/${y}`;
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${days[date.getDay()]}, ${months[m - 1]} ${d}, ${y}`;
   } catch {
     return dateStr;
   }
@@ -65,7 +66,7 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
   const deleteMutation = useDeleteDailyCheckinMutation();
 
   const [selectedEmoji, setSelectedEmoji] = useState<string>('😊');
-  const [selectedMoodLabel, setSelectedMoodLabel] = useState<string>('Ổn định / Bình thường');
+  const [selectedMoodLabel, setSelectedMoodLabel] = useState<string>('Balanced / Calm');
   const [energyLevel, setEnergyLevel] = useState<number>(3);
   const [note, setNote] = useState<string>('');
   const [isPeriodDay, setIsPeriodDay] = useState<boolean>(false);
@@ -74,14 +75,14 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
   useEffect(() => {
     if (existingCheckin) {
       setSelectedEmoji(existingCheckin.moodEmoji || '😊');
-      setSelectedMoodLabel(existingCheckin.moodLabel || 'Ổn định / Bình thường');
+      setSelectedMoodLabel(existingCheckin.moodLabel || 'Balanced / Calm');
       setEnergyLevel(existingCheckin.energyLevel || 3);
       setNote(existingCheckin.note || '');
       setIsPeriodDay(Boolean(existingCheckin.isPeriodDay));
       setFlowIntensity(existingCheckin.flowIntensity || 'NONE');
     } else {
       setSelectedEmoji('😊');
-      setSelectedMoodLabel('Ổn định / Bình thường');
+      setSelectedMoodLabel('Balanced / Calm');
       setEnergyLevel(3);
       setNote('');
       setIsPeriodDay(false);
@@ -153,20 +154,20 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-foreground text-base sm:text-lg flex items-center gap-2">
-                Daily Check-in & Nhật ký
+                Daily Check-in & Journal
                 <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-primary/10 text-primary border border-primary/20">
                   {formatDateDisplay(dateStr)}
                 </span>
               </h3>
               <p className="text-xs text-muted-foreground">
-                Ghi nhận cảm xúc, mức năng lượng và sức khỏe trong ngày
+                Log mood, energy levels, and wellness throughout the day
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-            aria-label="Đóng"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -177,7 +178,7 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
           {/* Section 1: Mood Emoji Selector */}
           <div>
             <label className="text-xs font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
-              <Smile className="w-4 h-4 text-primary" /> Tâm trạng hôm nay
+              <Smile className="w-4 h-4 text-primary" /> Today's Mood
             </label>
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
               {MOOD_PRESETS.map((m) => {
@@ -205,7 +206,7 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
               })}
             </div>
             <p className="text-[11px] text-muted-foreground/80 mt-1.5 font-medium italic">
-              Đang chọn: <span className="text-foreground font-semibold">{selectedMoodLabel}</span>
+              Selected: <span className="text-foreground font-semibold">{selectedMoodLabel}</span>
             </p>
           </div>
 
@@ -213,7 +214,7 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-amber-500" /> Mức năng lượng & Thể trạng
+                <Zap className="w-4 h-4 text-amber-500" /> Energy & Physical State
               </label>
               <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${
                 energyLevel <= 2
@@ -222,11 +223,11 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
                   ? 'bg-amber-500/15 text-amber-500 border border-amber-500/20'
                   : 'bg-emerald-500/15 text-emerald-500 border border-emerald-500/20'
               }`}>
-                {energyLevel === 1 && '1/5 · Kiệt sức 😣'}
-                {energyLevel === 2 && '2/5 · Mệt mỏi 🥱'}
-                {energyLevel === 3 && '3/5 · Vừa phải 😊'}
-                {energyLevel === 4 && '4/5 · Tràn đầy năng lượng 🔥'}
-                {energyLevel === 5 && '5/5 · Đỉnh cao / Sẵn sàng mọi thứ 🚀'}
+                {energyLevel === 1 && '1/5 · Exhausted 😣'}
+                {energyLevel === 2 && '2/5 · Tired 🥱'}
+                {energyLevel === 3 && '3/5 · Moderate 😊'}
+                {energyLevel === 4 && '4/5 · Energetic 🔥'}
+                {energyLevel === 5 && '5/5 · Peak Flow 🚀'}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -260,10 +261,10 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
                 </div>
                 <div>
                   <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                    Đánh dấu chu kỳ kinh nguyệt
+                    Log Menstrual Period
                   </div>
                   <div className="text-[11px] text-muted-foreground">
-                    Theo dõi chu kỳ & hỗ trợ AI điều chỉnh lịch phù hợp
+                    Track cycle & empower AI adaptive suggestions
                   </div>
                 </div>
               </div>
@@ -290,7 +291,7 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
                 className="pt-2 border-t border-rose-500/15 space-y-2"
               >
                 <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                  <Droplets className="w-3.5 h-3.5" /> Lượng kinh nguyệt (Flow):
+                  <Droplets className="w-3.5 h-3.5" /> Period Flow Intensity:
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {FLOW_OPTIONS.map((f) => {
@@ -321,18 +322,18 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
           {/* Section 4: Daily Note */}
           <div>
             <label className="text-xs font-bold text-foreground/80 uppercase tracking-wider flex items-center gap-1.5 mb-2">
-              <FileText className="w-4 h-4 text-primary" /> Ghi chú & Cảm nghĩ ngày
+              <FileText className="w-4 h-4 text-primary" /> Daily Journal & Notes
             </label>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Ghi nhanh cảm xúc, sự kiện đáng nhớ hoặc lưu ý sức khỏe..."
+              placeholder="Quick thoughts, memorable events, or wellness notes..."
               rows={3}
               maxLength={500}
               className="w-full p-3 rounded-xl bg-background border border-border/80 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary resize-none transition-all"
             />
             <div className="text-right text-[10px] text-muted-foreground mt-0.5">
-              {note.length}/500 ký tự
+              {note.length}/500 characters
             </div>
           </div>
         </div>
@@ -347,7 +348,7 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
               className="px-3.5 py-2 rounded-xl border border-rose-500/30 text-rose-600 hover:bg-rose-500/10 text-xs font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Xóa check-in
+              Delete Check-in
             </button>
           ) : (
             <div />
@@ -359,7 +360,7 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
               onClick={onClose}
               className="px-4 py-2 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
             >
-              Hủy
+              Cancel
             </button>
             <button
               type="button"
@@ -370,12 +371,12 @@ export const DailyCheckinPopover: React.FC<DailyCheckinPopoverProps> = ({
               {upsertMutation.isPending ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  Đang lưu...
+                  Saving...
                 </>
               ) : (
                 <>
                   <Check className="w-3.5 h-3.5" />
-                  Lưu Check-in
+                  Save Check-in
                 </>
               )}
             </button>

@@ -329,7 +329,7 @@ export function useToggleTimeBlockCompletionMutation() {
         return await api.updateTimeBlockCompletion(block.id, completed);
       }
 
-      throw new Error('Không xác định được routine cần cập nhật.');
+      throw new Error('Unable to identify routine to update.');
     },
     onError: (_err, variables) => {
       // Rollback on error

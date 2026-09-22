@@ -77,24 +77,24 @@ export const ScenarioDiffPreviewCard: React.FC<ScenarioDiffPreviewCardProps> = (
               <Sparkles className="size-4" />
             </span>
             <h3 className="font-display text-base font-extrabold text-foreground">
-              Xem trước thay đổi lịch (Impact Preview)
+              Schedule Impact Preview
             </h3>
           </div>
           <p className="mt-1 text-xs text-muted-foreground font-medium">
-            {scenario.title || 'Phương án tối ưu hóa lịch trình'}
+            {scenario.title || 'Optimized schedule plan'}
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
-            {scenarioIndex === 0 ? '✨ Đề xuất tối ưu' : `Lựa chọn #${scenarioIndex + 1}`}
+            {scenarioIndex === 0 ? '✨ Best Match' : `Option #${scenarioIndex + 1}`}
           </span>
           {onClose && (
             <button
               type="button"
               onClick={onClose}
               className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-              title="Đóng xem trước (Close)"
+              title="Close Preview"
             >
               <X className="size-4" />
             </button>
@@ -106,7 +106,7 @@ export const ScenarioDiffPreviewCard: React.FC<ScenarioDiffPreviewCardProps> = (
       {scenario.description && (
         <div className="p-3.5 rounded-2xl bg-muted/30 border border-border/60 text-xs text-foreground/90 space-y-1.5 shrink-0">
           <p className="font-semibold text-primary flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-mono">
-            <span>💡 Kế hoạch điều chỉnh:</span>
+            <span>💡 Adaptation Rationale:</span>
           </p>
           <p className="leading-relaxed">{scenario.description}</p>
         </div>
@@ -116,22 +116,22 @@ export const ScenarioDiffPreviewCard: React.FC<ScenarioDiffPreviewCardProps> = (
       <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono shrink-0">
         {diffResult.newAddedCount > 0 && (
           <span className="px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold">
-            +{diffResult.newAddedCount} mới thêm
+            +{diffResult.newAddedCount} newly added
           </span>
         )}
         {diffResult.totalShiftedCount > 0 && (
           <span className="px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-semibold">
-            {diffResult.totalShiftedCount} dời giờ
+            {diffResult.totalShiftedCount} shifted
           </span>
         )}
         {diffResult.totalCompressedCount > 0 && (
           <span className="px-2 py-0.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 font-semibold">
-            {diffResult.totalCompressedCount} rút ngắn
+            {diffResult.totalCompressedCount} shortened
           </span>
         )}
         {diffResult.totalDeferredCount > 0 && (
           <span className="px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-semibold">
-            {diffResult.totalDeferredCount} hoãn sang mai
+            {diffResult.totalDeferredCount} deferred
           </span>
         )}
       </div>
@@ -139,12 +139,12 @@ export const ScenarioDiffPreviewCard: React.FC<ScenarioDiffPreviewCardProps> = (
       {/* Diff Items List */}
       <div className="space-y-2 flex-1 flex flex-col min-h-0 overflow-hidden">
         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider shrink-0">
-          Chi tiết các lịch trình bị ảnh hưởng ({diffResult.items.length})
+          Affected Activities Detail ({diffResult.items.length})
         </p>
 
         {diffResult.items.length === 0 ? (
           <div className="p-4 rounded-2xl bg-muted/20 border border-border/60 text-center text-xs text-muted-foreground">
-            Không có lịch trình nào bị xung đột hay thay đổi.
+            No activities conflicted or moved.
           </div>
         ) : (
           <div className="space-y-2.5 overflow-y-auto pr-1.5 flex-1 custom-scrollbar">
@@ -226,7 +226,7 @@ export const ScenarioDiffPreviewCard: React.FC<ScenarioDiffPreviewCardProps> = (
           className="w-full py-3 px-4 rounded-2xl bg-foreground text-background font-bold text-sm hover:bg-foreground/90 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-50"
         >
           <Check className="size-4 text-emerald-400" />
-          <span>{isApplying ? 'Đang áp dụng...' : 'Áp dụng phương án này (Apply changes)'}</span>
+          <span>{isApplying ? 'Applying...' : 'Apply this plan'}</span>
         </button>
 
         <button
@@ -235,7 +235,7 @@ export const ScenarioDiffPreviewCard: React.FC<ScenarioDiffPreviewCardProps> = (
           className="w-full py-2 text-xs font-semibold text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1.5"
         >
           <ExternalLink className="size-3.5" />
-          <span>Xem toàn bộ timeline cả ngày (View full timeline)</span>
+          <span>View full day timeline</span>
         </button>
       </div>
 
@@ -246,7 +246,7 @@ export const ScenarioDiffPreviewCard: React.FC<ScenarioDiffPreviewCardProps> = (
             <div className="p-5 border-b border-border flex items-center justify-between bg-muted/20">
               <div>
                 <h4 className="font-bold text-sm text-foreground">
-                  Toàn bộ timeline sau khi áp dụng kịch bản
+                  Full Day Timeline Under This Scenario
                 </h4>
                 <p className="text-xs text-muted-foreground">
                   {scenario.title}
@@ -290,7 +290,7 @@ export const ScenarioDiffPreviewCard: React.FC<ScenarioDiffPreviewCardProps> = (
                 onClick={() => setIsFullTimelineOpen(false)}
                 className="px-4 py-2 rounded-xl bg-foreground text-background text-xs font-bold"
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>

@@ -74,8 +74,8 @@ public class ProjectGoalService {
                     notificationService.createNotification(CreateNotificationRequest.builder()
                             .type("PROJECT_COMPLETED")
                             .priority("NORMAL")
-                            .title("Chúc mừng! Bạn đã hoàn thành dự án")
-                            .message("Tất cả các subtask trong dự án \"" + goal.getTitle() + "\" đã hoàn tất xuất sắc.")
+                            .title("Congratulations! You completed the project")
+                            .message("All subtasks in project \"" + goal.getTitle() + "\" have been successfully completed.")
                             .relatedEntityType("PROJECT")
                             .relatedEntityId(goal.getId())
                             .actionType("VIEW_PROJECT")
@@ -97,7 +97,7 @@ public class ProjectGoalService {
     @Transactional
     public ProjectGoalDto completeProject(Long projectId) {
         ProjectGoalEntity goal = projectGoalRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dự án với ID: " + projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + projectId));
 
         // 1. Mark goal as completed
         goal.setStatus(ProjectGoalStatus.COMPLETED);
@@ -124,8 +124,8 @@ public class ProjectGoalService {
             notificationService.createNotification(CreateNotificationRequest.builder()
                     .type("PROJECT_COMPLETED")
                     .priority("NORMAL")
-                    .title("Chúc mừng! Dự án đã hoàn tất")
-                    .message("Dự án \"" + goal.getTitle() + "\" đã hoàn thành và lưu vào lịch sử. Thời gian biểu đã được dọn sạch tinh gọn.")
+                    .title("Congratulations! Project completed")
+                    .message("Project \"" + goal.getTitle() + "\" has been completed and archived. Timetable has been cleaned up.")
                     .relatedEntityType("PROJECT")
                     .relatedEntityId(goal.getId())
                     .actionType("VIEW_PROJECT")
@@ -139,8 +139,8 @@ public class ProjectGoalService {
         // 5. Record in Activity History (AdaptationActionEntity)
         try {
             AdaptationActionEntity action = AdaptationActionEntity.builder()
-                    .reason("Hoàn thành và lưu trữ lịch sử dự án: " + goal.getTitle())
-                    .scenarioTitle("Chốt hoàn tất dự án")
+                    .reason("Completed and archived project history: " + goal.getTitle())
+                    .scenarioTitle("Confirm project completion")
                     .selectedScenarioId("completed")
                     .date(LocalDate.now())
                     .beforeSnapshotJson("[]")
@@ -161,7 +161,7 @@ public class ProjectGoalService {
 
         // 1. Create ProjectGoalEntity
         ProjectGoalEntity goal = ProjectGoalEntity.builder()
-                .title(request.getGoalTitle() != null ? request.getGoalTitle() : "Dự án mới")
+                .title(request.getGoalTitle() != null ? request.getGoalTitle() : "New Project")
                 .description(request.getDescription())
                 .officialDeadline(request.getOfficialDeadline() != null ? request.getOfficialDeadline() : LocalDate.now().plusWeeks(2))
                 .internalTargetDate(request.getInternalTargetDate() != null ? request.getInternalTargetDate() : LocalDate.now().plusWeeks(2).minusDays(2))
@@ -249,8 +249,8 @@ public class ProjectGoalService {
                         if (!existingWorkBlocks.isEmpty()) {
                             timeBlock = existingWorkBlocks.get(0);
                             timeBlock.setProjectGoalId(projectId);
-                            String milestoneName = blockDto.getMilestoneName() != null ? blockDto.getMilestoneName() : "Trọng tâm";
-                            timeBlock.setDetail("Dự án: " + goal.getTitle() + " · " + milestoneName);
+                            String milestoneName = blockDto.getMilestoneName() != null ? blockDto.getMilestoneName() : "Focus";
+                            timeBlock.setDetail("Project: " + goal.getTitle() + " · " + milestoneName);
                             if (msJson.length() > 0) {
                                 timeBlock.setMicroStepsJson(msJson.toString());
                             }
@@ -264,10 +264,10 @@ public class ProjectGoalService {
                                     .orElse(null);
 
                             if (workRoutine != null) {
-                                String milestoneName = blockDto.getMilestoneName() != null ? blockDto.getMilestoneName() : "Trọng tâm";
+                                String milestoneName = blockDto.getMilestoneName() != null ? blockDto.getMilestoneName() : "Focus";
                                 timeBlock = TimeBlockEntity.builder()
                                         .title(workRoutine.getTitle())
-                                        .detail("Dự án: " + goal.getTitle() + " · " + milestoneName)
+                                        .detail("Project: " + goal.getTitle() + " · " + milestoneName)
                                         .startTime(workRoutine.getStartTime())
                                         .endTime(workRoutine.getEndTime())
                                         .category(workRoutine.getCategory())
@@ -292,7 +292,7 @@ public class ProjectGoalService {
                     // Option B: Add a new dedicated slot into timetable (for Dedicated Deep Work, Flexible, or if no work routine exists)
                     if (timeBlock == null) {
                         timeBlock = TimeBlockEntity.builder()
-                                .title(blockDto.getTitle() != null ? blockDto.getTitle() : ("Dự án: " + goal.getTitle()))
+                                .title(blockDto.getTitle() != null ? blockDto.getTitle() : ("Project: " + goal.getTitle()))
                                 .detail(blockDto.getMilestoneName() != null ? blockDto.getMilestoneName() : blockDto.getNote())
                                 .startTime(blockDto.getStartTime())
                                 .endTime(blockDto.getEndTime())

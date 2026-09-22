@@ -15,7 +15,7 @@ export function useProjectGoals() {
     queryKey: ['projectGoals'],
     queryFn: async () => {
       const res = await fetch(`${API_BASE}/projects`);
-      if (!res.ok) throw new Error('Không thể tải danh sách dự án');
+      if (!res.ok) throw new Error('Unable to load project goals');
       return res.json();
     },
     staleTime: 30000,
@@ -30,7 +30,7 @@ export function useTodaySubtasks(date?: string) {
         ? `${API_BASE}/projects/today?date=${date}`
         : `${API_BASE}/projects/today`;
       const res = await fetch(url);
-      if (!res.ok) throw new Error('Không thể tải danh sách subtasks hôm nay');
+      if (!res.ok) throw new Error('Unable to load today subtasks');
       return res.json();
     },
   });
@@ -55,7 +55,7 @@ export function useToggleSubtask() {
           body: JSON.stringify({ completed }),
         }
       );
-      if (!res.ok) throw new Error('Không thể cập nhật trạng thái subtask');
+      if (!res.ok) throw new Error('Unable to update subtask status');
       return res.json();
     },
     onSuccess: () => {
@@ -78,7 +78,7 @@ export function useDecomposeGoal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Không thể phân rã mục tiêu');
+      if (!res.ok) throw new Error('Unable to decompose goal');
       return res.json();
     },
   });
@@ -102,7 +102,7 @@ export function useApplyGoalScenario() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Không thể áp dụng kịch bản dự án');
+      if (!res.ok) throw new Error('Unable to apply project scenario');
       return res.json();
     },
     onSuccess: () => {
@@ -125,7 +125,7 @@ export function useRebalanceGoal() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error('Không thể tạo phương án tái cân bằng');
+      if (!res.ok) throw new Error('Unable to generate rebalance scenario');
       return res.json();
     },
   });
@@ -140,7 +140,7 @@ export function useCompleteGoalMutation() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-      if (!res.ok) throw new Error('Không thể hoàn tất dự án');
+      if (!res.ok) throw new Error('Unable to complete project');
       return res.json();
     },
     onSuccess: () => {

@@ -33,6 +33,8 @@ export interface TimeBlock {
   sourceType?: 'ROUTINE' | 'CUSTOM' | 'AI_ADDED' | 'AI_RESCHEDULED';
   sourceRoutineId?: number;
   overrideType?: 'NONE' | 'MODIFIED' | 'CANCELLED';
+  intentType?: 'SCHEDULE_EVENT' | 'CONVERSATION' | 'EMOTIONAL_SUPPORT';
+  replyMessage?: string;
 }
 
 export interface WeeklyRoutine {

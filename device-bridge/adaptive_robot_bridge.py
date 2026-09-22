@@ -24,7 +24,13 @@ import urllib.request
 from datetime import date, datetime, timedelta
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any
+import sys
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 import websockets
 
@@ -32,7 +38,7 @@ import websockets
 BACKEND_URL = os.getenv("ADAPTIVE_BACKEND_URL", "http://127.0.0.1:8080/api").rstrip("/")
 DEVICE_IP = os.getenv("XIAOZHI_DEVICE_IP", "172.20.10.5")
 AUDIO_PORT = int(os.getenv("BRIDGE_AUDIO_PORT", "8765"))
-POLL_SECONDS = int(os.getenv("BRIDGE_POLL_SECONDS", "10"))
+POLL_SECONDS = int(os.getenv("BRIDGE_POLL_SECONDS", "3"))
 AUDIO_DIR = Path(os.getenv("BRIDGE_AUDIO_DIR", Path(__file__).with_name("audio-cache")))
 TTS_VOICE = os.getenv("BRIDGE_TTS_VOICE", "")
 BRIDGE_LANGUAGE = os.getenv("BRIDGE_LANGUAGE", "en").strip().lower()
@@ -42,14 +48,15 @@ SUPPORTED_LANGUAGES = {"en", "vi"}
 SUPPORTED_STYLES = {"gentle", "direct", "minimal"}
 
 
-def local_ip() -> str:
-    """Return the Mac's LAN address used to serve audio to the ESP32."""
+def local_ip(target_ip: str = "") -> str:
+    """Return the host machine's LAN address used to serve audio to the ESP32."""
     override = os.getenv("BRIDGE_HOST_IP")
     if override:
         return override
+    dest = target_ip or DEVICE_IP
     probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        probe.connect((DEVICE_IP, 8080))
+        probe.connect((dest, 8080))
         return probe.getsockname()[0]
     except OSError:
         return "127.0.0.1"
@@ -57,14 +64,14 @@ def local_ip() -> str:
         probe.close()
 
 
-def api_request(path: str, method: str = "GET", payload: Any | None = None) -> Any:
+def api_request(path: str, method: str = "GET", payload: Any | None = None, backend_url: str = BACKEND_URL) -> Any:
     body = None
     headers = {"Accept": "application/json"}
     if payload is not None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         headers["Content-Type"] = "application/json"
     request = urllib.request.Request(
-        f"{BACKEND_URL}{path}", data=body, headers=headers, method=method
+        f"{backend_url}{path}", data=body, headers=headers, method=method
     )
     with urllib.request.urlopen(request, timeout=8) as response:
         if response.status == 204:
@@ -103,41 +110,135 @@ def duration_minutes(block: dict[str, Any]) -> int:
         return 30
 
 
-def create_audio(text: str, voice: str = "") -> tuple[Path, float]:
-    """Use macOS speech synthesis, then convert to the Ogg Opus format XiaoZhi expects."""
+def get_ffmpeg_cmd() -> str:
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return "ffmpeg"
+
+
+def get_audio_duration(file_path: Path) -> float:
+    try:
+        ffmpeg_bin = get_ffmpeg_cmd()
+        res = subprocess.run([ffmpeg_bin, "-i", str(file_path)], capture_output=True, text=True)
+        m = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", res.stderr)
+        if m:
+            h, mins, s = int(m.group(1)), int(m.group(2)), float(m.group(3))
+            return max(2.5, h * 3600 + mins * 60 + s)
+    except Exception:
+        pass
+    return 6.0
+
+
+def create_audio(text: str, language: str = "vi", voice: str = "") -> tuple[Path, float]:
+    """Generate OGG OPUS TTS audio file required by XiaoZhi hardware."""
     AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    digest = hashlib.sha256(f"{language}:{text}".encode("utf-8")).hexdigest()[:16]
     ogg_path = AUDIO_DIR / f"{digest}.ogg"
     if ogg_path.exists():
-        return ogg_path, max(3.0, len(text) / 12.0)
+        return ogg_path, get_audio_duration(ogg_path)
 
-    aiff_path = AUDIO_DIR / f"{digest}.aiff"
-    say_command = ["say", "-o", str(aiff_path)]
-    if voice:
-        say_command[1:1] = ["-v", voice]
-    say_command.append(text)
-    subprocess.run(say_command, check=True, capture_output=True)
-    subprocess.run(
-        [
-            "ffmpeg",
-            "-y",
-            "-loglevel",
-            "error",
-            "-i",
-            str(aiff_path),
-            "-ac",
-            "1",
-            "-c:a",
-            "libopus",
-            "-b:a",
-            "24k",
-            str(ogg_path),
-        ],
-        check=True,
-        capture_output=True,
-    )
-    aiff_path.unlink(missing_ok=True)
-    return ogg_path, max(3.0, len(text) / 12.0)
+    ffmpeg_bin = get_ffmpeg_cmd()
+
+    # 1. Try gTTS + ffmpeg (High quality Vietnamese & English)
+    try:
+        from gtts import gTTS
+        mp3_temp = AUDIO_DIR / f"{digest}_tmp.mp3"
+        tts = gTTS(text=text, lang="vi" if language == "vi" else "en")
+        tts.save(str(mp3_temp))
+        subprocess.run(
+            [
+                ffmpeg_bin,
+                "-y",
+                "-loglevel",
+                "error",
+                "-i",
+                str(mp3_temp),
+                "-ac",
+                "1",
+                "-c:a",
+                "libopus",
+                "-b:a",
+                "24k",
+                str(ogg_path),
+            ],
+            check=True,
+            capture_output=True,
+        )
+        mp3_temp.unlink(missing_ok=True)
+        return ogg_path, get_audio_duration(ogg_path)
+    except Exception:
+        pass
+
+    # 2. Try macOS say + ffmpeg
+    try:
+        aiff_path = AUDIO_DIR / f"{digest}.aiff"
+        say_command = ["say", "-o", str(aiff_path)]
+        if voice:
+            say_command[1:1] = ["-v", voice]
+        say_command.append(text)
+        subprocess.run(say_command, check=True, capture_output=True)
+        subprocess.run(
+            [
+                ffmpeg_bin,
+                "-y",
+                "-loglevel",
+                "error",
+                "-i",
+                str(aiff_path),
+                "-ac",
+                "1",
+                "-c:a",
+                "libopus",
+                "-b:a",
+                "24k",
+                str(ogg_path),
+            ],
+            check=True,
+            capture_output=True,
+        )
+        aiff_path.unlink(missing_ok=True)
+        return ogg_path, get_audio_duration(ogg_path)
+    except Exception:
+        pass
+
+    # 3. Try Windows PowerShell System.Speech + ffmpeg
+    try:
+        wav_temp = AUDIO_DIR / f"{digest}_tmp.wav"
+        ps_script = f"""
+        Add-Type -AssemblyName System.Speech
+        $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
+        $synth.SetOutputToWaveFile('{str(wav_temp)}')
+        $synth.Speak('{text}')
+        $synth.Dispose()
+        """
+        subprocess.run(["powershell", "-Command", ps_script], check=True, capture_output=True)
+        subprocess.run(
+            [
+                ffmpeg_bin,
+                "-y",
+                "-loglevel",
+                "error",
+                "-i",
+                str(wav_temp),
+                "-ac",
+                "1",
+                "-c:a",
+                "libopus",
+                "-b:a",
+                "24k",
+                str(ogg_path),
+            ],
+            check=True,
+            capture_output=True,
+        )
+        wav_temp.unlink(missing_ok=True)
+        return ogg_path, get_audio_duration(ogg_path)
+    except Exception:
+        pass
+
+    raise RuntimeError("Cannot generate Ogg Opus audio for robot.")
 
 
 class QuietAudioHandler(SimpleHTTPRequestHandler):
@@ -151,13 +252,19 @@ class Bridge:
         language: str = BRIDGE_LANGUAGE,
         reminder_style: str = BRIDGE_REMINDER_STYLE,
         tts_voice: str = TTS_VOICE,
+        device_ip: str = DEVICE_IP,
+        host_ip: str = "",
+        backend_url: str = BACKEND_URL,
     ) -> None:
         self.device_socket: Any | None = None
         self.send_lock = asyncio.Lock()
         self.pending: dict[str, dict[str, Any]] = {}
         self.fired: set[str] = set()
-        self.audio_host = local_ip()
-        self.language = language if language in SUPPORTED_LANGUAGES else "en"
+        self.fired_notifications: set[int] = set()
+        self.device_ip = device_ip
+        self.backend_url = backend_url
+        self.audio_host = host_ip or local_ip(self.device_ip)
+        self.language = language if language in SUPPORTED_LANGUAGES else "vi"
         self.reminder_style = reminder_style if reminder_style in SUPPORTED_STYLES else "gentle"
         self.tts_voice = tts_voice or ("Samantha" if self.language == "en" else "")
 
@@ -230,13 +337,12 @@ class Bridge:
         async with self.send_lock:
             await self.device_socket.send(json.dumps(message, ensure_ascii=False))
 
-    async def notify(self, text: str) -> bool:
+    async def notify(self, text: str, open_listen: bool = False) -> bool:
         if self.device_socket is None:
-            print("[bridge] Bỏ qua nhắc lịch: robot chưa kết nối WebSocket")
+            print(f"[bridge] Bỏ qua: robot ({self.device_ip}) chưa kết nối WebSocket")
             return False
-        # Refresh this in case the Mac moved onto the robot's hotspot after startup.
-        self.audio_host = local_ip()
-        audio_path, estimated_seconds = await asyncio.to_thread(create_audio, text, self.tts_voice)
+        self.audio_host = local_ip(self.device_ip)
+        audio_path, duration_seconds = await asyncio.to_thread(create_audio, text, self.language, self.tts_voice)
         relative_path = urllib.parse.quote(audio_path.name)
         try:
             await self.send(
@@ -247,12 +353,13 @@ class Bridge:
                 }
             )
         except (OSError, websockets.WebSocketException, RuntimeError) as error:
-            print(f"[bridge] Không gửi được nhắc lịch: {error}")
+            print(f"[bridge] Không gửi được thông báo: {error}")
             return False
-        # The notification protocol is intentionally one-way. After playback,
-        # open a normal XiaoZhi listening turn so the user can answer naturally.
-        await asyncio.sleep(estimated_seconds + 0.8)
-        if self.device_socket is not None:
+
+        # Đợi phát hết toàn bộ âm thanh (đã đo chính xác độ dài)
+        await asyncio.sleep(duration_seconds + 1.2)
+
+        if open_listen and self.device_socket is not None:
             try:
                 await self.send({"type": "listen"})
             except (OSError, websockets.WebSocketException, RuntimeError) as error:
@@ -264,7 +371,7 @@ class Bridge:
         while True:
             try:
                 today = date.today().isoformat()
-                blocks = await asyncio.to_thread(api_request, f"/timeblocks?date={today}")
+                blocks = await asyncio.to_thread(api_request, f"/timeblocks?date={today}", "GET", None, self.backend_url)
                 now = datetime.now()
                 self.fired = {marker for marker in self.fired if marker.startswith(f"{today}:")}
                 for block in blocks or []:
@@ -284,9 +391,10 @@ class Bridge:
                         marker = f"{today}:{block_id}:{minutes}"
                         if marker in self.fired:
                             continue
-                        if timedelta(seconds=-2) <= now - trigger_at <= timedelta(seconds=75):
+                        if timedelta(seconds=-5) <= now - trigger_at <= timedelta(seconds=120):
                             title = block.get("title", "this task")
-                            if await self.notify(self.reminder_text(title, int(minutes))):
+                            print(f"[bridge] Đang nhắc lịch: {title} (trước {minutes} phút)")
+                            if await self.notify(self.reminder_text(title, int(minutes)), open_listen=True):
                                 self.fired.add(marker)
                                 self.pending[block_id] = block
                                 break
@@ -308,6 +416,7 @@ class Bridge:
                     f"/timeblocks/{block_id}",
                     "PUT",
                     {"isCompleted": True},
+                    self.backend_url,
                 )
                 await self.notify(self.response_text("done", block.get("title", "this task")))
                 self.pending.pop(block_id, None)
@@ -323,13 +432,14 @@ class Bridge:
                         f"/timeblocks/{block_id}",
                         "PUT",
                         {"startTime": new_start, "endTime": new_end},
+                        self.backend_url,
                     )
                     await self.notify(self.response_text("moved", block.get("title", "this task"), new_start))
                     self.pending.pop(block_id, None)
                     return
 
             parsed = await asyncio.to_thread(
-                api_request, "/planner/parse-intent", "POST", {"prompt": text}
+                api_request, "/planner/parse-intent", "POST", {"prompt": text}, self.backend_url
             )
             updates = {
                 key: parsed[key]
@@ -337,7 +447,7 @@ class Bridge:
                 if parsed.get(key) is not None
             }
             if updates and block_id.isdigit():
-                await asyncio.to_thread(api_request, f"/timeblocks/{block_id}", "PUT", updates)
+                await asyncio.to_thread(api_request, f"/timeblocks/{block_id}", "PUT", updates, self.backend_url)
                 await self.notify(self.response_text("updated", updates.get("title", block.get("title", "this task"))))
                 self.pending.pop(block_id, None)
             else:
@@ -347,13 +457,13 @@ class Bridge:
             await self.notify(self.response_text("backend"))
 
     async def receive_device_events(self) -> None:
-        uri = f"ws://{DEVICE_IP}:8080/ws"
+        uri = f"ws://{self.device_ip}:8080/ws"
         while True:
             try:
                 print(f"[bridge] Đang kết nối {uri}")
                 async with websockets.connect(uri, ping_interval=20, open_timeout=8) as websocket:
                     self.device_socket = websocket
-                    print("[bridge] Đã kết nối robot")
+                    print("[bridge] Đã kết nối robot thành công!")
                     async for raw_message in websocket:
                         try:
                             message = json.loads(raw_message)
@@ -363,10 +473,45 @@ class Bridge:
                             print(f"[bridge] Robot nghe: {message.get('text', '')}")
                             await self.handle_stt(message.get("text", ""))
             except (OSError, TimeoutError, asyncio.TimeoutError, websockets.WebSocketException) as error:
-                print(f"[bridge] Robot chưa kết nối: {error}")
+                print(f"[bridge] Robot ({self.device_ip}) chưa kết nối: {error}")
             finally:
                 self.device_socket = None
             await asyncio.sleep(3)
+
+    async def poll_notifications(self) -> None:
+        # Pre-seed existing notifications so bridge doesn't replay old history at boot
+        try:
+            initial = await asyncio.to_thread(api_request, "/notifications", "GET", None, self.backend_url)
+            for item in initial or []:
+                if item.get("id") is not None:
+                    self.fired_notifications.add(str(item["id"]))
+        except Exception:
+            pass
+
+        while True:
+            try:
+                notifications = await asyncio.to_thread(
+                    api_request, "/notifications", "GET", None, self.backend_url
+                )
+                for item in notifications or []:
+                    notif_id = str(item.get("id", ""))
+                    is_read = item.get("isRead", False)
+                    if not is_read and notif_id and notif_id not in self.fired_notifications:
+                        title = item.get("title", "").strip()
+                        message = item.get("message", "").strip()
+                        
+                        if self.language == "vi":
+                            speech_text = f"Thông báo: {title}. {message}" if title else message
+                        else:
+                            speech_text = f"Notification: {title}. {message}" if title else message
+                        
+                        print(f"[bridge] Đang phát thông báo mới: {title}")
+                        self.fired_notifications.add(notif_id)
+                        await self.notify(speech_text, open_listen=False)
+                        await asyncio.sleep(1)
+            except (urllib.error.URLError, TimeoutError, OSError, ValueError) as error:
+                print(f"[bridge] Lỗi kiểm tra thông báo: {error}")
+            await asyncio.sleep(POLL_SECONDS)
 
     async def run(self) -> None:
         AUDIO_DIR.mkdir(parents=True, exist_ok=True)
@@ -376,17 +521,30 @@ class Bridge:
         server = ThreadingHTTPServer(("0.0.0.0", AUDIO_PORT), handler)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         print(f"[bridge] Audio server: http://{self.audio_host}:{AUDIO_PORT}/")
-        await asyncio.gather(self.receive_device_events(), self.poll_calendar())
+        print(f"[bridge] Ngôn ngữ: {self.language} | Phong cách nhắc: {self.reminder_style}")
+        print(f"[bridge] Robot IP: {self.device_ip} | Backend: {self.backend_url}")
+        await asyncio.gather(self.receive_device_events(), self.poll_calendar(), self.poll_notifications())
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Adaptive Planner XiaoZhi bridge")
+    parser.add_argument("--ip", "--device-ip", dest="device_ip", default=DEVICE_IP, help="Robot IP address (e.g. 10.38.219.148)")
+    parser.add_argument("--host", "--bridge-host-ip", dest="host_ip", default=os.getenv("BRIDGE_HOST_IP", ""), help="Host machine IP")
+    parser.add_argument("--backend-url", default=BACKEND_URL, help="Adaptive Backend API URL")
     parser.add_argument("--language", choices=sorted(SUPPORTED_LANGUAGES), default=BRIDGE_LANGUAGE)
     parser.add_argument("--style", choices=sorted(SUPPORTED_STYLES), default=BRIDGE_REMINDER_STYLE)
-    parser.add_argument("--voice", default=TTS_VOICE, help="macOS say voice name")
+    parser.add_argument("--voice", default=TTS_VOICE, help="TTS voice name")
     args = parser.parse_args()
     try:
-        asyncio.run(Bridge(args.language, args.style, args.voice).run())
+        bridge = Bridge(
+            language=args.language,
+            reminder_style=args.style,
+            tts_voice=args.voice,
+            device_ip=args.device_ip,
+            host_ip=args.host_ip,
+            backend_url=args.backend_url,
+        )
+        asyncio.run(bridge.run())
     except KeyboardInterrupt:
         print("\n[bridge] Đã dừng")
 

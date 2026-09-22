@@ -35,46 +35,46 @@ const HELP_TOPICS: HelpTopic[] = [
   {
     id: 'now-card',
     icon: <Target className="size-4 text-teal-600 dark:text-teal-400" />,
-    title: 'Tôi nên làm gì lúc này? (Thẻ NOW)',
-    summary: 'Modo luôn ghim công việc quan trọng nhất tại thời điểm hiện tại.',
-    details: 'Thay vì một danh sách dài vô tận gây quá tải nhận thức, thẻ NOW chỉ tập trung vào việc đang làm cùng thanh tiến độ thời gian thực và các bước vi mô (micro-steps).',
+    title: 'What should I do right now? (NOW Card)',
+    summary: 'Modo anchors focus on your single highest priority task right now.',
+    details: 'Instead of an overwhelming infinite to-do list, the NOW card keeps you in flow with live countdown timers and bite-sized micro-steps.',
   },
   {
     id: 'next-buffer',
     icon: <Clock className="size-4 text-teal-600 dark:text-teal-400" />,
-    title: 'Việc tiếp theo là gì? (Khoảng đệm NEXT)',
-    summary: 'Biết trước việc sắp tới mà không cần lo lắng về giờ giấc.',
-    details: 'Modo tự động chèn các khoảng đệm chuyển tiếp (+15m buffer) giữa các công việc để bộ não của bạn có thời gian chuyển giao êm dịu, không bị giật mình hay kiệt sức.',
+    title: 'What comes next? (NEXT Buffer)',
+    summary: 'Preview what is ahead without clock anxiety.',
+    details: 'Modo automatically introduces intelligent transition buffers (+15m) between blocks so your brain can context-switch gently without burnout.',
   },
   {
     id: 'add-task',
     icon: <Sparkles className="size-4 text-teal-600 dark:text-teal-400" />,
-    title: 'Cách lên lịch bằng ngôn ngữ tự nhiên',
-    summary: 'Nhắn siêu ngắn như đang chat với bạn thân.',
-    details: 'Bạn có thể gõ câu cụt lủn vào ô AI Chat. Modo sẽ tự động bóc tách ngày giờ và xếp vào thời gian biểu.',
-    tipExample: 'Ví dụ: "mai 7h cafe 2h", "t2 họp team 9h", "chiều nay gym 17h30 1h"',
+    title: 'Natural Language Scheduling',
+    summary: 'Type short phrases just like texting a friend.',
+    details: 'Type brief sentences in the AI Chat. Modo parses the dates, times, and energies automatically into your schedule.',
+    tipExample: 'Examples: "coffee tomorrow 7am 2hrs", "mon team meeting 9am", "gym today 5:30pm 1h"',
   },
   {
     id: 'focus-mode',
     icon: <Zap className="size-4 text-teal-600 dark:text-teal-400" />,
-    title: 'Chế độ Tập trung (Focus Mode)',
-    summary: 'Làm việc trong không gian yên tĩnh và có kiểm soát.',
-    details: 'Khi bắt đầu Focus, Modo ẩn toàn bộ các công việc khác, bật bộ đếm ngược trực quan và hỗ trợ âm thanh nền thư giãn giúp bạn duy trì dòng chảy tập trung.',
+    title: 'Focus Mode',
+    summary: 'Work in a quiet, distraction-free environment.',
+    details: 'Entering Focus Mode hides all other distractions, initiates a visual countdown, and plays calming ambient audio to sustain deep work flow.',
   },
   {
     id: 'ask-modo',
     icon: <MessageSquare className="size-4 text-teal-600 dark:text-teal-400" />,
-    title: 'Hỏi Modo phân rã việc khó hoặc tái cân bằng',
-    summary: 'Vượt qua sức ỳ khi một công việc quá lớn hoặc khi quá tải.',
-    details: 'Nếu bạn cảm thấy bế tắc, hãy bấm "Break it down" hoặc nhắn cho Modo. AI sẽ chia công việc thành 2-3 bước nhỏ cực dễ bắt đầu.',
-    tipExample: 'Ví dụ: "Tôi đang bị quá tải, hãy dời bớt việc không gấp sang ngày mai"',
+    title: 'Ask Modo to Decompose or Rebalance',
+    summary: 'Overcome inertia when a task feels too intimidating.',
+    details: 'Feeling stuck? Click "Break it down" or prompt Modo in chat. The AI splits daunting projects into 2-3 frictionless starter steps.',
+    tipExample: 'Example: "I am feeling overwhelmed, please postpone non-urgent tasks to tomorrow"',
   },
   {
     id: 'insights',
     icon: <BarChart3 className="size-4 text-teal-600 dark:text-teal-400" />,
-    title: 'Hiểu Tải trọng (Workload) & Xu hướng tuần',
-    summary: 'Tìm ra nhịp sinh học tự nhiên, không phải điểm số phán xét.',
-    details: 'Modo quan sát mức độ tiêu hao năng lượng để cảnh báo ngày quá tải và gợi ý khoảng nghỉ, giúp bạn xây dựng thói quen làm việc bền vững và trắc ẩn với bản thân.',
+    title: 'Workload & Weekly Insights',
+    summary: 'Discover your natural circadian rhythm without judgmental scoring.',
+    details: 'Modo tracks energy consumption patterns to warn about heavy days and suggest rest windows, fostering compassionate and sustainable work habits.',
   },
 ];
 
@@ -115,15 +115,15 @@ export const HelpDrawer: React.FC<HelpDrawerProps> = ({
                 <BookOpen className="size-5" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-foreground">Trợ giúp nhanh (Quick Help)</h2>
-                <p className="text-xs text-muted-foreground">Học cách làm chủ Modo qua từng hành động</p>
+                <h2 className="text-base font-extrabold text-foreground">Quick Help</h2>
+                <p className="text-xs text-muted-foreground">Master Modo step-by-step</p>
               </div>
             </div>
 
             <button
               onClick={onClose}
               className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-              title="Đóng (Esc)"
+              title="Close (Esc)"
             >
               <X className="size-5" />
             </button>
@@ -135,12 +135,12 @@ export const HelpDrawer: React.FC<HelpDrawerProps> = ({
             <div className="p-4 rounded-2xl bg-gradient-to-br from-teal-500/10 via-background to-emerald-500/10 border border-teal-500/25 space-y-3 shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-teal-800 dark:text-teal-200 uppercase tracking-wider">
-                  Hướng dẫn tương tác
+                  Interactive Guide
                 </span>
-                <span className="text-[11px] font-medium text-muted-foreground">30–45 giây</span>
+                <span className="text-[11px] font-medium text-muted-foreground">30–45s</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Trải nghiệm lại hành trình 5 bước tương tác trực quan ngay trên giao diện thật của bạn.
+                Walk through the 5-step visual dashboard tour directly on your live workspace.
               </p>
               <div className="flex items-center gap-2 pt-1">
                 <button
@@ -152,7 +152,7 @@ export const HelpDrawer: React.FC<HelpDrawerProps> = ({
                   className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer"
                 >
                   <Play className="size-3.5 fill-white" />
-                  Xem lại Dashboard Tour
+                  Replay Tour
                 </button>
                 <button
                   type="button"
@@ -162,17 +162,17 @@ export const HelpDrawer: React.FC<HelpDrawerProps> = ({
                     onReplayTour();
                   }}
                   className="px-3 py-2 rounded-xl border border-border text-xs font-semibold hover:bg-muted transition-colors flex items-center gap-1.5 cursor-pointer"
-                  title="Xóa lịch sử mẹo đã xem và bắt đầu lại từ đầu"
+                  title="Reset all viewed tips and restart"
                 >
                   <RotateCcw className="size-3.5 text-muted-foreground" />
-                  Đặt lại tất cả
+                  Reset All
                 </button>
               </div>
             </div>
 
             {/* Guidance Density Style Preference */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-foreground">Độ chi tiết của hướng dẫn</label>
+              <label className="text-xs font-bold text-foreground">Guidance Detail Level</label>
               <div className="grid grid-cols-3 gap-2">
                 {(['minimal', 'guided', 'detailed'] as GuidanceStyle[]).map((style) => (
                   <button
@@ -185,7 +185,7 @@ export const HelpDrawer: React.FC<HelpDrawerProps> = ({
                         : 'border-border bg-card/60 text-muted-foreground hover:bg-muted'
                     }`}
                   >
-                    {style === 'minimal' ? 'Tối giản' : style === 'guided' ? 'Chuẩn' : 'Chi tiết'}
+                    {style === 'minimal' ? 'Minimal' : style === 'guided' ? 'Standard' : 'Detailed'}
                   </button>
                 ))}
               </div>
@@ -194,7 +194,7 @@ export const HelpDrawer: React.FC<HelpDrawerProps> = ({
             {/* Micro Guides Accordion */}
             <div className="space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Chủ đề thường gặp
+                Frequently Asked Topics
               </h3>
 
               <div className="space-y-2">
@@ -250,7 +250,7 @@ export const HelpDrawer: React.FC<HelpDrawerProps> = ({
           {/* Footer */}
           <div className="p-4 border-t border-border/80 bg-card/80 text-center">
             <p className="text-[11px] text-muted-foreground">
-              Nguyên tắc: Đơn giản theo mặc định · Chi tiết khi bạn cần.
+              Principle: Simple by default · Detailed on demand.
             </p>
           </div>
         </motion.div>

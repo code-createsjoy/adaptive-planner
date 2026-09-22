@@ -43,6 +43,8 @@ public class TimeBlockDto {
     private Integer durationMinutes;
     private List<String> missingFields;
     private Double confidence;
+    private String intentType; // "SCHEDULE_EVENT" | "CONVERSATION" | "EMOTIONAL_SUPPORT"
+    private String replyMessage;
 
     @Data
     @Builder

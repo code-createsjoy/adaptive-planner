@@ -57,7 +57,7 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-base sm:text-lg font-extrabold text-foreground">
-                Hồ sơ Thích ứng & Trải nghiệm Tiếp cận
+                Adaptive Accessibility Profile
               </h3>
               <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
                 Universal Design
@@ -71,27 +71,27 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
             className="px-4 py-2 rounded-xl bg-card border border-border text-xs font-semibold text-foreground hover:bg-muted hover:border-primary/40 flex items-center gap-2 shadow-xs transition-all self-start sm:self-center cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5 text-primary" />
-            Làm lại bài khảo sát (30s)
+            Retake Onboarding (30s)
           </button>
         </div>
       </div>
 
       {/* Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* 1. Mật độ thị giác (Visual Density) */}
+        {/* 1. Visual Density */}
         <div className="p-5 rounded-3xl bg-card border border-border/80 space-y-3.5 shadow-xs">
           <div className="flex items-center gap-2.5">
             <div className="size-8 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <Eye className="w-4 h-4" />
             </div>
-            <h4 className="text-sm font-bold text-foreground">Mật độ hiển thị thông tin</h4>
+            <h4 className="text-sm font-bold text-foreground">Visual Information Density</h4>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
             {[
-              { id: 'MINIMAL', label: 'Tối giản', desc: 'Ít màu, font rõ' },
-              { id: 'BALANCED', label: 'Cân bằng', desc: 'Hài hòa chuẩn' },
-              { id: 'DETAILED', label: 'Trực quan', desc: 'Giàu biểu đồ & icon' },
+              { id: 'MINIMAL', label: 'Minimal', desc: 'Low noise, clean fonts' },
+              { id: 'BALANCED', label: 'Balanced', desc: 'Standard balance' },
+              { id: 'DETAILED', label: 'Rich', desc: 'Rich charts & badges' },
             ].map((item) => {
               const isSelected = profile.visualDensity === item.id;
               return (
@@ -113,20 +113,20 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
           </div>
         </div>
 
-        {/* 2. Mức độ nhạy cảm giác quan (Sensory Sensitivity) */}
+        {/* 2. Sensory Sensitivity */}
         <div className="p-5 rounded-3xl bg-card border border-border/80 space-y-3.5 shadow-xs">
           <div className="flex items-center gap-2.5">
             <div className="size-8 rounded-xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
               <Zap className="w-4 h-4" />
             </div>
-            <h4 className="text-sm font-bold text-foreground">Mức độ nhạy cảm thị giác & âm thanh</h4>
+            <h4 className="text-sm font-bold text-foreground">Sensory Sensitivity</h4>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
             {[
-              { id: 'LOW', label: 'Tiêu chuẩn', desc: 'Hiệu ứng đầy đủ' },
-              { id: 'MEDIUM', label: 'Vừa phải', desc: 'Giảm chuyển động' },
-              { id: 'HIGH', label: 'Cao (Calm)', desc: 'Tĩnh lặng & êm dịu' },
+              { id: 'LOW', label: 'Standard', desc: 'Full animations' },
+              { id: 'MEDIUM', label: 'Moderate', desc: 'Gentle motion' },
+              { id: 'HIGH', label: 'High (Calm)', desc: 'Still & peaceful' },
             ].map((item) => {
               const isSelected = profile.sensorySensitivity === item.id;
               return (
@@ -153,20 +153,20 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
           </div>
         </div>
 
-        {/* 3. Âm báo & Tần số chữa lành (Reminder Chime) */}
+        {/* 3. Reminder Chime & Frequency */}
         <div className="p-5 rounded-3xl bg-card border border-border/80 space-y-3.5 shadow-xs">
           <div className="flex items-center gap-2.5">
             <div className="size-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
               <Volume2 className="w-4 h-4" />
             </div>
-            <h4 className="text-sm font-bold text-foreground">Âm thanh chuông thông báo</h4>
+            <h4 className="text-sm font-bold text-foreground">Notification Chime</h4>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
             {[
-              { id: 'GENTLE_432HZ', label: '🕊️ Sóng 432Hz', desc: 'Êm ái không giật mình' },
-              { id: 'STANDARD', label: '🔔 Tiêu chuẩn', desc: 'Chuông nhẹ nhàng' },
-              { id: 'NONE', label: '🔕 Yên lặng', desc: 'Chỉ Toast hình ảnh' },
+              { id: 'GENTLE_432HZ', label: '🕊️ 432Hz Wave', desc: 'Gentle non-startle' },
+              { id: 'STANDARD', label: '🔔 Standard', desc: 'Soft bell chime' },
+              { id: 'NONE', label: '🔕 Mute', desc: 'Visual toast only' },
             ].map((item) => {
               const isSelected = (profile.reminderChime || 'GENTLE_432HZ') === item.id;
               return (
@@ -188,20 +188,20 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
           </div>
         </div>
 
-        {/* 4. Khung đệm thời gian (Buffer Time) */}
+        {/* 4. Transition Buffer Time */}
         <div className="p-5 rounded-3xl bg-card border border-border/80 space-y-3.5 shadow-xs">
           <div className="flex items-center gap-2.5">
             <div className="size-8 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
-            <h4 className="text-sm font-bold text-foreground">Khoảng đệm chuyển tiếp (Buffer)</h4>
+            <h4 className="text-sm font-bold text-foreground">Transition Buffer Time</h4>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
             {[
-              { val: 0, label: '0 phút', desc: 'Lịch trình liền mạch' },
-              { val: 10, label: '10 phút', desc: 'Khuyến nghị chuẩn' },
-              { val: 15, label: '15 phút', desc: 'Thư thả & phục hồi' },
+              { val: 0, label: '0 mins', desc: 'Back-to-back' },
+              { val: 10, label: '10 mins', desc: 'Standard buffer' },
+              { val: 15, label: '15 mins', desc: 'Rest & recovery' },
             ].map((item) => {
               const isSelected = profile.bufferTimeMinutes === item.val;
               return (
@@ -228,7 +228,7 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
       <div className="p-4.5 rounded-2xl bg-muted/40 border border-border/70 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Layers className="size-4 text-muted-foreground" />
-          <p className="text-xs font-bold text-foreground">Giảm chuyển động (Reduced Motion)</p>
+          <p className="text-xs font-bold text-foreground">Reduced Motion</p>
         </div>
 
         <button
@@ -255,7 +255,7 @@ export const AccessibilityProfileSettings: React.FC<AccessibilityProfileSettings
           className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-2xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-2 shadow-xl"
         >
           <Check className="size-4 stroke-[3]" />
-          Đã lưu tùy chỉnh Hồ sơ Thích ứng!
+          Accessibility Profile updated!
         </motion.div>
       )}
     </div>

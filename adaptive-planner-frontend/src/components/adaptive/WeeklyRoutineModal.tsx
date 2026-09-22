@@ -25,13 +25,13 @@ import {
 } from 'lucide-react';
 
 const DAYS_OF_WEEK: { id: DayOfWeekType; label: string; short: string }[] = [
-  { id: 'MONDAY', label: 'Thứ 2', short: 'T2' },
-  { id: 'TUESDAY', label: 'Thứ 3', short: 'T3' },
-  { id: 'WEDNESDAY', label: 'Thứ 4', short: 'T4' },
-  { id: 'THURSDAY', label: 'Thứ 5', short: 'T5' },
-  { id: 'FRIDAY', label: 'Thứ 6', short: 'T6' },
-  { id: 'SATURDAY', label: 'Thứ 7', short: 'T7' },
-  { id: 'SUNDAY', label: 'Chủ Nhật', short: 'CN' },
+  { id: 'MONDAY', label: 'Monday', short: 'Mon' },
+  { id: 'TUESDAY', label: 'Tuesday', short: 'Tue' },
+  { id: 'WEDNESDAY', label: 'Wednesday', short: 'Wed' },
+  { id: 'THURSDAY', label: 'Thursday', short: 'Thu' },
+  { id: 'FRIDAY', label: 'Friday', short: 'Fri' },
+  { id: 'SATURDAY', label: 'Saturday', short: 'Sat' },
+  { id: 'SUNDAY', label: 'Sunday', short: 'Sun' },
 ];
 
 function timeToMinutes(timeStr: string): number {
@@ -318,7 +318,7 @@ export const WeeklyRoutineModal: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">
-                Thời khóa biểu tuần
+                Weekly Routines
               </h3>
             </div>
           </div>
@@ -335,7 +335,7 @@ export const WeeklyRoutineModal: React.FC = () => {
           {/* Quick Presets */}
           <div>
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
-              ⚡ Mẫu gợi ý
+              ⚡ Routine Templates
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
@@ -343,7 +343,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 onClick={() =>
                   handleAddPreset({
                     days: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'],
-                    title: '💼 Giờ làm việc tập trung (Core Work)',
+                    title: '💼 Core Work & Focus',
                     detail: 'Focus coding & task execution',
                     startTime: '08:30',
                     endTime: '17:00',
@@ -354,7 +354,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 className="p-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 text-left text-xs transition-all flex items-start justify-between group"
               >
                 <div>
-                  <div className="font-bold text-foreground group-hover:text-primary">Thứ 2–6: Làm việc chính</div>
+                  <div className="font-bold text-foreground group-hover:text-primary">Mon–Fri: Core Work</div>
                   <div className="text-muted-foreground text-[11px]">08:30 – 17:00 · Work & Focus</div>
                 </div>
                 <Plus className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
@@ -365,7 +365,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 onClick={() =>
                   handleAddPreset({
                     days: ['TUESDAY', 'THURSDAY'],
-                    title: '💪 Gym & Rèn luyện thể lực',
+                    title: '💪 Gym & Fitness',
                     detail: 'Cardio & Strength workout',
                     startTime: '17:30',
                     endTime: '18:30',
@@ -376,7 +376,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 className="p-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 text-left text-xs transition-all flex items-start justify-between group"
               >
                 <div>
-                  <div className="font-bold text-foreground group-hover:text-primary">Thứ 3, 5: Tập Gym</div>
+                  <div className="font-bold text-foreground group-hover:text-primary">Tue, Thu: Gym Workout</div>
                   <div className="text-muted-foreground text-[11px]">17:30 – 18:30 · Health & Movement</div>
                 </div>
                 <Plus className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
@@ -387,7 +387,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 onClick={() =>
                   handleAddPreset({
                     days: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'],
-                    title: '📚 Tự học & Nghiên cứu AI',
+                    title: '📚 Evening Study & Research',
                     detail: 'Algorithms & software design',
                     startTime: '19:30',
                     endTime: '21:30',
@@ -398,7 +398,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 className="p-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 text-left text-xs transition-all flex items-start justify-between group"
               >
                 <div>
-                  <div className="font-bold text-foreground group-hover:text-primary">Thứ 2–6: Tự học buổi tối</div>
+                  <div className="font-bold text-foreground group-hover:text-primary">Mon–Fri: Evening Study</div>
                   <div className="text-muted-foreground text-[11px]">19:30 – 21:30 · Study & Skill</div>
                 </div>
                 <Plus className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
@@ -409,7 +409,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 onClick={() =>
                   handleAddPreset({
                     days: ['SATURDAY'],
-                    title: '🎨 Dự án cá nhân & Thư giãn',
+                    title: '🎨 Side Project & Creative Focus',
                     detail: 'Creative passion projects',
                     startTime: '09:00',
                     endTime: '12:00',
@@ -420,7 +420,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 className="p-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/40 text-left text-xs transition-all flex items-start justify-between group"
               >
                 <div>
-                  <div className="font-bold text-foreground group-hover:text-primary">Thứ 7: Dự án cá nhân</div>
+                  <div className="font-bold text-foreground group-hover:text-primary">Sat: Side Project</div>
                   <div className="text-muted-foreground text-[11px]">09:00 – 12:00 · Creative Focus</div>
                 </div>
                 <Plus className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
@@ -432,20 +432,20 @@ export const WeeklyRoutineModal: React.FC = () => {
           <form onSubmit={handleAddRoutine} className="bg-card border border-border/80 rounded-xl p-4 space-y-4">
             <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
               <Plus className="w-4 h-4 text-primary" />
-              Tạo khung giờ lặp lại tùy chỉnh
+              Create Custom Recurring Timeblock
             </span>
 
             {/* Days Selector */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-medium text-muted-foreground">Chọn các ngày áp dụng:</label>
+                <label className="text-xs font-medium text-muted-foreground">Select days to apply:</label>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={handleSelectWeekdays}
                     className="text-[11px] text-primary hover:underline font-medium"
                   >
-                    Thứ 2–6
+                    Weekdays (Mon-Fri)
                   </button>
                   <span className="text-muted-foreground/40">·</span>
                   <button
@@ -453,7 +453,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                     onClick={handleSelectAll}
                     className="text-[11px] text-primary hover:underline font-medium"
                   >
-                    Cả tuần
+                    Everyday
                   </button>
                 </div>
               </div>
@@ -481,21 +481,21 @@ export const WeeklyRoutineModal: React.FC = () => {
             {/* Title & Detail */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Tên công việc / Hoạt động *</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">Activity Title *</label>
                 <input
                   type="text"
                   required
-                  placeholder="Ví dụ: 💪 Gym & Rèn luyện thể lực, Học tiếng Anh, Làm việc..."
+                  placeholder="e.g. 💼 Deep Work, Gym Workout, Study English..."
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Chi tiết ngắn (Detail)</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">Details (Optional)</label>
                 <input
                   type="text"
-                  placeholder="Ghi chú thêm..."
+                  placeholder="Additional notes..."
                   value={detail}
                   onChange={(e) => setDetail(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -506,7 +506,7 @@ export const WeeklyRoutineModal: React.FC = () => {
             {/* Time & Attributes */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Bắt đầu</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">Start Time</label>
                 <input
                   type="time"
                   required
@@ -516,7 +516,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Kết thúc</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">End Time</label>
                 <input
                   type="time"
                   required
@@ -528,21 +528,21 @@ export const WeeklyRoutineModal: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Phân loại</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as BlockCategory)}
                   className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
-                  <option value="work">Công việc (Work)</option>
-                  <option value="health">Sức khỏe (Health)</option>
-                  <option value="rest">Nghỉ ngơi (Rest)</option>
-                  <option value="social">Xã hội (Social)</option>
-                  <option value="transition">Chuyển tiếp (Buffer)</option>
+                  <option value="work">Work & Focus</option>
+                  <option value="health">Health & Fitness</option>
+                  <option value="rest">Rest & Recovery</option>
+                  <option value="social">Social & Outing</option>
+                  <option value="transition">Buffer & Commute</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground block mb-1">Năng lượng</label>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">Energy Level</label>
                 <select
                   value={energyLevel}
                   onChange={(e) => setEnergyLevel(e.target.value as EnergyLevel)}
@@ -559,7 +559,7 @@ export const WeeklyRoutineModal: React.FC = () => {
             {!isTimeOrderValid && (
               <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs flex items-center gap-2 animate-in fade-in">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>Giờ kết thúc ({endTime}) phải sau giờ bắt đầu ({startTime}). Vui lòng điều chỉnh lại giờ hợp lệ.</span>
+                <span>End time ({endTime}) must be after start time ({startTime}). Please adjust times.</span>
               </div>
             )}
 
@@ -568,14 +568,14 @@ export const WeeklyRoutineModal: React.FC = () => {
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs space-y-1.5 animate-in fade-in">
                 <div className="flex items-center gap-2 font-bold">
                   <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>Phát hiện trùng lặp hoạt động: Đã có lịch này trong ngày!</span>
+                  <span>Duplicate activity detected: This routine is already scheduled for the day!</span>
                 </div>
                 <div className="space-y-1 pl-6">
                   {exactDuplicates.map((dup, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-[11px]">
                       <span className="px-1.5 py-0.5 rounded bg-amber-500/20 font-bold">{dup.dayLabel}</span>
                       <span>
-                        Đã có <b>"{dup.title}"</b> ({dup.time}). Bạn không cần thêm lại.
+                        Already has <b>"{dup.title}"</b> ({dup.time}). No need to add again.
                       </span>
                     </div>
                   ))}
@@ -590,7 +590,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all flex items-center gap-1.5 shadow-sm shadow-primary/20 disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
-                Lưu vào thời khóa biểu tuần
+                Save to Weekly Routines
               </button>
             </div>
           </form>
@@ -599,16 +599,16 @@ export const WeeklyRoutineModal: React.FC = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Danh sách thời khóa biểu hiện có ({routines.length} khung giờ)
+                Active Weekly Routines ({routines.length} timeblocks)
               </span>
               <span className="text-[11px] text-muted-foreground italic">
-                💡 Bấm vào một khung giờ để chỉnh sửa (1 ngày hoặc tất cả các thứ)
+                💡 Click any timeblock to edit (single day or all matching days)
               </span>
             </div>
 
             {routines.length === 0 ? (
               <div className="text-center py-8 border border-dashed border-border/80 rounded-xl bg-muted/10 text-muted-foreground text-xs">
-                Chưa có thời khóa biểu mẫu nào. Hãy chọn một gợi ý nhanh ở trên hoặc tự tạo khung giờ của bạn!
+                No recurring routines yet. Choose a quick template above or create your own!
               </div>
             ) : (
               <div className="space-y-3">
@@ -625,7 +625,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                             {day.label}
                           </span>
                           <span className="text-muted-foreground text-[11px]">
-                            ({dayRoutines.length} khung giờ)
+                            ({dayRoutines.length} timeblocks)
                           </span>
                         </div>
 
@@ -637,7 +637,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                             className="text-[11px] font-semibold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/15 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
                           >
                             <Copy className="w-3 h-3" />
-                            Sao chép từ ngày khác...
+                            Copy from another day...
                           </button>
 
                           {/* Dropdown to pick source day */}
@@ -645,7 +645,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                             <div className="absolute right-0 top-full mt-1 z-30 w-72 bg-card border border-border rounded-xl shadow-xl p-3 space-y-2.5 animate-in fade-in zoom-in-95">
                               <div className="flex items-center justify-between border-b border-border/60 pb-1.5">
                                 <span className="text-xs font-bold text-foreground">
-                                  Sao chép sang {day.label}
+                                  Copy to {day.label}
                                 </span>
                                 <button
                                   type="button"
@@ -656,7 +656,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                                 </button>
                               </div>
                               <p className="text-[11px] text-muted-foreground">
-                                Chọn ngày nguồn có sẵn để lấy toàn bộ lịch sao chép sang {day.label}:
+                                Select a source day to copy all routines to {day.label}:
                               </p>
                               <select
                                 value={selectedSourceDay}
@@ -667,7 +667,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                                   const count = routines.filter((r) => r.dayOfWeek === d.id).length;
                                   return (
                                     <option key={d.id} value={d.id}>
-                                      {d.label} ({count} khung giờ)
+                                      {d.label} ({count} timeblocks)
                                     </option>
                                   );
                                 })}
@@ -677,7 +677,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                               {copyDayDuplicates.length > 0 && (
                                 <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-700 dark:text-amber-300 space-y-1">
                                   <div className="font-semibold flex items-center gap-1">
-                                    <AlertTriangle className="w-3 h-3" /> Đã có sẵn (sẽ tự động bỏ qua trùng):
+                                    <AlertTriangle className="w-3 h-3" /> Already exists (duplicates will be skipped):
                                   </div>
                                   {copyDayDuplicates.map((msg, i) => (
                                     <div key={i} className="text-[10px] pl-3">• {msg}</div>
@@ -691,7 +691,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                                   onClick={() => setCopyingTargetDay(null)}
                                   className="px-2 py-1 text-xs text-muted-foreground hover:bg-muted rounded-md"
                                 >
-                                  Hủy
+                                  Cancel
                                 </button>
                                 <button
                                   type="button"
@@ -699,7 +699,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                                   className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-md hover:bg-primary/90 flex items-center gap-1"
                                 >
                                   <Check className="w-3 h-3" />
-                                  Sao chép ngay
+                                  Copy Now
                                 </button>
                               </div>
                             </div>
@@ -710,7 +710,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                       {/* Routines list for this day */}
                       {dayRoutines.length === 0 ? (
                         <p className="text-xs text-muted-foreground/60 italic py-2 pl-1">
-                          Chưa có lịch cho {day.label}. Bạn có thể bấm "Sao chép từ ngày khác..." ở trên hoặc tạo mới.
+                          No routines for {day.label} yet. You can click "Copy from another day..." or create new routines.
                         </p>
                       ) : (
                         <div className="space-y-1.5">
@@ -733,7 +733,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                                 <div
                                   onClick={() => handleOpenEdit(routine)}
                                   className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer group"
-                                  title="Bấm vào để chỉnh sửa khung giờ này"
+                                  title="Click to edit this timeblock"
                                 >
                                   <span className="font-mono text-xs font-semibold text-foreground/90 shrink-0 group-hover:text-primary transition-colors flex items-center gap-1.5">
                                     <Clock className="w-3 h-3 opacity-60 group-hover:opacity-100" />
@@ -746,7 +746,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                                       {isDuplicate && (
                                         <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-bold flex items-center gap-1 shrink-0">
                                           <AlertTriangle className="w-3 h-3" />
-                                          Bị trùng lặp
+                                          Duplicate
                                         </span>
                                       )}
                                     </div>
@@ -762,10 +762,10 @@ export const WeeklyRoutineModal: React.FC = () => {
                                     type="button"
                                     onClick={() => handleOpenEdit(routine)}
                                     className="px-2 py-1 rounded-md text-[10px] font-semibold text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center gap-1"
-                                    title="Chỉnh sửa khung giờ"
+                                    title="Edit timeblock"
                                   >
                                     <Pencil className="w-3 h-3" />
-                                    Sửa
+                                    Edit
                                   </button>
 
                                   {/* Copy single task to other days */}
@@ -778,10 +778,10 @@ export const WeeklyRoutineModal: React.FC = () => {
                                       );
                                     }}
                                     className="px-2 py-1 rounded-md text-[10px] font-semibold text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors flex items-center gap-1"
-                                    title="Áp dụng task này cho các thứ khác..."
+                                    title="Apply this routine to other days..."
                                   >
                                     <Layers className="w-3 h-3" />
-                                    Thêm sang thứ khác
+                                    Add to other days
                                   </button>
 
                                   <button
@@ -800,7 +800,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                                     type="button"
                                     onClick={() => deleteRoutineMutation.mutate(routine.id)}
                                     className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors"
-                                    title="Xóa"
+                                    title="Delete"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                   </button>
@@ -829,10 +829,10 @@ export const WeeklyRoutineModal: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-foreground">
-                      Chỉnh sửa khung giờ
+                      Edit Recurring Timeblock
                     </h4>
                     <p className="text-xs text-muted-foreground">
-                      Đang sửa lịch: <b>{DAYS_OF_WEEK.find((d) => d.id === editingRoutine.dayOfWeek)?.label}</b> · {editingRoutine.title}
+                      Editing for: <b>{DAYS_OF_WEEK.find((d) => d.id === editingRoutine.dayOfWeek)?.label}</b> · {editingRoutine.title}
                     </p>
                   </div>
                 </div>
@@ -849,7 +849,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 {/* Scope selector */}
                 <div className="p-3 rounded-xl border border-primary/20 bg-primary/5 space-y-2">
                   <span className="text-xs font-bold text-foreground block">
-                    Phạm vi thay đổi:
+                    Update Scope:
                   </span>
                   <div className="space-y-1.5">
                     <label className="flex items-start gap-2.5 text-xs text-foreground cursor-pointer p-1.5 rounded-lg hover:bg-primary/10">
@@ -862,10 +862,10 @@ export const WeeklyRoutineModal: React.FC = () => {
                       />
                       <div>
                         <span className="font-semibold">
-                          Chỉ áp dụng cho {DAYS_OF_WEEK.find((d) => d.id === editingRoutine.dayOfWeek)?.label}
+                          Apply only to {DAYS_OF_WEEK.find((d) => d.id === editingRoutine.dayOfWeek)?.label}
                         </span>
                         <p className="text-[11px] text-muted-foreground">
-                          Chỉ cập nhật khung giờ này ở riêng {DAYS_OF_WEEK.find((d) => d.id === editingRoutine.dayOfWeek)?.label}. Các thứ khác giữ nguyên.
+                          Only updates this timeblock on {DAYS_OF_WEEK.find((d) => d.id === editingRoutine.dayOfWeek)?.label}. Other days remain unchanged.
                         </p>
                       </div>
                     </label>
@@ -881,10 +881,10 @@ export const WeeklyRoutineModal: React.FC = () => {
                         />
                         <div>
                           <span className="font-semibold text-primary">
-                            Áp dụng cho TẤT CẢ các thứ có hoạt động "{editingRoutine.title}" ({matchingDayLabels.join(', ')})
+                            Apply to ALL days with "{editingRoutine.title}" ({matchingDayLabels.join(', ')})
                           </span>
                           <p className="text-[11px] text-muted-foreground">
-                            Đồng bộ thay đổi khung giờ này sang toàn bộ {matchingDaysForEdit.length} ngày đang có hoạt động cùng tên.
+                            Sync these changes across all {matchingDaysForEdit.length} days with this activity title.
                           </p>
                         </div>
                       </label>
@@ -896,7 +896,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 <div className="space-y-3">
                   <div>
                     <label className="text-xs font-medium text-muted-foreground block mb-1">
-                      Tên hoạt động *
+                      Activity Title *
                     </label>
                     <input
                       type="text"
@@ -908,7 +908,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                   </div>
                   <div>
                     <label className="text-xs font-medium text-muted-foreground block mb-1">
-                      Chi tiết (Detail)
+                      Detail (Notes)
                     </label>
                     <input
                       type="text"
@@ -923,7 +923,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-muted-foreground block mb-1">
-                      Giờ bắt đầu
+                      Start Time
                     </label>
                     <input
                       type="time"
@@ -935,7 +935,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                   </div>
                   <div>
                     <label className="text-xs font-medium text-muted-foreground block mb-1">
-                      Giờ kết thúc
+                      End Time
                     </label>
                     <input
                       type="time"
@@ -955,23 +955,23 @@ export const WeeklyRoutineModal: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-muted-foreground block mb-1">
-                      Phân loại
+                      Category
                     </label>
                     <select
                       value={editCategory}
                       onChange={(e) => setEditCategory(e.target.value as BlockCategory)}
                       className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
-                      <option value="work">Công việc (Work)</option>
-                      <option value="health">Sức khỏe (Health)</option>
-                      <option value="rest">Nghỉ ngơi (Rest)</option>
-                      <option value="social">Xã hội (Social)</option>
-                      <option value="transition">Chuyển tiếp (Buffer)</option>
+                      <option value="work">Work & Focus</option>
+                      <option value="health">Health & Fitness</option>
+                      <option value="rest">Rest & Recovery</option>
+                      <option value="social">Social & Outing</option>
+                      <option value="transition">Buffer & Commute</option>
                     </select>
                   </div>
                   <div>
                     <label className="text-xs font-medium text-muted-foreground block mb-1">
-                      Năng lượng
+                      Energy Level
                     </label>
                     <select
                       value={editEnergyLevel}
@@ -988,7 +988,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                 {!isEditTimeOrderValid && (
                   <div className="p-2.5 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
                     <AlertTriangle className="w-4 h-4 shrink-0" />
-                    <span>Giờ kết thúc ({editEndTime}) phải sau giờ bắt đầu ({editStartTime}).</span>
+                    <span>End time ({editEndTime}) must be after start time ({editStartTime}).</span>
                   </div>
                 )}
 
@@ -998,7 +998,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                     onClick={() => setEditingRoutine(null)}
                     className="px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted rounded-xl"
                   >
-                    Hủy
+                    Cancel
                   </button>
                   <button
                     type="submit"
@@ -1006,7 +1006,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                     className="px-4 py-1.5 bg-primary text-primary-foreground text-xs font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 flex items-center gap-1.5 shadow-xs shadow-primary/20"
                   >
                     <Check className="w-3.5 h-3.5" />
-                    Lưu thay đổi
+                    Save Changes
                   </button>
                 </div>
               </form>
@@ -1021,7 +1021,7 @@ export const WeeklyRoutineModal: React.FC = () => {
               <div className="flex items-center justify-between border-b border-border/80 pb-2">
                 <div>
                   <h4 className="text-sm font-bold text-foreground">
-                    Áp dụng sang các thứ khác
+                    Apply to Other Days
                   </h4>
                   <p className="text-xs text-muted-foreground truncate">
                     Task: "{copyTaskTargetModal.title}" ({copyTaskTargetModal.startTime} - {copyTaskTargetModal.endTime})
@@ -1038,7 +1038,7 @@ export const WeeklyRoutineModal: React.FC = () => {
 
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-2">
-                  Tick chọn các thứ bạn muốn áp dụng task này:
+                  Select days to apply this routine to:
                 </label>
                 <div className="grid grid-cols-7 gap-1.5">
                   {DAYS_OF_WEEK.map((day) => {
@@ -1063,7 +1063,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                             ? 'bg-primary text-primary-foreground shadow-xs'
                             : 'bg-muted/40 text-muted-foreground hover:bg-muted'
                         }`}
-                        title={isOrigin ? 'Ngày gốc' : undefined}
+                        title={isOrigin ? 'Origin day' : undefined}
                       >
                         {day.short}
                       </button>
@@ -1077,11 +1077,11 @@ export const WeeklyRoutineModal: React.FC = () => {
                 <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-300 space-y-1">
                   <div className="font-bold flex items-center gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5" />
-                    Đã có sẵn ở ngày đích (sẽ tự động bỏ qua trùng):
+                    Already exists on target day (will skip duplicate):
                   </div>
                   {copyTaskDuplicates.map((c, i) => (
                     <div key={i} className="text-[11px] pl-4">
-                      • <b>{c.dayLabel}</b>: Đã có {c.title}
+                      • <b>{c.dayLabel}</b>: Already has {c.title}
                     </div>
                   ))}
                 </div>
@@ -1093,7 +1093,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                   onClick={() => setCopyTaskTargetModal(null)}
                   className="px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted rounded-xl"
                 >
-                  Hủy
+                  Cancel
                 </button>
                 <button
                   type="button"
@@ -1102,7 +1102,7 @@ export const WeeklyRoutineModal: React.FC = () => {
                   className="px-4 py-1.5 bg-primary text-primary-foreground text-xs font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 flex items-center gap-1.5 shadow-xs shadow-primary/20"
                 >
                   <Check className="w-3.5 h-3.5" />
-                  Áp dụng ngay
+                  Apply Now
                 </button>
               </div>
             </div>
@@ -1115,7 +1115,7 @@ export const WeeklyRoutineModal: React.FC = () => {
             onClick={() => setIsRoutineModalOpen(false)}
             className="px-4 py-2 rounded-xl bg-foreground text-background text-xs font-bold hover:bg-foreground/90 transition-all"
           >
-            Đóng & Áp dụng
+            Close & Apply
           </button>
         </div>
       </div>

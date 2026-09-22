@@ -75,7 +75,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
 
   // Group subtasks by scheduledDate
   const subtasksByDate = allSubtasks.reduce<Record<string, ProjectSubtask[]>>((acc, st) => {
-    const key = st.scheduledDate || 'Chưa xếp ngày';
+    const key = st.scheduledDate || 'Unassigned';
     if (!acc[key]) acc[key] = [];
     acc[key].push(st);
     return acc;
@@ -90,14 +90,14 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
   }, {});
 
   const getDayLabel = (dateStr: string) => {
-    if (!dateStr || dateStr === 'Chưa xếp ngày') return 'Chưa xếp ngày';
+    if (!dateStr || dateStr === 'Unassigned') return 'Unassigned';
     try {
       const [y, m, d] = dateStr.split('-').map(Number);
       const date = new Date(y, m - 1, d);
-      const days = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
       const dayName = days[date.getDay()];
       const isToday = selectedDate ? dateStr === selectedDate : false;
-      return `${dayName} (${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')})${isToday ? ' · Hôm nay' : ''}`;
+      return `${dayName} (${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')})${isToday ? ' · Today' : ''}`;
     } catch {
       return dateStr;
     }
@@ -117,13 +117,13 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
             </h4>
           </div>
           <p className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium flex-wrap">
-            <span>Hạn chót: <strong>{goal.officialDeadline}</strong></span>
+            <span>Deadline: <strong>{goal.officialDeadline}</strong></span>
             <span>•</span>
             <span className="text-emerald-600 dark:text-emerald-400">
-              {goal.remainingBufferDays} ngày đệm an toàn
+              {goal.remainingBufferDays} buffer days
             </span>
             <span>•</span>
-            <span>{totalCompletedAll}/{totalSubtasksAll} việc đã xong</span>
+            <span>{totalCompletedAll}/{totalSubtasksAll} completed</span>
           </p>
         </div>
 
@@ -131,7 +131,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
           {isLocked ? (
             <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 flex items-center gap-1.5 shadow-xs">
               <ShieldCheck className="size-3.5" />
-              Đã hoàn thành & Lưu lịch sử
+              Completed & Archived
             </span>
           ) : (
             <>
@@ -142,7 +142,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                   className="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md flex items-center gap-1.5 px-3 py-1 animate-pulse"
                 >
                   <Sparkles className="size-3.5" />
-                  Chốt hoàn thành
+                  Mark Complete
                 </Button>
               ) : (
                 <span
@@ -152,7 +152,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                       : 'bg-primary/10 text-primary border-primary/20'
                   }`}
                 >
-                  {isTight ? '⚠️ Lịch sát' : '⚡ On track'}
+                  {isTight ? '⚠️ Tight' : '⚡ On track'}
                 </span>
               )}
             </>
@@ -165,9 +165,9 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
         <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-2.5 text-xs text-emerald-800 dark:text-emerald-200 animate-in fade-in">
           <ShieldCheck className="size-4.5 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
           <div className="space-y-0.5">
-            <p className="font-bold">Dự án đã được chốt hoàn thành thành công!</p>
+            <p className="font-bold">Project successfully completed!</p>
             <p className="text-[11px] opacity-90 leading-relaxed">
-              Dự án đã được lưu vào lịch sử quyết định và khóa chỉnh sửa. Các đầu việc trên thời gian biểu đã được dọn sạch để không làm rối lịch.
+              Archived to decision history with locked edits. Associated timetable tasks have been cleared to keep your daily view uncluttered.
             </p>
           </div>
         </div>
@@ -177,7 +177,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs font-mono">
           <span className="text-muted-foreground">
-            Giai đoạn: <strong className="text-foreground">{goal.currentMilestone}</strong>
+            Milestone: <strong className="text-foreground">{goal.currentMilestone}</strong>
           </span>
           <span className="font-bold text-primary">
             {goal.progressPercentage}% ({Math.round(goal.completedEstimatedMinutes / 60)}h / {Math.round(goal.totalEstimatedMinutes / 60)}h)
@@ -203,20 +203,20 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
             </div>
             <div>
               <p className="font-bold text-foreground flex items-center gap-1.5">
-                <span>{isLocked ? 'Lịch sử các việc đã làm' : 'Danh sách công việc chi tiết'}</span>
+                <span>{isLocked ? 'Completed Activity History' : 'Detailed Task Breakdown'}</span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground">
-                  {totalCompletedAll}/{totalSubtasksAll} xong
+                  {totalCompletedAll}/{totalSubtasksAll} done
                 </span>
               </p>
               <p className="text-[11px] text-muted-foreground">
                 {isLocked
-                  ? 'Đã thu gọn để không làm rối giao diện • Nhấn để xem lại chi tiết'
-                  : 'Nhấn để mở xem và đánh dấu tiến độ'}
+                  ? 'Collapsed to save space • Click to view history details'
+                  : 'Click to open and check off progress'}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1 text-primary font-bold text-xs group-hover:underline">
-            <span>Mở danh sách</span>
+            <span>View Tasks</span>
             <ChevronDown className="size-4" />
           </div>
         </div>
@@ -235,7 +235,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                 }`}
               >
                 <ListTodo className="size-3" />
-                <span>Hôm nay ({todayCompletedCount}/{todayTotalCount})</span>
+                <span>Today ({todayCompletedCount}/{todayTotalCount})</span>
               </button>
               <button
                 type="button"
@@ -247,7 +247,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                 }`}
               >
                 <Calendar className="size-3" />
-                <span>Theo từng ngày ({totalCompletedAll}/{totalSubtasksAll})</span>
+                <span>By Day ({totalCompletedAll}/{totalSubtasksAll})</span>
               </button>
               <button
                 type="button"
@@ -259,7 +259,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                 }`}
               >
                 <Layers className="size-3" />
-                <span>Theo giai đoạn</span>
+                <span>By Milestone</span>
               </button>
             </div>
 
@@ -271,16 +271,16 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                   className="text-primary hover:underline flex items-center gap-1 font-semibold text-xs"
                 >
                   <RefreshCw className="size-3" />
-                  <span className="hidden sm:inline">Tái cân bằng (Rebalance)</span>
+                  <span className="hidden sm:inline">Rebalance</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => setIsListExpanded(false)}
                 className="px-2.5 py-1 rounded-lg border border-border/70 hover:bg-muted text-muted-foreground hover:text-foreground flex items-center gap-1 text-[11px] font-medium transition-all"
-                title="Thu gọn danh sách"
+                title="Collapse list"
               >
-                <span>Thu gọn</span>
+                <span>Collapse</span>
                 <ChevronUp className="size-3" />
               </button>
             </div>
@@ -291,7 +291,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
             <div className="space-y-2">
               {todayTotalCount === 0 ? (
                 <div className="p-3 text-center rounded-2xl bg-muted/20 border border-border/60 text-xs text-muted-foreground">
-                  Không có nhiệm vụ nào được xếp cho ngày này. Hãy chuyển sang tab <strong>"Theo từng ngày"</strong> để xem phân chia cả tuần hoặc đánh dấu trước tiến độ!
+                  No subtasks scheduled for today. Switch to the <strong>"By Day"</strong> tab to view the week's distribution or check off tasks in advance!
                 </div>
               ) : (
                 <div className="space-y-1.5">
@@ -326,7 +326,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                           {st.title}
                         </p>
                         <p className="text-[10px] text-muted-foreground font-mono">
-                          {st.milestoneName} · {st.estimatedMinutes}p
+                          {st.milestoneName} · {st.estimatedMinutes}m
                         </p>
                       </div>
                     </label>
@@ -374,7 +374,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                             : 'bg-muted text-muted-foreground border-border'
                         }`}
                       >
-                        {completedCount}/{tasks.length} xong
+                        {completedCount}/{tasks.length} done
                       </span>
                     </div>
 
@@ -411,7 +411,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                                 {st.title}
                               </p>
                               <p className="text-[10px] text-muted-foreground font-mono">
-                                {st.milestoneName} · {st.estimatedMinutes}p
+                                {st.milestoneName} · {st.estimatedMinutes}m
                               </p>
                             </div>
                           </label>
@@ -458,7 +458,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                             : 'bg-muted text-muted-foreground border-border'
                         }`}
                       >
-                        {completedCount}/{milestoneTotal} xong
+                        {completedCount}/{milestoneTotal} done
                       </span>
                     </div>
 
@@ -495,7 +495,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
                                 {st.title}
                               </p>
                               <p className="text-[10px] text-muted-foreground font-mono">
-                                {st.scheduledDate ? getDayLabel(st.scheduledDate) : 'Chưa xếp ngày'} · {st.estimatedMinutes}p
+                                {st.scheduledDate ? getDayLabel(st.scheduledDate) : 'Unassigned'} · {st.estimatedMinutes}m
                               </p>
                             </div>
                           </label>
@@ -518,24 +518,24 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
               <CheckCircle2 className="size-6" />
             </div>
             <DialogTitle className="font-display text-lg font-bold text-foreground">
-              Xác nhận hoàn thành dự án?
+              Confirm Project Completion?
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground pt-1.5 leading-relaxed space-y-3">
               <p>
-                Bạn sắp chốt hoàn thành dự án <strong>"{goal.title}"</strong> ({totalCompletedAll}/{totalSubtasksAll} việc).
+                You are about to mark project <strong>"{goal.title}"</strong> as complete ({totalCompletedAll}/{totalSubtasksAll} tasks).
               </p>
               <div className="p-3.5 rounded-2xl bg-muted/60 border border-border/80 space-y-2 text-xs text-foreground">
                 <div className="flex items-start gap-2">
                   <Check className="size-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>Lưu vĩnh viễn vào <strong>Lịch sử quyết định</strong> và khóa chỉnh sửa (Read-only).</span>
+                  <span>Permanently save to <strong>Decision History</strong> and lock editing (Read-only).</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="size-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span><strong>Dọn sạch (clear)</strong> danh sách công việc trên thời gian biểu để lịch trình luôn tinh gọn, không bị rối.</span>
+                  <span><strong>Clear</strong> remaining project subtasks from the timetable for a clean schedule.</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <Check className="size-4 text-emerald-500 shrink-0 mt-0.5" />
-                  <span>Gửi thông báo chúc mừng vào <strong>Trung tâm thông báo</strong>.</span>
+                  <span>Send a celebration alert to the <strong>Notification Center</strong>.</span>
                 </div>
               </div>
             </DialogDescription>
@@ -546,7 +546,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
               onClick={() => setShowConfirmModal(false)}
               className="rounded-xl"
             >
-              Kiểm tra lại
+              Review
             </Button>
             <Button
               onClick={() => {
@@ -557,7 +557,7 @@ export const ProjectProgressWidget: React.FC<ProjectProgressWidgetProps> = ({
               }}
               className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
             >
-              Xác nhận hoàn tất
+              Confirm Complete
             </Button>
           </div>
         </DialogContent>

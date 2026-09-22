@@ -96,13 +96,13 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
                 M
               </span>
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Thiết lập Hồ sơ Thích ứng Cá nhân
+                Personal Accessibility Setup
               </span>
             </div>
             <button
               onClick={onClose}
               className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              aria-label="Đóng"
+              aria-label="Close"
             >
               <X className="w-4 h-4" />
             </button>
@@ -139,13 +139,13 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
               >
                 <div>
                   <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20">
-                    Câu hỏi 1 / 4
+                    Question 1 / 4
                   </span>
                   <h3 className="text-lg sm:text-xl font-bold text-foreground mt-2.5">
-                    Bạn thích thông tin được trình bày như thế nào?
+                    How do you prefer information presented?
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Modo sẽ tự điều chỉnh mật độ thị giác và cách sắp xếp khối công việc.
+                    Modo will adapt visual density and timetable block layouts to your liking.
                   </p>
                 </div>
 
@@ -153,18 +153,18 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
                   {[
                     {
                       id: 'VISUAL',
-                      title: '🎨 Trực quan & Giàu màu sắc (Visual)',
-                      desc: 'Nhiều icon, thanh tiến trình %, timeline trực quan để dễ nắm bắt toàn cảnh.',
+                      title: '🎨 Visual & Color-Rich',
+                      desc: 'Icons, progress bars, and rich visual timeline blocks for intuitive overview.',
                     },
                     {
                       id: 'TEXT',
-                      title: '📝 Cấu trúc & Tối giản (Text & Minimal)',
-                      desc: 'Ít màu, font chữ rõ ràng, hạn chế chi tiết đồ họa để tránh rối mắt.',
+                      title: '📝 Structured & Minimal Text',
+                      desc: 'Clean typography, low saturation, minimal decorative noise.',
                     },
                     {
                       id: 'MIXED',
-                      title: '✨ Cân bằng hài hòa (Mixed)',
-                      desc: 'Vừa có timeline trực quan vừa có checklist chi tiết chuẩn xác.',
+                      title: '✨ Balanced & Mixed',
+                      desc: 'Harmonious combination of visual timelines and precise checklists.',
                     },
                   ].map((opt) => {
                     const isSelected = answers.infoStyle === opt.id;
@@ -206,13 +206,13 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
               >
                 <div>
                   <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20">
-                    Câu hỏi 2 / 4
+                    Question 2 / 4
                   </span>
                   <h3 className="text-lg sm:text-xl font-bold text-foreground mt-2.5">
-                    Mức độ nhạy cảm với xao nhãng của bạn?
+                    How sensitive are you to cognitive overload & distractions?
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Giúp hệ thống quyết định số lượng task hiển thị đồng thời và mức độ animation.
+                    Helps determine the number of concurrent tasks and motion effects.
                   </p>
                 </div>
 
@@ -220,18 +220,18 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
                   {[
                     {
                       id: 'HIGH',
-                      title: '🌪️ Dễ quá tải (Cần không gian tĩnh & tập trung cao)',
-                      desc: 'Ưu tiên hiển thị Now → Next task, giảm animation, ẩn các widget phụ.',
+                      title: '🌪️ Sensitive (Needs quiet & focused space)',
+                      desc: 'Show Now → Next task only, reduce motion, hide non-essential side panels.',
                     },
                     {
                       id: 'MEDIUM',
-                      title: '⚖️ Trung bình (Thỉnh thoảng mất tập trung)',
-                      desc: 'Hiển thị timeline bán phần kèm nhắc nhở chuyển tiếp nhẹ nhàng.',
+                      title: '⚖️ Moderate (Occasional wandering focus)',
+                      desc: 'Half-day timeline window with gentle transition prompts.',
                     },
                     {
                       id: 'LOW',
-                      title: '🍃 Thấp (Tập trung tốt & thích xem nhiều việc)',
-                      desc: 'Xem đầy đủ 24 giờ cả ngày và quản lý nhiều danh sách cùng lúc.',
+                      title: '🍃 Resilient (High focus & broad overview)',
+                      desc: 'Full 24-hour timeline display with multiple concurrent task panels.',
                     },
                   ].map((opt) => {
                     const isSelected = answers.distractionSensitivity === opt.id;
@@ -273,13 +273,13 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
               >
                 <div>
                   <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20">
-                    Câu hỏi 3 / 4
+                    Question 3 / 4
                   </span>
                   <h3 className="text-lg sm:text-xl font-bold text-foreground mt-2.5">
-                    Bạn muốn nhận nhắc nhở & âm báo như thế nào?
+                    How would you like reminder chimes & notifications?
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Tránh các âm thanh giật mình gây căng thẳng cảm xúc.
+                    Avoid startling buzzers to support sensory well-being.
                   </p>
                 </div>
 
@@ -287,18 +287,18 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
                   {[
                     {
                       id: 'GENTLE',
-                      title: '🕊️ Êm dịu (Chuông sóng Sin 432Hz & Toast nhẹ)',
-                      desc: 'Âm thanh chữa lành êm ái, nhắc nhở trước 10 phút để chuyển đổi tâm lý êm đềm.',
+                      title: '🕊️ Gentle (432Hz Sine Tone & Subtle Toast)',
+                      desc: 'Calming harmonic tone with 10-minute early heads-up for smooth context switching.',
                     },
                     {
                       id: 'STANDARD',
-                      title: '🔔 Tiêu chuẩn (Visual + Sound vừa phải)',
-                      desc: 'Thông báo popup góc phải kèm chuông tinh tế đúng giờ bắt đầu.',
+                      title: '🔔 Standard (Visual + Moderate Chime)',
+                      desc: 'Corner toast notification with clean chime right at start time.',
                     },
                     {
                       id: 'PERSISTENT',
-                      title: '⏰ Rõ ràng & Dứt khoát (Persistent Cues)',
-                      desc: 'Nổi bật thông báo nhiều nấc (30p, 10p, 0p) để không bỏ lỡ việc quan trọng.',
+                      title: '⏰ Persistent (Multi-stage Reminders)',
+                      desc: 'Staged alerts (30m, 10m, start) to ensure critical commitments are never missed.',
                     },
                   ].map((opt) => {
                     const isSelected = answers.reminderPreference === opt.id;
@@ -340,13 +340,13 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
               >
                 <div>
                   <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-md bg-primary/10 border border-primary/20">
-                    Câu hỏi 4 / 4
+                    Question 4 / 4
                   </span>
                   <h3 className="text-lg sm:text-xl font-bold text-foreground mt-2.5">
-                    Bạn thích cấu trúc lịch trình của mình ra sao?
+                    What timetable structure fits your flow best?
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Định hình cách AI đề xuất sắp xếp thời gian biểu hàng ngày.
+                    Shapes how the AI suggests daily schedule reorganizations.
                   </p>
                 </div>
 
@@ -354,18 +354,18 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
                   {[
                     {
                       id: 'FLEXIBLE',
-                      title: '🌊 Linh hoạt & Có Buffer Time (Adaptive)',
-                      desc: 'Luôn chèn 10-15 phút đệm, dễ dàng dời task khi mệt mỏi mà không tạo áp lực.',
+                      title: '🌊 Adaptive & Buffer-Rich',
+                      desc: 'Includes 10-15m transition buffers; easily reschedules tasks without pressure.',
                     },
                     {
                       id: 'BALANCED',
-                      title: '⚖️ Cân bằng (Balanced Flow)',
-                      desc: 'Có routine cố định buổi sáng/tối nhưng buổi chiều linh hoạt theo năng lượng.',
+                      title: '⚖️ Balanced Flow',
+                      desc: 'Anchored morning/evening routines with adaptive flexibility throughout the afternoon.',
                     },
                     {
                       id: 'STRUCTURED',
-                      title: '📐 Cố định & Kỷ luật (Structured Timetable)',
-                      desc: 'Khung giờ rõ ràng, khóa các block quan trọng không xê dịch.',
+                      title: '📐 Structured & Timetabled',
+                      desc: 'Clear time slots with protected priority blocks locked in place.',
                     },
                   ].map((opt) => {
                     const isSelected = answers.schedulePreference === opt.id;
@@ -410,10 +410,10 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
 
                 <div>
                   <h3 className="text-xl font-extrabold text-foreground">
-                    Hồ sơ Thích ứng của bạn đã sẵn sàng!
+                    Your Adaptive Profile is Ready!
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
-                    Modo đã cấu hình giao diện và trợ lý AI phù hợp tối đa với nhịp sinh học và phong cách nhận thức của bạn.
+                    Modo configured your workspace and AI companion to harmonize with your cognitive style.
                   </p>
                 </div>
 
@@ -424,44 +424,44 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
                       <ShieldCheck className="size-4 text-primary" /> Personal Accessibility Profile
                     </span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-primary/15 text-primary">
-                      Tự động kích hoạt
+                      Active
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="p-2.5 rounded-xl bg-background/80 border border-border/60 space-y-1">
                       <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
-                        <Eye className="size-3" /> Mật độ hiển thị:
+                        <Eye className="size-3" /> Visual Density:
                       </span>
                       <p className="font-bold text-foreground">
-                        {answers.infoStyle === 'VISUAL' ? 'Trực quan (Visual)' : answers.infoStyle === 'TEXT' ? 'Tối giản (Minimal)' : 'Cân bằng (Mixed)'}
+                        {answers.infoStyle === 'VISUAL' ? 'Visual' : answers.infoStyle === 'TEXT' ? 'Minimal Text' : 'Balanced'}
                       </p>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-background/80 border border-border/60 space-y-1">
                       <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
-                        <Zap className="size-3 text-amber-500" /> Hỗ trợ tập trung:
+                        <Zap className="size-3 text-amber-500" /> Focus Support:
                       </span>
                       <p className="font-bold text-foreground">
-                        {answers.distractionSensitivity === 'HIGH' ? 'Now → Next task' : 'Timeline đa tầng'}
+                        {answers.distractionSensitivity === 'HIGH' ? 'Now → Next tasks' : 'Full timeline'}
                       </p>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-background/80 border border-border/60 space-y-1">
                       <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
-                        <Volume2 className="size-3 text-teal-500" /> Kiểu nhắc nhở:
+                        <Volume2 className="size-3 text-teal-500" /> Chime Style:
                       </span>
                       <p className="font-bold text-foreground">
-                        {answers.reminderPreference === 'GENTLE' ? 'Chuông 432Hz êm ái' : 'Tiêu chuẩn'}
+                        {answers.reminderPreference === 'GENTLE' ? '432Hz Sine Chime' : 'Standard'}
                       </p>
                     </div>
 
                     <div className="p-2.5 rounded-xl bg-background/80 border border-border/60 space-y-1">
                       <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
-                        <Calendar className="size-3 text-primary" /> Cấu trúc ngày:
+                        <Calendar className="size-3 text-primary" /> Daily Flow:
                       </span>
                       <p className="font-bold text-foreground">
-                        {answers.schedulePreference === 'FLEXIBLE' ? 'Thích ứng + Buffer' : 'Cố định'}
+                        {answers.schedulePreference === 'FLEXIBLE' ? 'Adaptive + Buffers' : 'Structured'}
                       </p>
                     </div>
                   </div>
@@ -479,7 +479,7 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
               onClick={handlePrev}
               className="px-4 py-2 rounded-xl border border-border text-xs font-semibold hover:bg-muted text-foreground transition-colors flex items-center gap-1.5"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Quay lại
+              <ArrowLeft className="w-3.5 h-3.5" /> Back
             </button>
           ) : (
             <div />
@@ -491,7 +491,7 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
               onClick={handleNext}
               className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold shadow-md hover:bg-primary/90 flex items-center gap-1.5 transition-all ml-auto cursor-pointer"
             >
-              Tiếp tục <ArrowRight className="w-3.5 h-3.5" />
+              Continue <ArrowRight className="w-3.5 h-3.5" />
             </button>
           ) : (
             <button
@@ -501,7 +501,7 @@ export const AdaptiveOnboardingModal: React.FC<AdaptiveOnboardingModalProps> = (
               className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-bold shadow-lg hover:opacity-95 flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <Sparkles className="w-4 h-4" />
-              {submitMutation.isPending ? 'Đang áp dụng...' : 'Bắt đầu trải nghiệm Modo'}
+              {submitMutation.isPending ? 'Saving...' : 'Start using Modo'}
             </button>
           )}
         </div>

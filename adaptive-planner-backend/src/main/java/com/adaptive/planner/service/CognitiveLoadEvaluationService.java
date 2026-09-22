@@ -50,8 +50,8 @@ public class CognitiveLoadEvaluationService {
                     .date(date.toString())
                     .score(10)
                     .level("LIGHT")
-                    .summary("Hôm nay lịch trình trống trải và rất thư thả.")
-                    .bulletPoints(List.of("Không có khối công việc nào được lên lịch", "Thời gian tự do tối đa"))
+                    .summary("Today's schedule is open and very restful.")
+                    .bulletPoints(List.of("No work blocks scheduled", "Maximum free time"))
                     .metrics(CognitiveMetricsDto.builder()
                             .totalTasks(0)
                             .meetingCount(0)
@@ -256,45 +256,45 @@ public class CognitiveLoadEvaluationService {
     private String generateSummary(String level, int meetings, int backToBack, int contextSwitches, int bufferMin, double focusHours) {
         if ("HEAVY".equals(level)) {
             if (backToBack >= 2 || (meetings >= 3 && bufferMin < 30)) {
-                return "Buổi chiều có nhiều khối công việc liên tiếp với ít khoảng đệm phục hồi.";
+                return "The afternoon has multiple consecutive blocks with minimal recovery buffers.";
             } else if (contextSwitches >= 4) {
-                return "Lịch trình có nhiều lần chuyển đổi lĩnh vực liên tục, dễ gây tiêu hao năng lượng nhận thức.";
+                return "Your schedule has frequent context switches, which may rapidly drain cognitive energy.";
             } else if (focusHours >= 5.0) {
-                return "Tổng thời gian tập trung cao độ vượt ngưỡng tối ưu cho một ngày làm việc.";
+                return "Total deep focus time exceeds the optimal threshold for a single workday.";
             }
-            return "Khối lượng công việc hôm nay khá dày đặc, bạn nên bổ sung các quãng nghỉ đệm.";
+            return "Today's workload is quite dense; consider adding structured recovery buffers.";
         } else if ("MODERATE".equals(level)) {
             if (meetings >= 2) {
-                return "Lịch trình cân bằng vừa phải, có vài cuộc họp xen kẽ công việc chuyên môn.";
+                return "Balanced schedule with a few meetings interspersed among core focus blocks.";
             }
-            return "Khối lượng công việc ở mức ổn định, nhịp độ hoạt động hài hòa.";
+            return "Workload is at a steady, sustainable pace with good momentum.";
         } else {
-            return "Lịch trình nhẹ nhàng, có nhiều khoảng trống thoải mái để sáng tạo và nghỉ ngơi.";
+            return "Gentle schedule with generous free space for creativity, rest, and flexibility.";
         }
     }
 
     private List<String> generateBullets(int tasks, int meetings, int backToBack, int contextSwitches, int bufferMin, double focusHours, int deadlines) {
         List<String> list = new ArrayList<>();
         if (focusHours > 0) {
-            list.add(String.format("%.1fh tập trung chuyên sâu", focusHours));
+            list.add(String.format("%.1fh deep focus time", focusHours));
         }
         if (meetings > 0) {
             if (backToBack > 0) {
-                list.add(String.format("%d cuộc họp (%d cuộc họp liên tiếp)", meetings, backToBack));
+                list.add(String.format("%d meetings (%d back-to-back)", meetings, backToBack));
             } else {
-                list.add(String.format("%d cuộc họp được phân bổ", meetings));
+                list.add(String.format("%d scheduled meetings", meetings));
             }
         }
         if (contextSwitches >= 2) {
-            list.add(String.format("%d lần chuyển đổi ngữ cảnh công việc", contextSwitches));
+            list.add(String.format("%d domain context switches", contextSwitches));
         }
         if (bufferMin < 45) {
-            list.add(String.format("Chỉ có %d phút đệm trống trong ngày", bufferMin));
+            list.add(String.format("Only %d min buffer space throughout the day", bufferMin));
         } else {
-            list.add(String.format("%d phút thời gian đệm thoải mái", bufferMin));
+            list.add(String.format("%d min comfortable buffer time", bufferMin));
         }
         if (deadlines > 0) {
-            list.add(String.format("%d hạn chót cần hoàn thành", deadlines));
+            list.add(String.format("%d deadlines to meet", deadlines));
         }
         return list;
     }

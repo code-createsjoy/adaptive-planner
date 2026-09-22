@@ -148,11 +148,11 @@ public class WeeklyInsightsService {
                         .toList();
 
                 String fp = generateFingerprint(ruleKey, weekStart, evidenceList);
-                String daypartVn = "morning".equals(dm.daypart()) ? "buổi sáng" : "afternoon".equals(dm.daypart()) ? "buổi chiều" : "buổi tối";
+                String daypartEn = "morning".equals(dm.daypart()) ? "morning" : "afternoon".equals(dm.daypart()) ? "afternoon" : "evening";
                 Pattern p = new Pattern(
                         ruleKey,
-                        "Hiệu quả hoàn thành tốt nhất vào " + daypartVn,
-                        "Bạn hoàn thành " + dm.completedBlocks() + "/" + dm.eligibleBlocks() + " việc (" + dm.completionRatePercent() + "%) vào " + daypartVn + ".",
+                        "Peak completion during " + daypartEn,
+                        "You completed " + dm.completedBlocks() + "/" + dm.eligibleBlocks() + " tasks (" + dm.completionRatePercent() + "%) in the " + daypartEn + ".",
                         dm.eligibleBlocks(),
                         semantics.confidence(dm.eligibleBlocks()),
                         fp,
@@ -162,9 +162,9 @@ public class WeeklyInsightsService {
 
                 recommendations.add(new Recommendation(
                         ruleKey,
-                        "Ưu tiên công việc trọng tâm vào " + daypartVn,
-                        "Dữ liệu cho thấy bạn giữ nhịp độ và hoàn thành công việc cao nhất trong khung giờ này.",
-                        "Xếp 1-2 khối công việc quan trọng nhất của ngày vào " + daypartVn + " cho tuần tới.",
+                        "Schedule key focus work in the " + daypartEn,
+                        "Data indicates you maintain the highest focus and completion rate during this time window.",
+                        "Allocate 1-2 core priority blocks in the " + daypartEn + " for next week.",
                         fp,
                         dm.eligibleBlocks()
                 ));
@@ -181,12 +181,12 @@ public class WeeklyInsightsService {
 
                 int rate = transitions.coverageRatePercent() != null ? transitions.coverageRatePercent() : 0;
                 String obs = rate >= 70
-                        ? "Bạn duy trì khoảng nghỉ chuyển tiếp tốt (" + rate + "% khoảng trống bảo vệ giữa các việc)."
-                        : "Lịch trình khá sát nhau (" + (100 - rate) + "% ca làm việc liền kề thiếu khoảng đệm).";
+                        ? "You maintain healthy transition buffers (" + rate + "% protected gaps between tasks)."
+                        : "Schedule is tightly packed (" + (100 - rate) + "% adjacent sessions lack recovery buffers).";
 
                 patterns.add(new Pattern(
                         ruleKey,
-                        "Độ đệm và chuyển tiếp giữa các công việc",
+                        "Task Transition & Buffer Coverage",
                         obs,
                         transitions.opportunities(),
                         semantics.confidence(transitions.opportunities()),
@@ -197,9 +197,9 @@ public class WeeklyInsightsService {
                 if (rate < 70) {
                     recommendations.add(new Recommendation(
                             ruleKey,
-                            "Bổ sung 10-15 phút đệm giữa các phiên làm việc",
-                            "Khoảng nghỉ chuyển tiếp giúp giảm căng thẳng và tránh việc trễ giờ dây chuyền.",
-                            "Tự động chèn thêm khoảng nghỉ 10 phút sau mỗi khối làm việc trên 90 phút.",
+                            "Add 10-15 min buffers between work sessions",
+                            "Transition windows reduce cognitive fatigue and prevent ripple delays.",
+                            "Automatically insert a 10-minute buffer after any focus block exceeding 90 minutes.",
                             fp,
                             transitions.opportunities()
                     ));
@@ -217,8 +217,8 @@ public class WeeklyInsightsService {
 
                 patterns.add(new Pattern(
                         ruleKey,
-                        "Khả năng thích ứng và bảo vệ ưu tiên",
-                        "Đã áp dụng thành công " + appliedAdaptations + " đề xuất điều chỉnh lịch từ AI để bảo vệ các mục tiêu chính.",
+                        "Adaptive Resilience & Priority Protection",
+                        "Successfully applied " + appliedAdaptations + " AI schedule adaptations to protect core priorities.",
                         appliedAdaptations,
                         semantics.confidence(appliedAdaptations),
                         fp,
@@ -302,7 +302,7 @@ public class WeeklyInsightsService {
         if (!currentSufficient || !prevSufficient) {
             return new PreviousWeekComparison(
                     false,
-                    "Chưa đủ dữ liệu tối thiểu 3 ngày ở cả 2 tuần để so sánh chính xác.",
+                    "Insufficient data across both weeks (minimum 3 days each) for precise comparison.",
                     List.of()
             );
         }

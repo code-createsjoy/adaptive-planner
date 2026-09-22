@@ -52,7 +52,7 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
     switch (type) {
       case 'EXISTING_WORK_FIT':
         return {
-          label: '✓ Tận dụng Routine có sẵn',
+          label: '✓ Fits Existing Routine',
           className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
         };
       case 'DEDICATED_DEEP_WORK':
@@ -67,7 +67,7 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
         };
       default:
         return {
-          label: 'Linh hoạt',
+          label: 'Flexible',
           className: 'bg-muted text-muted-foreground border-border',
         };
     }
@@ -87,10 +87,10 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
             </h3>
           </div>
           <p className="mt-1 text-xs text-muted-foreground font-medium flex items-center gap-2">
-            <span>Hạn chót: <strong>{decomposition.officialDeadline}</strong></span>
+            <span>Official Deadline: <strong>{decomposition.officialDeadline}</strong></span>
             <span>•</span>
             <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-              Đích hoàn thành: {selectedScenario.internalTargetDate}
+              Target Finish: {selectedScenario.internalTargetDate}
             </span>
           </p>
         </div>
@@ -102,17 +102,17 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
             )}`}
           >
             {selectedScenario.badge === 'RECOMMENDED'
-              ? '✨ Khuyên dùng'
+              ? '✨ Recommended'
               : selectedScenario.badge === 'FASTER'
-              ? '⚡ Xong sớm'
-              : '🌱 Thong thả'}
+              ? '⚡ Faster'
+              : '🌱 Gentle Pace'}
           </span>
           {onClose && (
             <button
               type="button"
               onClick={onClose}
               className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-              title="Đóng"
+              title="Close"
             >
               <X className="size-4" />
             </button>
@@ -123,18 +123,18 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
       {/* Scenario Strategy Rationale */}
       <div className="p-3.5 rounded-2xl bg-muted/30 border border-border/60 text-xs text-foreground/90 space-y-1.5 shrink-0">
         <p className="font-semibold text-primary flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-mono">
-          <span>💡 Chiến lược phân bổ:</span>
+          <span>💡 Strategic Allocation:</span>
         </p>
         <p className="leading-relaxed">{selectedScenario.description}</p>
         <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-[10px]">
           <span className="px-2 py-0.5 rounded-md bg-background border border-border text-foreground font-bold">
-            ⏱️ Tổng thời lượng: {Math.round(selectedScenario.totalPlannedMinutes / 60)} giờ
+            ⏱️ Total Duration: {Math.round(selectedScenario.totalPlannedMinutes / 60)} hours
           </span>
           <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold">
-            🛡️ {selectedScenario.bufferDays} ngày đệm dự phòng
+            🛡️ {selectedScenario.bufferDays} buffer days
           </span>
           <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">
-            {selectedScenario.daysCount} ngày làm việc
+            {selectedScenario.daysCount} active work days
           </span>
         </div>
       </div>
@@ -142,9 +142,9 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
       {/* Multi-Day Roadmap List */}
       <div className="space-y-2 flex-1 flex flex-col min-h-0 overflow-hidden">
         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider shrink-0 flex items-center justify-between">
-          <span>Lộ trình chi tiết theo từng ngày ({selectedScenario.roadmapDays.length} ngày)</span>
+          <span>Detailed Multi-Day Roadmap ({selectedScenario.roadmapDays.length} days)</span>
           <span className="text-[10px] text-muted-foreground/70 lowercase font-normal">
-            Bấm ngày để xem chi tiết
+            Click day to inspect
           </span>
         </p>
 
@@ -171,7 +171,7 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
                   )}
                 </div>
                 <span className="text-[10px] font-mono text-muted-foreground">
-                  {day.blocks.length} phiên làm việc
+                  {day.blocks.length} sessions
                 </span>
               </div>
 
@@ -190,7 +190,7 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
                             {b.title}
                           </p>
                           <p className="text-[10px] text-muted-foreground font-mono">
-                            {b.startTime} – {b.endTime} ({b.durationMinutes}p)
+                            {b.startTime} – {b.endTime} ({b.durationMinutes}m)
                           </p>
                         </div>
                         <span
@@ -203,7 +203,7 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
                       {b.subtaskTitles && b.subtaskTitles.length > 0 && (
                         <div className="pt-1 border-t border-border/40 space-y-1">
                           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider font-mono">
-                            Nhiệm vụ trọng tâm:
+                            Focus Subtasks:
                           </p>
                           <ul className="space-y-0.5 pl-1">
                             {b.subtaskTitles.map((st, sIdx) => (
@@ -244,8 +244,8 @@ export const GoalRoadmapPreviewCard: React.FC<GoalRoadmapPreviewCardProps> = ({
           <Check className="size-4 text-emerald-400" />
           <span>
             {isApplying
-              ? 'Đang tạo kế hoạch...'
-              : 'Áp dụng lộ trình này (Apply Roadmap)'}
+              ? 'Creating roadmap...'
+              : 'Apply this roadmap'}
           </span>
         </button>
       </div>

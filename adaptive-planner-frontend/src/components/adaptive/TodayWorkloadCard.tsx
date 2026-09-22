@@ -45,28 +45,28 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
 
   const levelConfig = {
     LIGHT: {
-      label: 'Nhẹ nhàng',
+      label: 'Light & Calm',
       badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
       icon: <Feather className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />,
       borderClass: 'border-emerald-500/20',
       bgGradient: 'from-emerald-500/5 via-background to-card',
     },
     MODERATE: {
-      label: 'Cân bằng',
+      label: 'Balanced',
       badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
       icon: <Scale className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />,
       borderClass: 'border-amber-500/20',
       bgGradient: 'from-amber-500/5 via-background to-card',
     },
     HEAVY: {
-      label: 'Dày đặc & Tải cao',
+      label: 'Demanding & High Load',
       badgeClass: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30',
       icon: <Flame className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />,
       borderClass: 'border-rose-500/30 shadow-xs',
       bgGradient: 'from-rose-500/10 via-background to-card',
     },
   }[level] || {
-    label: 'Cân bằng',
+    label: 'Balanced',
     badgeClass: 'bg-primary/15 text-primary border-primary/30',
     icon: <Brain className="w-3.5 h-3.5 text-primary" />,
     borderClass: 'border-border',
@@ -84,7 +84,7 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
             <Brain className="w-3.5 h-3.5 text-primary" />
           </div>
           <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
-            Tải trọng hôm nay
+            Today's Workload
           </h3>
         </div>
 
@@ -105,7 +105,7 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
       <div className="grid grid-cols-3 gap-1.5 pt-0.5">
         <div className="p-2 rounded-xl bg-card/80 border border-border/60 text-center">
           <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
-            🧠 Tập trung
+            🧠 Deep Focus
           </span>
           <p className="text-xs font-bold text-foreground mt-0.5">
             {metrics.highFocusHours > 0 ? `${metrics.highFocusHours}h` : '0h'}
@@ -114,7 +114,7 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
 
         <div className="p-2 rounded-xl bg-card/80 border border-border/60 text-center">
           <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
-            📅 Cuộc họp
+            📅 Meetings
           </span>
           <p className="text-xs font-bold text-foreground mt-0.5">
             {metrics.meetingCount}
@@ -123,7 +123,7 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
 
         <div className="p-2 rounded-xl bg-card/80 border border-border/60 text-center">
           <span className="text-[10px] text-muted-foreground flex items-center justify-center gap-1">
-            ⏱ Đệm nghỉ
+            ⏱ Buffers
           </span>
           <p className="text-xs font-bold text-foreground mt-0.5">
             {metrics.totalBufferMinutes}m
@@ -139,7 +139,7 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
             onClick={() => setIsWhyExpanded(!isWhyExpanded)}
             className="w-full flex items-center justify-between text-[11px] text-muted-foreground hover:text-foreground font-semibold py-1 transition-colors cursor-pointer"
           >
-            <span>Chi tiết nguyên nhân tải trọng ({bulletPoints.length})</span>
+            <span>Load Factor Breakdown ({bulletPoints.length})</span>
             {isWhyExpanded ? (
               <ChevronUp className="w-3.5 h-3.5" />
             ) : (
@@ -170,7 +170,7 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
       {/* Bottom Row: Discreet Score + Review Button */}
       <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/50">
         <span className="text-[10px] text-muted-foreground font-mono">
-          Ước tính tải: <strong className="text-foreground">{score}/100</strong>
+          Est. Load: <strong className="text-foreground">{score}/100</strong>
         </span>
 
         <button
@@ -178,7 +178,7 @@ export const TodayWorkloadCard: React.FC<TodayWorkloadCardProps> = ({
           onClick={onReviewSchedule}
           className="px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all flex items-center gap-1 shadow-xs cursor-pointer"
         >
-          Tối ưu lịch <ArrowRight className="w-3 h-3" />
+          Optimize Schedule <ArrowRight className="w-3 h-3" />
         </button>
       </div>
     </div>

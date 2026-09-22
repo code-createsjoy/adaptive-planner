@@ -131,7 +131,7 @@ export const CoachMark: React.FC<CoachMarkProps> = ({
 
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Step dots (● ● ○ ○ ○) */}
-            <div className="flex items-center gap-1" aria-label={`Bước ${currentStep + 1} trên ${totalSteps}`}>
+            <div className="flex items-center gap-1" aria-label={`Step ${currentStep + 1} of ${totalSteps}`}>
               {Array.from({ length: totalSteps }).map((_, idx) => (
                 <span
                   key={idx}
@@ -149,8 +149,8 @@ export const CoachMark: React.FC<CoachMarkProps> = ({
             <button
               onClick={onSkip}
               className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              title="Đóng / Bỏ qua hướng dẫn (Esc)"
-              aria-label="Đóng hướng dẫn"
+              title="Close / Skip tour (Esc)"
+              aria-label="Close tour"
             >
               <X className="size-4" />
             </button>
@@ -173,7 +173,7 @@ export const CoachMark: React.FC<CoachMarkProps> = ({
               className="text-[11px] font-medium text-teal-600 dark:text-teal-400 hover:underline flex items-center gap-1"
             >
               <HelpCircle className="size-3" />
-              {showDetailed ? 'Ẩn chi tiết' : 'Tại sao lại cần điều này?'}
+              {showDetailed ? 'Hide details' : 'Why is this helpful?'}
             </button>
             {showDetailed && (
               <motion.div
@@ -205,7 +205,7 @@ export const CoachMark: React.FC<CoachMarkProps> = ({
               onClick={onSkip}
               className="px-2 py-1.5 text-[11px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
             >
-              Bỏ qua
+              Skip
             </button>
           </div>
 
