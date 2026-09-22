@@ -21,6 +21,7 @@ public class AiPlannerService {
     private final WebClient groqWebClient;
     private final ObjectMapper objectMapper;
     private final TimeBlockService timeBlockService;
+    private final NotificationService notificationService;
 
     @Value("${app.groq.api-key:}")
     private String apiKey;
@@ -67,10 +68,11 @@ public class AiPlannerService {
                    - If 'mốt', use 2 days from today.
                    - If no date is specified, use today's date '%s'.
                 2. Vietnamese 24-hour time conversion:
-                   - 'sáng' (AM): 6h sáng -> '06:00', 8h sáng -> '08:00'
+                   - 'sáng' (AM): 6h sáng -> '06:00', 6h30 sáng -> '06:30', 8h sáng -> '08:00'
                    - 'trưa' (Noon): 12h trưa -> '12:00', 11h30 -> '11:30'
-                   - 'chiều' (PM): 2h chiều -> '14:00', 4h chiều -> '16:00', 5h chiều -> '17:00'
-                   - 'tối' / 'đêm' (Evening/Night): 6h tối -> '18:00', 7h tối -> '19:00', 8h tối -> '20:00', 9h tối -> '21:00', 10h tối -> '22:00'
+                   - 'chiều' (PM): 2h chiều -> '14:00', 2h30 chiều -> '14:30', 4h chiều -> '16:00', 5h chiều -> '17:00'
+                   - 'tối' / 'đêm' (Evening/Night): 6h tối -> '18:00', 6h30 tối -> '18:30', 7h tối -> '19:00', 8h tối -> '20:00', 8h30 tối -> '20:30', 9h tối -> '21:00', 10h tối -> '22:00'
+                   - 'từ 6h30 tới 8h30 tối' or '6h30-8h30 tối' -> startTime: '18:30', endTime: '20:30'.
                    - 'từ 6h tới 8h tối' or '6h-8h tối' -> startTime: '18:00', endTime: '20:00'.
                 3. Urgent / Sudden tasks:
                    - If user mentions 'đột xuất', 'khẩn cấp', 'gấp', 'emergency', set category: 'urgent' and priority: 'High'.
@@ -210,11 +212,38 @@ public class AiPlannerService {
                 if (res.getAlternativeScenarios() != null) list.addAll(res.getAlternativeScenarios());
                 res.setScenarios(list);
             }
+
+            try {
+                notificationService.createNotification(CreateNotificationRequest.builder()
+                        .type("SCHEDULE_CONFLICT")
+                        .priority("HIGH")
+                        .title("Phát hiện xung đột lịch trình")
+                        .message("Có sự kiện phát sinh (" + request.getUrgentEvent() + ") gây trùng lịch. AI đã chuẩn bị 3 phương án điều chỉnh thích ứng.")
+                        .actionType("VIEW_SCHEDULE")
+                        .eventKey("schedule_conflict:" + System.currentTimeMillis() / 60000)
+                        .build());
+            } catch (Exception ex) {
+                log.warn("Could not emit schedule conflict notification: {}", ex.getMessage());
+            }
+
             return res;
 
         } catch (Exception e) {
             log.error("Failed to generate reschedule scenarios via Groq, falling back to local engine", e);
-            return fallbackGenerateScenarios(request);
+            RescheduleResponseDto fallback = fallbackGenerateScenarios(request);
+            try {
+                notificationService.createNotification(CreateNotificationRequest.builder()
+                        .type("SCHEDULE_CONFLICT")
+                        .priority("HIGH")
+                        .title("Phát hiện xung đột lịch trình")
+                        .message("Có sự kiện phát sinh (" + request.getUrgentEvent() + ") gây trùng lịch. AI đã chuẩn bị 3 phương án điều chỉnh thích ứng.")
+                        .actionType("VIEW_SCHEDULE")
+                        .eventKey("schedule_conflict:" + System.currentTimeMillis() / 60000)
+                        .build());
+            } catch (Exception ex) {
+                log.warn("Could not emit schedule conflict notification: {}", ex.getMessage());
+            }
+            return fallback;
         }
     }
 
@@ -276,7 +305,7 @@ public class AiPlannerService {
         } else if (lower.contains("ngày mai") || lower.contains(" mai") || lower.startsWith("mai ") || lower.startsWith("mai\t") || lower.equals("mai") || lower.contains("tomorrow")) {
             targetDate = now.plusDays(1);
         } else if (lower.contains("hôm qua") || lower.contains("yesterday")) {
-            targetDate = now.minusDays(1);
+            targetDate = now;
         } else {
             // Check for explicit "ngày X tháng Y [năm Z]"
             java.util.regex.Pattern dmyTextPat = java.util.regex.Pattern.compile(
@@ -320,7 +349,7 @@ public class AiPlannerService {
                             if (d >= 1 && d <= 31) {
                                 int m = now.getMonthValue();
                                 int y = now.getYear();
-                                if (d < now.getDayOfMonth() && (now.getDayOfMonth() - d) > 15) {
+                                if (d < now.getDayOfMonth()) {
                                     java.time.LocalDate nextMonthDate = now.plusMonths(1);
                                     m = nextMonthDate.getMonthValue();
                                     y = nextMonthDate.getYear();
@@ -349,6 +378,11 @@ public class AiPlannerService {
                     }
                 }
             }
+        }
+
+        // Ensure date is never in the past
+        if (targetDate.isBefore(now)) {
+            targetDate = now;
         }
 
         // 2. Parse Duration & Missing info detection
@@ -387,9 +421,9 @@ public class AiPlannerService {
         boolean hasExplicitStartTime = false;
         boolean hasExplicitEndTime = false;
 
-        // Check for range like "từ 8h - 17h", "8h - 17h", "8-10h", "8h đến 17h", "18h tới 20h", "từ 6h tới 8h tối"
+        // Check for range like "từ 8h - 17h", "8h - 17h", "8-10h", "8h đến 17h", "18h tới 20h", "từ 6h30 tới 8h30 tối"
         java.util.regex.Pattern rangePat = java.util.regex.Pattern.compile(
-                "(?:từ\\s*)?(\\d{1,2})(?:h|:(\\d{2}))?\\s*(?:-|–|đến|to|tới)\\s*(\\d{1,2})(?:h|:(\\d{2}))?(?:h)?\\s*(am|pm|sáng|chiều|tối|đêm)?",
+                "(?:từ|from|khoảng)?\\s*(\\d{1,2})(?:(?:h|:|g|giờ|\\s*h\\s*|\\s*g\\s*|\\s*giờ\\s*)(\\d{1,2})(?:p|phút|m)?)?(?:h|g|giờ)?\\s*(am|pm|sáng|chiều|tối|đêm)?\\s*(?:-|–|—|đến|to|tới|\\.\\.|->)\\s*(\\d{1,2})(?:(?:h|:|g|giờ|\\s*h\\s*|\\s*g\\s*|\\s*giờ\\s*)(\\d{1,2})(?:p|phút|m)?)?(?:h|g|giờ)?\\s*(am|pm|sáng|chiều|tối|đêm)?",
                 java.util.regex.Pattern.CASE_INSENSITIVE
         );
         java.util.regex.Matcher rangeMat = rangePat.matcher(prompt);
@@ -397,31 +431,52 @@ public class AiPlannerService {
         if (rangeMat.find()) {
             int sh = Integer.parseInt(rangeMat.group(1));
             int sm = rangeMat.group(2) != null ? Integer.parseInt(rangeMat.group(2)) : 0;
-            int eh = Integer.parseInt(rangeMat.group(3));
-            int em = rangeMat.group(4) != null ? Integer.parseInt(rangeMat.group(4)) : 0;
-            String period = rangeMat.group(5) != null ? rangeMat.group(5).toLowerCase() : "";
+            String period1 = rangeMat.group(3) != null ? rangeMat.group(3).toLowerCase() : "";
+            int eh = Integer.parseInt(rangeMat.group(4));
+            int em = rangeMat.group(5) != null ? Integer.parseInt(rangeMat.group(5)) : 0;
+            String period2 = rangeMat.group(6) != null ? rangeMat.group(6).toLowerCase() : "";
 
-            boolean isEvening = period.contains("tối") || period.contains("đêm") || lower.contains("tối") || lower.contains("đêm") || (period.contains("pm") && eh <= 11);
-            boolean isAfternoon = period.contains("chiều") || lower.contains("chiều");
+            if (sh >= 0 && sh <= 24 && sm >= 0 && sm <= 59 && eh >= 0 && eh <= 24 && em >= 0 && em <= 59) {
+                boolean isStartPm = period1.contains("pm") || period1.contains("chiều") || period1.contains("tối") || period1.contains("đêm");
+                boolean isEndPm = period2.contains("pm") || period2.contains("chiều") || period2.contains("tối") || period2.contains("đêm");
+                boolean generalEvening = lower.contains("tối") || lower.contains("đêm") || lower.contains("evening") || lower.contains("night");
+                boolean generalAfternoon = lower.contains("chiều") || lower.contains("afternoon");
 
-            if (isEvening) {
-                if (sh < 12) sh += 12;
-                if (eh < 12) eh += 12;
-            } else if (isAfternoon) {
-                if (sh <= 5) sh += 12;
-                if (eh <= 5) eh += 12;
+                if (isStartPm && sh < 12) sh += 12;
+                if (isEndPm && eh < 12) eh += 12;
+
+                if (!isStartPm && !period1.contains("am") && !period1.contains("sáng")) {
+                    if (isEndPm || generalEvening) {
+                        if (sh < 12) sh += 12;
+                    } else if (generalAfternoon && sh <= 6) {
+                        sh += 12;
+                    }
+                }
+                if (!isEndPm && !period2.contains("am") && !period2.contains("sáng")) {
+                    if (generalEvening && eh < 12) {
+                        eh += 12;
+                    } else if (generalAfternoon && eh <= 6) {
+                        eh += 12;
+                    }
+                }
+
+                if (sh > eh && eh < 12) {
+                    eh += 12;
+                }
+
+                startTime = String.format("%02d:%02d", sh % 24, sm);
+                endTime = String.format("%02d:%02d", eh % 24, em);
+                hasExplicitStartTime = true;
+                hasExplicitEndTime = true;
+                durationMinutes = (eh * 60 + em) - (sh * 60 + sm);
+                if (durationMinutes <= 0) durationMinutes = 60;
             }
+        }
 
-            startTime = String.format("%02d:%02d", sh, sm);
-            endTime = String.format("%02d:%02d", eh, em);
-            hasExplicitStartTime = true;
-            hasExplicitEndTime = true;
-            durationMinutes = (eh * 60 + em) - (sh * 60 + sm);
-            if (durationMinutes <= 0) durationMinutes = 60;
-        } else {
-            // Check for single start time like "8h java", "7 PM", "7pm", "19h", "lúc 8h", "22h", "3h dentist"
+        if (!hasExplicitStartTime) {
+            // Check for single start time like "8h java", "7 PM", "7pm", "19h", "lúc 8h", "22h", "3h dentist", "6h30 tối"
             java.util.regex.Pattern singlePat = java.util.regex.Pattern.compile(
-                    "(?:lúc|vào|at)?\\s*(\\d{1,2})(?:h|:(\\d{2}))?\\s*(am|pm|sáng|chiều|tối|đêm)?\\b",
+                    "(?:lúc|vào|at|khoảng)?\\s*(\\d{1,2})(?:(?:h|:|g|giờ|\\s*h\\s*|\\s*g\\s*|\\s*giờ\\s*)(\\d{1,2})(?:p|phút|m)?)?(?:h|g|giờ)?\\s*(am|pm|sáng|chiều|tối|đêm)?\\b",
                     java.util.regex.Pattern.CASE_INSENSITIVE
             );
             java.util.regex.Matcher singleMat = singlePat.matcher(prompt);
@@ -430,24 +485,26 @@ public class AiPlannerService {
                 int m = singleMat.group(2) != null ? Integer.parseInt(singleMat.group(2)) : 0;
                 String period = singleMat.group(3) != null ? singleMat.group(3).toLowerCase() : "";
 
-                if ((period.contains("tối") || period.contains("đêm") || lower.contains("tối") || lower.contains("đêm")) && h < 12) {
-                    h += 12;
-                } else if ((period.contains("chiều") || lower.contains("chiều")) && h <= 5) {
-                    h += 12;
-                } else if (period.contains("pm") && h < 12) {
-                    h += 12;
-                } else if ((lower.contains("dentist") || lower.contains("nha sĩ")) && h >= 1 && h <= 5) {
-                    h += 12;
+                if (h >= 0 && h <= 24 && m >= 0 && m <= 59) {
+                    if ((period.contains("tối") || period.contains("đêm") || lower.contains("tối") || lower.contains("đêm")) && h < 12) {
+                        h += 12;
+                    } else if ((period.contains("chiều") || lower.contains("chiều")) && h <= 6) {
+                        h += 12;
+                    } else if (period.contains("pm") && h < 12) {
+                        h += 12;
+                    } else if ((lower.contains("dentist") || lower.contains("nha sĩ")) && h >= 1 && h <= 5) {
+                        h += 12;
+                    }
+
+                    startTime = String.format("%02d:%02d", h % 24, m);
+                    hasExplicitStartTime = true;
+
+                    int dur = (durationMinutes != null && durationMinutes > 0) ? durationMinutes : 60;
+                    int totalEndMin = (h % 24) * 60 + m + dur;
+                    int endH = (totalEndMin / 60) % 24;
+                    int endM = totalEndMin % 60;
+                    endTime = String.format("%02d:%02d", endH, endM);
                 }
-
-                startTime = String.format("%02d:%02d", h, m);
-                hasExplicitStartTime = true;
-
-                int dur = (durationMinutes != null && durationMinutes > 0) ? durationMinutes : 60;
-                int totalEndMin = h * 60 + m + dur;
-                int endH = (totalEndMin / 60) % 24;
-                int endM = totalEndMin % 60;
-                endTime = String.format("%02d:%02d", endH, endM);
             }
         }
 
@@ -849,12 +906,43 @@ public class AiPlannerService {
     }
 
     private TaskBreakdownResponseDto fallbackTaskBreakdown(String taskTitle) {
+        String lower = taskTitle != null ? taskTitle.toLowerCase() : "";
+        List<TimeBlockDto.MicroStepDto> steps;
+
+        if (containsAny(lower, "gym", "tập", "thể thao", "chạy", "workout")) {
+            steps = List.of(
+                    new TimeBlockDto.MicroStepDto("ms-1", "Uống một cốc nước và thay trang phục thể thao (2 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Chuẩn bị bình nước và giày tập (1 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Khởi động nhẹ xoay khớp 3 phút", false)
+            );
+        } else if (containsAny(lower, "báo cáo", "report", "viết", "write", "doc", "tài liệu")) {
+            steps = List.of(
+                    new TimeBlockDto.MicroStepDto("ms-1", "Mở tài liệu và ghi tiêu đề cho \"" + taskTitle + "\" (1 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Gạch 3 ý chính cần trình bày (3 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Viết 2 câu tóm tắt mở đầu (5 phút)", false)
+            );
+        } else if (containsAny(lower, "học", "study", "ôn", "đọc", "read", "sách")) {
+            steps = List.of(
+                    new TimeBlockDto.MicroStepDto("ms-1", "Dọn gọn bàn học và mở trang tài liệu đầu tiên (2 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Đọc lướt qua tiêu đề và mục lục (3 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Đọc tập trung phần mở đầu trong 5 phút", false)
+            );
+        } else if (containsAny(lower, "code", "java", "dev", "bug", "fix", "lập trình", "web")) {
+            steps = List.of(
+                    new TimeBlockDto.MicroStepDto("ms-1", "Mở IDE và chuẩn bị workspace cho \"" + taskTitle + "\" (2 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Xác định file code hoặc hàm cần xử lý đầu tiên (2 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Viết 5 dòng code hoặc test case đầu tiên (5 phút)", false)
+            );
+        } else {
+            steps = List.of(
+                    new TimeBlockDto.MicroStepDto("ms-1", "Mở không gian làm việc và chuẩn bị cho \"" + taskTitle + "\" (2 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-2", "Gạch đầu dòng 3 việc nhỏ cần làm (2 phút)", false),
+                    new TimeBlockDto.MicroStepDto("ms-3", "Bắt đầu làm việc nhỏ nhất trong 5 phút đầu tiên", false)
+            );
+        }
+
         return TaskBreakdownResponseDto.builder()
-                .microSteps(List.of(
-                        new TimeBlockDto.MicroStepDto("ms-1", "Open workspace and set title for " + taskTitle, false),
-                        new TimeBlockDto.MicroStepDto("ms-2", "List 3 bullet points of what needs doing", false),
-                        new TimeBlockDto.MicroStepDto("ms-3", "Work on the easiest first bullet for 5 minutes", false)
-                ))
+                .microSteps(steps)
                 .build();
     }
 

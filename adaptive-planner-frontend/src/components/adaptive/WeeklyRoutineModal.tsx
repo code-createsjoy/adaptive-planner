@@ -318,11 +318,8 @@ export const WeeklyRoutineModal: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-foreground">
-                Thiết lập Thời khóa biểu mẫu (Weekly Routine)
+                Thời khóa biểu tuần
               </h3>
-              <p className="text-xs text-muted-foreground">
-                Nhấp vào bất kỳ khung giờ nào để chỉnh sửa cho 1 ngày hoặc toàn bộ các thứ trong tuần
-              </p>
             </div>
           </div>
           <button
@@ -338,7 +335,7 @@ export const WeeklyRoutineModal: React.FC = () => {
           {/* Quick Presets */}
           <div>
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-2">
-              ⚡ Gợi ý mẫu nhanh (Quick Presets)
+              ⚡ Mẫu gợi ý
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button

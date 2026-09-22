@@ -21,7 +21,8 @@ class AiPlannerServiceTest {
         WebClient webClient = WebClient.builder().build();
         ObjectMapper objectMapper = new ObjectMapper();
         TimeBlockService timeBlockService = mock(TimeBlockService.class);
-        aiPlannerService = new AiPlannerService(webClient, objectMapper, timeBlockService);
+        NotificationService notificationService = mock(NotificationService.class);
+        aiPlannerService = new AiPlannerService(webClient, objectMapper, timeBlockService, notificationService);
     }
 
     @Test
@@ -122,6 +123,32 @@ class AiPlannerServiceTest {
         assertThat(result.getDurationMinutes()).isEqualTo(120);
         assertThat(result.getCategory()).isEqualTo("urgent");
         assertThat(result.getPriority()).isEqualTo("High");
+    }
+
+    @Test
+    @DisplayName("Test prompt with minutes: 'ngày 21 tôi có cuộc họp đột xuất từ 6h30 tới 8h30 tối'")
+    void testUrgentMeetingWithMinutesOnDate() {
+        TimeBlockDto result = aiPlannerService.parseIntent("ngày 21 tôi có cuộc họp đột xuất từ 6h30 tới 8h30 tối");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getTitle()).containsIgnoringCase("họp");
+        assertThat(result.getDate().getDayOfMonth()).isEqualTo(21);
+        assertThat(result.getStartTime()).isEqualTo("18:30");
+        assertThat(result.getEndTime()).isEqualTo("20:30");
+        assertThat(result.getDurationMinutes()).isEqualTo(120);
+        assertThat(result.getCategory()).isEqualTo("urgent");
+        assertThat(result.getPriority()).isEqualTo("High");
+    }
+
+    @Test
+    @DisplayName("Test colon format: '6:30 - 8:30 pm'")
+    void testColonRangeWithPm() {
+        TimeBlockDto result = aiPlannerService.parseIntent("6:30 - 8:30 pm");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getStartTime()).isEqualTo("18:30");
+        assertThat(result.getEndTime()).isEqualTo("20:30");
+        assertThat(result.getDurationMinutes()).isEqualTo(120);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.adaptive.planner.service;
 
+import com.adaptive.planner.dto.AdaptationActionDto;
 import com.adaptive.planner.dto.AdaptationActionResultDto;
 import com.adaptive.planner.dto.ApplyAdaptationRequest;
 import com.adaptive.planner.dto.TimeBlockDto;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,8 +59,12 @@ public class AdaptationService {
 
         // 4. Save Adaptation Action Record
         AdaptationActionEntity action = AdaptationActionEntity.builder()
+                .conversationId(request.getConversationId())
                 .date(targetDate)
                 .reason(request.getReason() != null ? request.getReason() : "Schedule adaptation applied")
+                .selectedScenarioId(request.getSelectedScenarioId())
+                .scenarioTitle(request.getScenarioTitle())
+                .explanationJson(request.getExplanationJson())
                 .beforeSnapshotJson(beforeJson)
                 .afterSnapshotJson(afterJson)
                 .status("APPLIED")
@@ -74,12 +80,28 @@ public class AdaptationService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public List<AdaptationActionDto> getAdaptations(LocalDate date) {
+        List<AdaptationActionEntity> list = (date != null)
+                ? actionRepository.findByDateOrderByCreatedAtDesc(date)
+                : actionRepository.findAllByOrderByCreatedAtDesc();
+
+        return list.stream().map(this::mapToDto).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public AdaptationActionDto getAdaptationById(Long actionId) {
+        AdaptationActionEntity entity = actionRepository.findById(actionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Adaptation action not found with id: " + actionId));
+        return mapToDto(entity);
+    }
+
     @Transactional
     public AdaptationActionResultDto undoAdaptation(Long actionId) {
         AdaptationActionEntity action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Adaptation action not found with id: " + actionId));
 
-        if ("ROLLED_BACK".equalsIgnoreCase(action.getStatus())) {
+        if ("ROLLED_BACK".equalsIgnoreCase(action.getStatus()) || "UNDONE".equalsIgnoreCase(action.getStatus())) {
             return AdaptationActionResultDto.builder()
                     .actionId(action.getId())
                     .message("Hành động này đã được hoàn tác trước đó.")
@@ -120,6 +142,22 @@ public class AdaptationService {
                 .message("Đã hoàn tác toàn bộ điều chỉnh về trạng thái ban đầu.")
                 .status("ROLLED_BACK")
                 .blocks(timeBlockService.getBlocksForDate(action.getDate()))
+                .build();
+    }
+
+    private AdaptationActionDto mapToDto(AdaptationActionEntity entity) {
+        return AdaptationActionDto.builder()
+                .id(entity.getId())
+                .conversationId(entity.getConversationId())
+                .date(entity.getDate())
+                .reason(entity.getReason())
+                .selectedScenarioId(entity.getSelectedScenarioId())
+                .scenarioTitle(entity.getScenarioTitle())
+                .explanationJson(entity.getExplanationJson())
+                .beforeSnapshotJson(entity.getBeforeSnapshotJson())
+                .afterSnapshotJson(entity.getAfterSnapshotJson())
+                .status(entity.getStatus())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

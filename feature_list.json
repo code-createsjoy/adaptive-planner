@@ -1,292 +1,52 @@
 [
   {
-    "id": "personal-timetable-visual-timeline",
-    "title": "Personal Timetable & Visual Timeline",
-    "user_visible_behavior": "Quản lý thời gian biểu cá nhân trực quan trên Web với hiển thị phân biệt rõ ràng block NOW, NEXT và các task đã qua.",
-    "verification_command": "Giao diện timeline làm nổi bật task đang diễn ra và chỉ thị rõ ràng task kế tiếp với visual timer.",
+    "id": "live-dashboard-tour",
+    "title": "Live 5-step Dashboard Spotlight Tour (NOW, NEXT, Create Task, Focus, Ask Modo)",
+    "user_visible_behavior": "so that I understand what to do immediately without reading long instructions",
+    "verification_command": "Tour highlights each target element sequentially with dimmed backdrop and coach mark, allows creating a task on Step 3, and finishes in under 60 seconds",
     "status": "passing",
-    "evidence": "npm run build passed (0 errors), Zustand store & enhanced Visual Timeline with NOW/NEXT/Buffer/Checklists working smoothly with PostgreSQL persistence.",
-    "notes": "Phase 01 Visual Timeline & Core UX completed.",
-    "priority": "P1"
-  },
-  {
-    "id": "natural-language-ai-planning",
-    "title": "Natural Language AI Planning",
-    "user_visible_behavior": "Nhập kế hoạch bằng văn bản tự nhiên để AI tự phân tích và xếp lịch vào các khung thời gian trống phù hợp kèm 5-15 phút Buffer Time.",
-    "verification_command": "Câu lệnh tiếng Việt/Anh được chuyển đổi chính xác thành TimeBlock trên lịch và hiển thị cho người dùng xác nhận.",
-    "status": "passing",
-    "evidence": "POST /api/planner/parse-intent connected to Groq Llama 3.3 70B via Spring Boot Gateway, returns structured TimeBlock preview for user confirmation.",
-    "notes": "Phase 04 AI Planning Engine verified.",
-    "priority": "P1"
-  },
-  {
-    "id": "conflict-detection-ai-reschedule",
-    "title": "Conflict Detection & AI-Assisted Dynamic Reschedule",
-    "user_visible_behavior": "Khi có việc khẩn cấp phát sinh hoặc lịch bị trùng, AI phân tích tác động và sinh 2-3 kịch bản sắp xếp lại rõ ràng để người dùng chọn áp dụng.",
-    "verification_command": "Hệ thống không tự ý sửa lịch mà chỉ áp dụng kịch bản sau khi người dùng bấm nút [Apply Option].",
-    "status": "passing",
-    "evidence": "POST /api/planner/reschedule-scenarios and batch-apply endpoint with 3 scenarios (Compress/Defer/Delegate) and User Decision confirmation.",
-    "notes": "Phase 05 Conflict Reschedule completed.",
-    "priority": "P1"
-  },
-  {
-    "id": "customizable-notifications",
-    "title": "Customizable Multi-stage Notifications",
-    "user_visible_behavior": "Tùy chỉnh số phút hệ thống gửi thông báo nhắc trước cho từng khung giờ để chủ động chuẩn bị tâm lý và chuyển đổi trạng thái.",
-    "verification_command": "Thông báo và âm thanh êm dịu kích hoạt đúng mốc phút đã cài đặt trước thời điểm bắt đầu task.",
-    "status": "passing",
-    "evidence": "Reminder minutes badge (30m, 10m, 0m) and gentle 432Hz sine chime synthesizer implemented in UI.",
-    "notes": "Phase 05 Cognitive Support verified.",
-    "priority": "P2"
-  },
-  {
-    "id": "what-should-i-do-now-transition",
-    "title": "What Should I Do Now & Transition Assistant",
-    "user_visible_behavior": "Bấm 1 nút để AI tóm tắt việc cần làm ngay lúc này và nhắc nhở chuyển tiếp nhẹ nhàng, giải phóng cảm giác tê liệt chờ đợi.",
-    "verification_command": "Widget tóm tắt hiển thị chính xác task hiện tại và thời gian đệm tới task kế tiếp.",
-    "status": "passing",
-    "evidence": "NowDialog and TransitionDialog modal overlays providing instant clarity and 4-step decompression ritual.",
-    "notes": "Phase 05 Transition Assistant verified.",
-    "priority": "P2"
-  },
-  {
-    "id": "magic-task-breakdown",
-    "title": "Magic Task Breakdown",
-    "user_visible_behavior": "Bấm 'Break it down' trên thẻ công việc để AI tự động chia nhỏ thành 3-5 micro-steps dưới 5 phút dễ thực hiện.",
-    "verification_command": "Xuất hiện checklist các bước vi mô và người dùng có thể tick hoàn thành từng bước.",
-    "status": "passing",
-    "evidence": "POST /api/planner/task-breakdown generates 3 bite-sized actionable microsteps per task via Groq AI with interactive checkboxes.",
-    "notes": "Phase 05 Magic Task Breakdown verified.",
-    "priority": "P2"
-  },
-  {
-    "id": "real-time-clock-and-now-next",
-    "title": "Real-time Clock & Dynamic NOW/NEXT State",
-    "user_visible_behavior": "Hiển thị đồng hồ thời gian thực ở Header và tự động xác định task NOW / NEXT dựa trên giờ thực của máy.",
-    "verification_command": "Task đang diễn ra tự động gắn nhãn NOW, task kế tiếp gắn nhãn NEXT và tự cập nhật khi hết giờ.",
-    "status": "passing",
-    "evidence": "useRealTimeClock (1s clock tick) + calculateTimelineState dynamically derives activeBlock, nextBlock, and pastBlocks from device Date.",
-    "notes": "Phase 01 Real-Time Hook completed.",
-    "priority": "P1"
-  },
-  {
-    "id": "now-indicator-line-and-free-time",
-    "title": "NOW Indicator Line & Contextual Free Time State",
-    "user_visible_behavior": "Đường chỉ báo NOW di chuyển dọc timeline và hiển thị card 'You're Free' khi không có lịch.",
-    "verification_command": "Đường kẻ đỏ NOW xuất hiện đúng vị trí giữa các block và card 'You're Free' hiện số phút trống.",
-    "status": "passing",
-    "evidence": "NowIndicatorLine renders with pulsating radar dot at chronological position; FreeTimeCard renders available gap minutes and action shortcuts.",
-    "notes": "Phase 02 NOW Line & Free Time completed.",
-    "priority": "P1"
-  },
-  {
-    "id": "time-remaining-and-transition-warnings",
-    "title": "Time Remaining Progress Gauge & Transition Warnings",
-    "user_visible_behavior": "Hiển thị số phút còn lại 'X min remaining' kèm thanh tiến trình và cảnh báo chuyển tiếp T-10m.",
-    "verification_command": "Thanh progress % và số phút đếm ngược chính xác, chuông 432Hz phát khi vào vùng đệm.",
-    "status": "passing",
-    "evidence": "CurrentActiveCard displays live progress bar %, countdown 'X min remaining', and 10M LEFT transition warning badge with gentle audio chime.",
-    "notes": "Phase 03 Sensory Polish completed.",
-    "priority": "P2"
-  },
-  {
-    "id": "mock-seed-purge-clean-database",
-    "title": "Mock Seed Purge & Clean Database",
-    "user_visible_behavior": "Xóa toàn bộ dữ liệu mock mẫu ban đầu trong PostgreSQL để cơ sở dữ liệu chỉ lưu trữ thời khóa biểu thực tế của người dùng.",
-    "verification_command": "Khởi động lại backend không còn tự động nạp mock blocks; người dùng có bảng dữ liệu sạch hoàn toàn.",
-    "status": "passing",
-    "evidence": "TimeBlockService seed logic purged; DELETE /api/timeblocks/purge endpoint tested.",
-    "notes": "Phase 01 Backend Engine.",
-    "priority": "P1"
-  },
-  {
-    "id": "weekly-routine-baseline-template",
-    "title": "Weekly Routine Baseline Template",
-    "user_visible_behavior": "Thiết lập thời khóa biểu cố định theo thứ trong tuần (Thứ 2-6, Thứ 3,5...) và tự động áp dụng lên các tuần trong tháng.",
-    "verification_command": "Tạo WeeklyRoutine cho Thứ 2-6, khi mở bất kỳ ngày Thứ 2-6 nào trong tháng đều tự động hiển thị đúng các khung giờ đó.",
-    "status": "passing",
-    "evidence": "WeeklyRoutineEntity, /api/routines CRUD & WeeklyRoutineModal component verified with 7/7 passing backend tests and 0 build errors.",
-    "notes": "Phase 01 Backend & Phase 03 UI.",
-    "priority": "P1"
-  },
-  {
-    "id": "monthly-calendar-view-navigation",
-    "title": "Monthly Calendar View & Workload Dots",
-    "user_visible_behavior": "Trang Lịch tháng trực quan hiển thị tất cả các ngày trong tháng, chỉ báo mật độ công việc (●), đánh dấu ngày hôm nay và chuyển ngày nhanh.",
-    "verification_command": "Hiển thị lưới 7 cột Thứ 2 đến CN, bấm vào ngày bất kỳ lập tức mở Visual Timeline chi tiết của ngày đó.",
-    "status": "passing",
-    "evidence": "MonthCalendarView component renders full month matrix, workload dots, Today halo, and instant navigation to Day Timeline.",
-    "notes": "Phase 02 Frontend Calendar.",
-    "priority": "P1"
-  },
-  {
-    "id": "single-day-override-adaptation",
-    "title": "Single-Day Schedule Override & Customization",
-    "user_visible_behavior": "Chỉnh sửa hoặc hủy một task trên 1 ngày cụ thể mà không làm thay đổi template thời khóa biểu của các tuần khác.",
-    "verification_command": "Hủy Gym ngày 15/10, ngày 15/10 không còn Gym nhưng ngày 22/10 và 8/10 vẫn giữ nguyên Gym trong tuần.",
-    "status": "passing",
-    "evidence": "cancelRoutineForDate API & EnhancedTimelineCard 'Hủy ngày này' button creates date-scoped CANCELLED override row.",
-    "notes": "Phase 01 API & Phase 03 UI.",
-    "priority": "P1"
-  },
-  {
-    "id": "vietnamese-public-holidays-agency",
-    "title": "Vietnamese Public Holidays & User Agency Prompt",
-    "user_visible_behavior": "Hiển thị cờ ngày lễ Quốc gia (🇻🇳 02/09, 30/04, 01/05, Tết...) trên lịch tháng và timeline ngày, kèm gợi ý 1-click tạm ngưng lịch làm việc.",
-    "verification_command": "Chọn ngày 02/09 hiển thị banner ngày lễ Quốc khánh và nút [Pause today's routine] hoạt động chính xác.",
-    "status": "passing",
-    "evidence": "HolidayService with Solar/Lunar statutory holidays, /api/holidays endpoint, and interactive Day Timeline banner with 1-click pause/resume.",
-    "notes": "Phase 01 Backend Holiday Engine & Phase 03 UI.",
-    "priority": "P1"
-  },
-  {
-    "id": "quick-add-recurring-tasks",
-    "title": "Quick-Add Recurring Tasks",
-    "user_visible_behavior": "Thêm nhanh các task lặp lại nhiều ngày trong tuần trực tiếp từ giao diện lập lịch hoặc AI natural language prompt.",
-    "verification_command": "Thêm task chọn lặp 'Thứ 2, Thứ 4, Thứ 6' tạo thành công các rule trong WeeklyRoutine.",
-    "status": "passing",
-    "evidence": "WeeklyRoutineModal multi-day selector and quick presets (Core Work, Gym, Study, Creative Project).",
-    "notes": "Phase 03 Polish.",
-    "priority": "P2"
-  },
-  {
-    "id": "ultra-short-shorthand-nlp-parser",
-    "title": "Ultra-Short Shorthand NLP Parser",
-    "user_visible_behavior": "Nhập các ký hiệu và từ viết tắt cực ngắn (mai 7h cafe 2h, 8h java, t2 hop 9h, cn 14h gym, 22h ngu, mai 3h dentist) để AI lên lịch ngay lập tức mà không cần câu cú ngữ pháp.",
-    "verification_command": "Tất cả các câu shorthand test case được phân tích chính xác ngày, giờ bắt đầu, kết thúc, tiêu đề và phân loại hoạt động.",
-    "status": "passing",
-    "evidence": "AiPlannerService shorthand regex tokenizer & Groq prompt system verified with 7/7 passing unit tests in AiPlannerServiceTest (mai 7h cafe 2 tiếng, 8h java, t2 8-10h hop, cn 14h gym, 22h ngủ, mai 3h dentist).",
-    "notes": "Phase 01 Tokenizer Engine.",
-    "priority": "P1"
-  },
-  {
-    "id": "interactive-gap-filling-chips",
-    "title": "Interactive Gap Filling Chips on Preview Card",
-    "user_visible_behavior": "Khi nhập thiếu thời lượng hoặc giờ cụ thể, card preview hiển thị các chip bấm chọn nhanh 1 chạm ([30p] [1h] [2h] hoặc [Sáng] [Chiều] [Tối]) thay vì bắt người dùng gõ lại.",
-    "verification_command": "Bấm chip thời lượng hoặc khung giờ lập tức cập nhật giờ kết thúc trên card preview trong tích tắc.",
-    "status": "passing",
-    "evidence": "AdaptiveApp.tsx PlannerView interactive duration chips & contextual time chips dynamically update pendingPlan state with zero latency.",
-    "notes": "Phase 02 UI Interactive Preview.",
-    "priority": "P1"
-  },
-  {
-    "id": "casual-text-approximate-timeframe",
-    "title": "Casual Text & Approximate Timeframe Handler",
-    "user_visible_behavior": "Nhập văn bản tự nhiên kiểu nhắn tin (chiều mai đi bơi, tối nay xem phim 2 tiếng) và AI xử lý khung giờ tương đối không bịa đặt thông tin.",
-    "verification_command": "Nhập 'chiều mai đi bơi' hiển thị gợi ý khung giờ 14:00, 16:00, 18:00 để người dùng chọn nhanh.",
-    "status": "passing",
-    "evidence": "missingFields ['TIME', 'DURATION'] detected by AiPlannerService and rendered as contextual 1-click slot chips in the AI Confirmation Card.",
-    "notes": "Phase 01 Tokenizer & Phase 02 Preview.",
-    "priority": "P1"
-  },
-  {
-    "id": "routine-informed-smart-autocomplete",
-    "title": "Routine-Informed Smart Autocomplete",
-    "user_visible_behavior": "Gõ từ khóa trùng với thói quen (gym, hop, cafe) hiển thị thanh gợi ý thông minh dựa trên WeeklyRoutine quen thuộc.",
-    "verification_command": "Gõ 'gym' hiển thị chip gợi ý '🏋️ Gym · Thứ 3 & Thứ 5 · 18:00 (1h)'.",
-    "status": "passing",
-    "evidence": "AdaptiveApp.tsx matchingRoutines autocomplete bar filters active user routines and fills input with 1-click preset chip.",
-    "notes": "Phase 03 Smart Autocomplete.",
-    "priority": "P2"
-  },
-  {
-    "id": "smart-default-adaptation-flow",
-    "title": "Smart Default Adaptation Flow & Explainability",
-    "user_visible_behavior": "AI tự động phân tích và đưa ra 1 phương án thích ứng tối ưu mặc định kèm lý do giải thích minh bạch (What changed, What will happen, Why this adjustment) để người dùng duyệt 1-click.",
-    "verification_command": "Nhập việc gấp trùng giờ, AI hiển thị thẻ Smart Default duy nhất kèm các bullet giải thích rõ ràng và nút [Apply this plan].",
-    "status": "passing",
-    "evidence": "Smart Default Adaptation card in PlannerView with bulleted reasons, clear schedule change summary, and collapsible alternatives accordion verified.",
-    "notes": "Phase 01 & 03 of Smart Default Adaptation.",
-    "priority": "P1"
-  },
-  {
-    "id": "smart-slotting-and-tomorrow-inbox",
-    "title": "Calm Slotting & Tomorrow Inbox for Deferred Tasks",
-    "user_visible_behavior": "Tự động tìm kiếm Calm Opening ngày mai để xếp task bị hoãn; nếu ngày mai kín lịch thì đưa task vào Tomorrow Inbox thay vì ép lịch.",
-    "verification_command": "Task bị dời sang ngày mai được xếp vào slot trống êm ả hoặc hiển thị trong ngăn kéo Tomorrow Inbox.",
-    "status": "passing",
-    "evidence": "CalmSlotService & TomorrowInboxDrawer implemented and tested (CalmSlotServiceTest passed, /api/timeblocks/inbox and /api/timeblocks/calm-openings verified).",
-    "notes": "Phase 02 of Smart Default Adaptation.",
-    "priority": "P1"
-  },
-  {
-    "id": "atomic-undo-and-instant-timeline-update",
-    "title": "Instant Timeline Navigation & 10s Atomic Undo",
-    "user_visible_behavior": "Sau khi bấm [Apply this plan], hệ thống phát chuông 432Hz êm dịu, chuyển ngay sang Day Timeline và hiển thị banner [Undo] 10 giây có khả năng rollback toàn bộ thay đổi.",
-    "verification_command": "Bấm Apply chuyển ngay sang Day Timeline và bấm [Undo] khôi phục chính xác trạng thái trước đó.",
-    "status": "passing",
-    "evidence": "POST /api/planner/adaptation/apply and /api/planner/adaptation/undo/{id} transactional engine with before/after snapshots and 10s floating undo toast verified (AdaptationServiceTest 3/3 passing, npm run build 0 errors).",
-    "notes": "Phase 03 of Smart Default Adaptation.",
-    "priority": "P1"
-  },
-  {
-    "id": "multi-factor-priority-deadline-matrix",
-    "title": "Multi-Factor Decision Matrix & Protected Inviolability",
-    "user_visible_behavior": "Đánh giá đa chiều tách biệt Priority và Deadline, bảo vệ tuyệt đối các khung giờ PROTECTED (như giờ ngủ, ăn tối) không bị xâm lấn.",
-    "verification_command": "Không bao giờ nhét task vào giờ ngủ (23:00–07:00) hoặc block Protected; task có deadline gần được ưu tiên trước.",
-    "status": "passing",
-    "evidence": "AiPlannerService multi-factor matrix and fallback scoring with bedtime defense tested (9/9 unit tests passing, schema updated with deadline, is_movable, status, inbox_date).",
-    "notes": "Phase 01 Backend & Scoring Engine.",
-    "priority": "P2"
-  },
-  {
-    "evidence": "npm run build exit code 0; computeDiff + SchedulePreviewPanel + BlockDiffRow implemented; AdaptivePanel split-layout (grid-cols-[2fr_3fr] desktop, grid-cols-1 mobile) with View full day toggle",
-    "title": "Schedule Preview Panel — Split Layout",
-    "id": "schedule-preview-panel-split-layout",
+    "evidence": "Verified in browser subagent: All 5 steps executed with SVG cutout spotlight and completed cleanly in under 45s",
     "notes": "",
-    "priority": "P1",
-    "verification_command": "Clicking any option card renders the preview panel within 150ms with correct before/after diff",
-    "status": "passing",
-    "user_visible_behavior": "so that users can see the impact of each AI option without mental simulation"
+    "priority": "P1"
   },
   {
-    "evidence": "npm run build exit code 0; computeDiff + SchedulePreviewPanel + BlockDiffRow implemented; AdaptivePanel split-layout (grid-cols-[2fr_3fr] desktop, grid-cols-1 mobile) with View full day toggle",
-    "title": "Schedule Preview — Per-Block Change Reasons",
-    "id": "schedule-preview-block-diff-reasons",
-    "notes": "",
-    "priority": "P1",
-    "verification_command": "Each changed block in preview shows >=1 reason bullet",
+    "id": "tour-user-control-skip-resume",
+    "title": "Tour User Control (Skip, Back, Resume, Esc)",
+    "user_visible_behavior": "so that I can skip or exit without being trapped in modal blockers",
+    "verification_command": "Pressing Skip or Escape dismisses the tour cleanly, saves progress in local storage, and shows a subtle resume option",
     "status": "passing",
-    "user_visible_behavior": "so that users understand WHY each block was moved, not just where"
+    "evidence": "Escape key listener and Skip button tested; subtle 'Tiếp tục hướng dẫn' button displays in top header when paused",
+    "notes": "",
+    "priority": "P1"
   },
   {
-    "evidence": "npm run build exit code 0; computeDiff + SchedulePreviewPanel + BlockDiffRow implemented; AdaptivePanel split-layout (grid-cols-[2fr_3fr] desktop, grid-cols-1 mobile) with View full day toggle",
-    "title": "Schedule Preview — Apply Button in Preview Panel",
-    "id": "schedule-preview-apply-in-panel",
-    "notes": "",
-    "priority": "P1",
-    "verification_command": "Exactly one Apply button, inside preview panel, disabled when no option selected",
+    "id": "contextual-first-use-tips",
+    "title": "Contextual First-Use Tips for Workload, Insights, Sensory Mode & Task Breakdown",
+    "user_visible_behavior": "so that I learn advanced features only when I visit them",
+    "verification_command": "First visit displays a dismissible FirstUseTip card with clear explanation and Got it action, never repeating after dismissal",
     "status": "passing",
-    "user_visible_behavior": "so that users always know which option they are applying"
+    "evidence": "Mounted FirstUseTip in TodayWorkloadCard, InsightsView, and NowHeroCard with Zustand local storage persistence",
+    "notes": "",
+    "priority": "P1"
   },
   {
-    "evidence": "npm run build exit code 0; computeDiff + SchedulePreviewPanel + BlockDiffRow implemented; AdaptivePanel split-layout (grid-cols-[2fr_3fr] desktop, grid-cols-1 mobile) with View full day toggle",
-    "title": "Schedule Preview — Mobile Stacked Layout",
-    "id": "schedule-preview-mobile-stacked",
-    "notes": "",
-    "priority": "P1",
-    "verification_command": "On viewport <768px layout switches to single-column stacked; preview appears below options after tap",
+    "id": "in-product-help-drawer",
+    "title": "In-Product Help Drawer (? Help) and Settings Replay Center",
+    "user_visible_behavior": "so that I can replay tours or inspect micro-guides on demand",
+    "verification_command": "Clicking ? Help opens slide-over panel with quick topic cards and Replay Dashboard Tour button; Settings contains Reset Guidance",
     "status": "passing",
-    "user_visible_behavior": "so that the feature is fully usable on touch devices"
+    "evidence": "Verified in browser subagent: '? Trợ giúp' button opens HelpDrawer with replay tour, reset tips, and Settings card",
+    "notes": "",
+    "priority": "P1"
   },
   {
-    "evidence": "npm run build exit code 0; computeDiff + SchedulePreviewPanel + BlockDiffRow implemented; AdaptivePanel split-layout (grid-cols-[2fr_3fr] desktop, grid-cols-1 mobile) with View full day toggle",
-    "title": "Schedule Preview — View Full Day Toggle",
-    "id": "schedule-preview-full-day-toggle",
-    "notes": "",
-    "priority": "P2",
-    "verification_command": "Toggling 'View full day' shows all blocks for that day ordered by time within preview panel",
+    "id": "accessibility-and-mobile-adaptation",
+    "title": "Keyboard Accessibility & Mobile Bottom-Sheet Adaptation",
+    "user_visible_behavior": "so that guidance is fully accessible via keyboard/screen reader and comfortable on mobile",
+    "verification_command": "Focus trap works inside coach mark, Esc closes it, and on screens <640px coach mark appears as an anchored bottom sheet",
     "status": "passing",
-    "user_visible_behavior": "so that users can get complete context when the affected-blocks view is not enough"
-  },
-  {
-    "evidence": "",
-    "title": "Schedule Preview — Hover Highlight on TodayView Blocks",
-    "id": "schedule-preview-hover-highlight",
+    "evidence": "CoachMark implements ARIA dialog attributes, Esc keyboard listener, and responsive bottom sheet layout for viewports < 640px",
     "notes": "",
-    "priority": "P2",
-    "verification_command": "Hover on option card adds Deferred/Moved badge to matching blocks in TodayView timeline",
-    "status": "not_started",
-    "user_visible_behavior": "so that desktop users get quick orientation before committing to a click"
+    "priority": "P2"
   }
 ]

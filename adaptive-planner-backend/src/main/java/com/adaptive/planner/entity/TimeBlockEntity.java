@@ -8,7 +8,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "time_blocks")
+@Table(
+        name = "time_blocks",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_time_blocks_routine_occurrence",
+                columnNames = {"source_routine_id", "event_date"}
+        )
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -80,6 +86,9 @@ public class TimeBlockEntity {
 
     @Column(name = "source_routine_id")
     private Long sourceRoutineId;
+
+    @Column(name = "project_goal_id")
+    private Long projectGoalId;
 
     @Column(name = "override_type")
     @Builder.Default

@@ -120,9 +120,6 @@ export const TomorrowInboxDrawer: React.FC<TomorrowInboxDrawerProps> = ({
                   {inboxBlocks.length} việc hoãn lại
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Các công việc được dời sang ngày mai để bảo vệ giờ ngủ & tránh quá tải.
-              </p>
             </div>
           </div>
 

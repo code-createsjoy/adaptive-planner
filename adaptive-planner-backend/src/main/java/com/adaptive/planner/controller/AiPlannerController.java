@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiPlannerController {
 
     private final AiPlannerService aiPlannerService;
+    private final com.adaptive.planner.service.GoalScheduleService goalScheduleService;
 
     @PostMapping("/parse-intent")
     public ResponseEntity<TimeBlockDto> parseIntent(@Valid @RequestBody ParseIntentRequest request) {
@@ -35,5 +36,15 @@ public class AiPlannerController {
             @Valid @RequestBody ParseIntentRequest request) {
         TaskBreakdownResponseDto response = aiPlannerService.breakdownTask(request.getPrompt());
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/goals/decompose")
+    public ResponseEntity<GoalDecompositionResponse> decomposeGoal(@RequestBody GoalDecompositionRequest request) {
+        return ResponseEntity.ok(goalScheduleService.decomposeGoal(request));
+    }
+
+    @PostMapping("/goals/rebalance")
+    public ResponseEntity<GoalRebalanceResponse> rebalanceGoal(@RequestBody GoalRebalanceRequest request) {
+        return ResponseEntity.ok(goalScheduleService.generateRebalanceOptions(request));
     }
 }

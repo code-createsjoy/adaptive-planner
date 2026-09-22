@@ -1,6 +1,7 @@
 package com.adaptive.planner.controller;
 
 import com.adaptive.planner.dto.CreateTimeBlockRequest;
+import com.adaptive.planner.dto.CompletionRequest;
 import com.adaptive.planner.dto.TimeBlockDto;
 import com.adaptive.planner.service.TimeBlockService;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +23,7 @@ public class TimeBlockController {
 
     private final TimeBlockService service;
     private final com.adaptive.planner.service.CalmSlotService calmSlotService;
+    private final Clock clock;
 
     @GetMapping
     public ResponseEntity<List<TimeBlockDto>> getBlocks(
@@ -28,7 +31,7 @@ public class TimeBlockController {
         if (date != null) {
             return ResponseEntity.ok(service.getBlocksForDate(date));
         }
-        return ResponseEntity.ok(service.getBlocksForDate(LocalDate.now()));
+        return ResponseEntity.ok(service.getBlocksForDate(LocalDate.now(clock)));
     }
 
     @GetMapping("/inbox")
@@ -59,8 +62,9 @@ public class TimeBlockController {
     public ResponseEntity<Map<String, Object>> getMonthlySummary(
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month) {
-        int targetYear = (year != null) ? year : LocalDate.now().getYear();
-        int targetMonth = (month != null) ? month : LocalDate.now().getMonthValue();
+        LocalDate today = LocalDate.now(clock);
+        int targetYear = (year != null) ? year : today.getYear();
+        int targetMonth = (month != null) ? month : today.getMonthValue();
         return ResponseEntity.ok(service.getMonthlySummary(targetYear, targetMonth));
     }
 
@@ -80,6 +84,21 @@ public class TimeBlockController {
             @PathVariable Long id,
             @RequestBody TimeBlockDto updates) {
         return ResponseEntity.ok(service.updateBlock(id, updates));
+    }
+
+    @PutMapping("/{id}/completion")
+    public ResponseEntity<TimeBlockDto> updateCompletion(
+            @PathVariable Long id,
+            @Valid @RequestBody CompletionRequest request) {
+        return ResponseEntity.ok(service.updateCompletion(id, request.getCompleted()));
+    }
+
+    @PutMapping("/routines/{routineId}/occurrences/{date}/completion")
+    public ResponseEntity<TimeBlockDto> updateRoutineOccurrenceCompletion(
+            @PathVariable Long routineId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @Valid @RequestBody CompletionRequest request) {
+        return ResponseEntity.ok(service.updateRoutineOccurrenceCompletion(routineId, date, request.getCompleted()));
     }
 
     @DeleteMapping("/{id}")

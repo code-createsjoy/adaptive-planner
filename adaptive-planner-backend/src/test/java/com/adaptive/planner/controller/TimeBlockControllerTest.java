@@ -56,4 +56,24 @@ class TimeBlockControllerTest {
                 .andExpect(jsonPath("$.title").value("Evening Reading & Wind-down"))
                 .andExpect(jsonPath("$.startTime").value("21:00"));
     }
+
+    @Test
+    void shouldRejectTimeBlockInThePast() throws Exception {
+        CreateTimeBlockRequest request = CreateTimeBlockRequest.builder()
+                .title("Past Meeting")
+                .detail("Meeting yesterday")
+                .startTime("10:00")
+                .endTime("11:00")
+                .date(java.time.LocalDate.now().minusDays(1))
+                .category("work")
+                .energyLevel("medium")
+                .priority("Normal")
+                .build();
+
+        mockMvc.perform(post("/api/timeblocks")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("Không thể thêm lịch cho những ngày trong quá khứ")));
+    }
 }

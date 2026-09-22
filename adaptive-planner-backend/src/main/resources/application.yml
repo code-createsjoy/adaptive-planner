@@ -10,6 +10,7 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:12345}
     driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
   jpa:
+    defer-datasource-initialization: true
     database-platform: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}
     hibernate:
       ddl-auto: update
@@ -17,8 +18,15 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
 
 app:
+  insights:
+    timezone: ${INSIGHTS_TIMEZONE:Asia/Ho_Chi_Minh}
+    canonical-user-key: ${INSIGHTS_CANONICAL_USER_KEY:single-user}
   groq:
     api-key: ${GROQ_API_KEY:}
     model: ${GROQ_MODEL:qwen/qwen3.8-27b}
