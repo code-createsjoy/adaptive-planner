@@ -609,7 +609,7 @@ public class AiPlannerService {
             microSteps.add(new TimeBlockDto.MicroStepDto("ms-2", "Head out to the park and recharge", false));
         } else if (containsAny(lower, "cafe", "coffee", "cà phê", "caphe")) {
             title = "Coffee Break";
-            detail = "The Workshop Cafe · Social recharge",
+            detail = "The Workshop Cafe · Social recharge";
             category = "social";
             energyLevel = "low";
             microSteps.add(new TimeBlockDto.MicroStepDto("ms-1", "Check location and gather personal belongings", false));
@@ -952,7 +952,7 @@ public class AiPlannerService {
                 .title("Zero-Guilt / Defer to Tomorrow")
                 .description("Defer overlapping tasks into Tomorrow Inbox to focus solely on " + eventTitle + ".")
                 .energyImpact("low")
-                .highlightText("Guilt-free cognitive recovery.",
+                .highlightText("Guilt-free cognitive recovery.")
                 .tag("Low-Demand")
                 .blocks(altDeferBlocks)
                 .build();
