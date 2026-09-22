@@ -29,6 +29,7 @@ import {
   Zap,
   AlertTriangle,
   AlertCircle,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -80,6 +81,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MonthCalendarView } from "./MonthCalendarView";
 import { WeeklyRoutineModal } from "./WeeklyRoutineModal";
 import { TomorrowInboxDrawer } from "./TomorrowInboxDrawer";
+import { InterviewLab } from "@/components/interview/InterviewLab";
 import avatarImage from "@/assets/thai-avatar.jpg";
 import companionImage from "@/assets/adaptive-desk-companion.jpg";
 
@@ -242,6 +244,7 @@ const navigation = [
   { id: "today", label: "Day Timeline", icon: Clock3 },
   { id: "calendar", label: "Monthly Calendar", icon: CalendarDays },
   { id: "planner", label: "AI Planner", icon: ListChecks },
+  { id: "interview", label: "Interview Lab", icon: Video },
   { id: "insights", label: "Insights", icon: Lightbulb },
   { id: "notifications", label: "Notifications", icon: Bell, badge: 2 },
   { id: "settings", label: "Settings", icon: Settings2 },
@@ -937,7 +940,9 @@ export function AdaptiveApp() {
   const title = useMemo(() => {
     const labels: Record<ViewId, string> = {
       today: "Good morning, Thai",
+      calendar: "Your month, at a glance",
       planner: "Plan your day naturally",
+      interview: "Interview Lab",
       insights: "Your day, at a glance",
       notifications: "Notifications",
       settings: "Settings",
@@ -1081,6 +1086,7 @@ export function AdaptiveApp() {
               onUpdatePending={setPendingActivity}
             />
           )}
+          {view === "interview" && <InterviewLab />}
           {view === "insights" && <InsightsView />}
           {view === "notifications" && <NotificationsView read={readNotifications} setRead={setReadNotifications} transitionOn={transitionOn} setTransitionOn={setTransitionOn} importantOn={importantOn} setImportantOn={setImportantOn} />}
           {view === "settings" && <SettingsView onNavigate={navigate} />}
@@ -3022,7 +3028,9 @@ function TransitionDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
 function subtitleFor(view: ViewId) {
   const subtitles: Record<ViewId, string> = {
     today: "",
+    calendar: "Browse your schedule without losing the day view.",
     planner: "Add or adjust plans in the words that come naturally.",
+    interview: "A simple candidate flow and a structured review space for interviewers.",
     insights: "A calm summary, without scores or pressure.",
     notifications: "Useful updates only—grouped so they do not interrupt your day.",
     settings: "A few clear ways to make Adaptive work for you.",
