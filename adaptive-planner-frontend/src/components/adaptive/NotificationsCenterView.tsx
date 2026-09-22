@@ -28,6 +28,7 @@ interface NotificationsCenterViewProps {
   onUpdatePreferences: (pref: Partial<NotificationPreferences>) => void;
   onNavigate: (viewId: string) => void;
   onOpenRebalance?: () => void;
+  onCreateTestNotification?: () => void;
 }
 
 // Format relative date into Vietnamese grouping
@@ -81,6 +82,7 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
   onUpdatePreferences,
   onNavigate,
   onOpenRebalance,
+  onCreateTestNotification,
 }) => {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
@@ -159,6 +161,19 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
               </button>
             </div>
 
+            {onCreateTestNotification && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl text-xs bg-primary/10 hover:bg-primary/20 text-primary border-primary/30 font-semibold"
+                onClick={onCreateTestNotification}
+                title="Tạo một thông báo mẫu để kiểm tra hoạt động"
+              >
+                <Sparkles className="size-3.5 mr-1" />
+                Gửi thông báo mẫu
+              </Button>
+            )}
+
             {unreadCount > 0 && (
               <Button
                 variant="outline"
@@ -184,6 +199,18 @@ export const NotificationsCenterView: React.FC<NotificationsCenterViewProps> = (
               <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto leading-relaxed">
                 Mọi nhắc nhở ca làm việc, cảnh báo tiến độ dự án và gợi ý từ AI sẽ xuất hiện tại đây khi phát sinh.
               </p>
+              {onCreateTestNotification && (
+                <div className="mt-4">
+                  <Button
+                    size="sm"
+                    className="rounded-xl text-xs font-semibold"
+                    onClick={onCreateTestNotification}
+                  >
+                    <Sparkles className="size-3.5 mr-1.5" />
+                    Tạo thông báo thử nghiệm
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         ) : (

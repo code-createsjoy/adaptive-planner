@@ -143,6 +143,7 @@ import {
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
   useDeleteNotificationMutation,
+  useCreateNotificationMutation,
 } from "@/hooks/useNotifications";
 import { DailyCheckinPopover } from "./DailyCheckinPopover";
 import { ProactiveWorkloadReliefBanner } from "./ProactiveWorkloadReliefBanner";
@@ -155,7 +156,6 @@ import { SensoryModeSwitcher } from "./SensoryModeSwitcher";
 import { AccessibilityProfileSettings } from "./AccessibilityProfileSettings";
 import { AdaptiveOnboardingModal } from "./AdaptiveOnboardingModal";
 import { TodayWorkloadCard } from "./TodayWorkloadCard";
-import { DemandingDayBanner } from "./DemandingDayBanner";
 import { QuickRebalanceModal } from "./QuickRebalanceModal";
 import { useAccessibilityProfileQuery } from "@/hooks/useAccessibilityProfile";
 import { useAccessibilityStore } from "@/store/useAccessibilityStore";
@@ -748,6 +748,51 @@ export function AdaptiveApp() {
   const markNotificationReadMutation = useMarkNotificationAsReadMutation();
   const markAllNotificationsReadMutation = useMarkAllNotificationsAsReadMutation();
   const deleteNotificationMutation = useDeleteNotificationMutation();
+  const createNotificationMutation = useCreateNotificationMutation();
+
+  const handleCreateTestNotification = () => {
+    const testTitle = "Thông báo thử nghiệm: Ca làm việc sắp bắt đầu";
+    const testMessage = "Đây là thông báo mẫu để bạn kiểm tra âm thanh chuông 432Hz, popup nổi và danh sách hộp thư thông báo.";
+    
+    // 1. Create persistent record in database
+    createNotificationMutation.mutate({
+      type: "AI_SUGGESTION",
+      priority: "NORMAL",
+      title: testTitle,
+      message: testMessage,
+      actionType: "OPEN_SESSION",
+    });
+
+    // 2. Play gentle chime
+    if (notificationPreferences.soundEnabled) {
+      playGentleChime();
+    }
+
+    // 3. Show in-app toast
+    if (notificationPreferences.inAppEnabled) {
+      handleShowToast({
+        id: `test-toast-${Date.now()}`,
+        type: "AI_SUGGESTION",
+        priority: "NORMAL",
+        title: testTitle,
+        message: testMessage,
+        actionLabel: "Đã hiểu",
+        onAction: () => {},
+        createdAt: Date.now(),
+      });
+    }
+
+    // 4. Browser push if permitted
+    if (
+      notificationPreferences.browserEnabled &&
+      typeof Notification !== "undefined" &&
+      Notification.permission === "granted"
+    ) {
+      try {
+        new Notification(testTitle, { body: testMessage });
+      } catch {}
+    }
+  };
 
   useNotificationScheduler({
     blocks: timeBlocks,
@@ -1470,9 +1515,18 @@ export function AdaptiveApp() {
     window.setTimeout(() => setVoiceTesting(false), 2400);
   };
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return "Good morning";
+    if (hour >= 12 && hour < 18) return "Good afternoon";
+    return "Good evening";
+  }, []);
+
   const title = useMemo(() => {
     const labels: Record<ViewId, string> = {
-      today: user?.name ? `Good morning, ${user.name}` : "Good morning, friend",
+      today: user?.name ? `${greeting}, ${user.name}` : `${greeting}, friend`,
       calendar: "Your month, at a glance",
       planner: "Plan your day naturally",
       interview: "Interview Lab",
@@ -1484,24 +1538,27 @@ export function AdaptiveApp() {
       companion: "Desk Companion",
     };
     return labels[view];
-  }, [view, user?.name]);
+  }, [view, user?.name, greeting]);
 
   if (user && !user.onboardingCompleted) {
     return <OnboardingWizard />;
   }
 
   return (
-    <div className="app-canvas min-h-screen overflow-x-hidden bg-background text-foreground">
-      {view !== "interview" && (
-        <>
-          <div className="ambient-shape ambient-shape-left" aria-hidden="true" />
-          <div className="ambient-shape ambient-shape-right" aria-hidden="true" />
-        </>
-      )}
-      <div className={view === "interview" ? "relative mx-auto min-h-screen max-w-[1440px]" : "relative mx-auto flex min-h-screen max-w-[1440px] gap-5 px-4 py-4 sm:px-5 sm:py-5"}>
-        {view !== "interview" && <DesktopSidebar active={view} onNavigate={navigate} voiceOn={voiceOn} unreadCount={unreadNotificationCount} />}
+    <div className="app-canvas min-h-screen overflow-x-clip bg-background text-foreground">
+      <div className="ambient-shape ambient-shape-left" aria-hidden="true" />
+      <div className="ambient-shape ambient-shape-right" aria-hidden="true" />
+      <div className="relative mx-auto flex min-h-screen max-w-[1440px] items-start gap-5 px-4 py-4 sm:px-5 sm:py-5">
+        <DesktopSidebar
+          active={view}
+          onNavigate={navigate}
+          voiceOn={voiceOn}
+          unreadCount={unreadNotificationCount}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        />
 
-        {mobileOpen && view !== "interview" && (
+        {mobileOpen && (
           <div className="fixed inset-0 z-50 bg-foreground/20 backdrop-blur-sm md:hidden" onClick={() => setMobileOpen(false)}>
             <div className="h-full w-[280px] bg-background p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
               <div className="flex items-center justify-between">
@@ -1513,29 +1570,23 @@ export function AdaptiveApp() {
           </div>
         )}
 
-        <main className={view === "interview" ? "min-w-0" : "min-w-0 flex-1 pb-20 md:pb-4"}>
-          {view !== "interview" && <header className="mb-7 flex items-start justify-between gap-4 pt-1">
+        <main className="min-w-0 flex-1 pb-20 md:pb-4">
+          <header className="mb-7 flex items-start justify-between gap-4 pt-1">
             <div className="flex items-start gap-3">
-              <Button className="mt-0.5 md:hidden" variant="outline" size="icon" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu /></Button>
+              <Button
+                className="mt-0.5 md:hidden"
+                variant="outline"
+                size="icon"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open navigation"
+              >
+                <Menu className="size-4" />
+              </Button>
               <div className="rise">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-xs font-semibold text-muted-foreground">{dateFormatted}</p>
-                  <span className="flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-primary shadow-xs">
-                    <Clock3 className="size-3 text-primary animate-pulse" /> {timeFormatted}
-                  </span>
-                </div>
-                <h1 className="mt-2 font-display text-3xl font-extrabold sm:text-4xl">{title}</h1>
-                <p className="mt-1.5 text-sm text-muted-foreground">
-                  {view === "today"
-                    ? disruptionState === "impact"
-                      ? "⚡ Schedule alert: 1 change needs your choice."
-                      : timelineState.activeBlock
-                      ? `Now in Focus: ${timelineState.activeBlock.title} (${timelineState.remainingMinutes} min left).`
-                      : timelineState.nextBlock
-                      ? `You're Free for the next ${timelineState.freeMinutesRemaining} min · Next: ${timelineState.nextBlock.title}.`
-                      : "All scheduled activities completed for today."
-                    : subtitleFor(view)}
-                </p>
+                <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{title}</h1>
+                {subtitleFor(view) && (
+                  <p className="mt-1.5 text-sm text-muted-foreground">{subtitleFor(view)}</p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -1580,7 +1631,7 @@ export function AdaptiveApp() {
                 <img src={avatarImage} alt="Thai" width={512} height={512} className="size-full object-cover" />
               </button>
             </div>
-          </header>}
+          </header>
 
           {view === "today" && (
             <TodayView
@@ -1733,6 +1784,7 @@ export function AdaptiveApp() {
                   rebalanceGoalMutation.mutate(projectGoals[0].id);
                 }
               }}
+              onCreateTestNotification={handleCreateTestNotification}
             />
           )}
           {view === "settings" && <SettingsView onNavigate={navigate} />}
@@ -1742,26 +1794,24 @@ export function AdaptiveApp() {
         </main>
       </div>
 
-      {view !== "interview" && (
-        <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-border bg-card/90 p-1.5 shadow-xl backdrop-blur-xl md:hidden">
-          {navigation.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => navigate(item.id)}
-              className={`relative flex min-w-12 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] ${
-                view === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-              }`}
-            >
-              <item.icon className="size-4" />
-              {item.label}
-              {item.id === "notifications" && unreadNotificationCount > 0 && (
-                <span className="absolute top-1.5 right-2 size-2 rounded-full bg-primary ring-2 ring-background" />
-              )}
-            </button>
-          ))}
-        </nav>
-      )}
+      <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-border bg-card/90 p-1.5 shadow-xl backdrop-blur-xl md:hidden">
+        {navigation.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => navigate(item.id)}
+            className={`relative flex min-w-12 flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] ${
+              view === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            <item.icon className="size-4" />
+            {item.label}
+            {item.id === "notifications" && unreadNotificationCount > 0 && (
+              <span className="absolute top-1.5 right-2 size-2 rounded-full bg-primary ring-2 ring-background" />
+            )}
+          </button>
+        ))}
+      </nav>
 
       {/* Real-time Floating Notification Toasts */}
       <NotificationToastContainer toasts={activeToasts} onDismiss={handleDismissToast} />
@@ -1826,6 +1876,7 @@ export function AdaptiveApp() {
 
       {/* In-Product Interactive Guidance & Onboarding Tour */}
       <DashboardTourController
+        disabled={isOnboardingOpen}
         onNavigateTab={(tab) => navigate(tab as ViewId)}
         onOpenAddTaskModal={() =>
           setEditingTimeBlock({
@@ -1904,54 +1955,128 @@ function Brand() {
   return <div className="flex items-center gap-2.5"><span className="grid size-9 place-items-center rounded-xl bg-primary font-display text-sm font-extrabold text-primary-foreground">A</span><div><p className="font-display text-[15px] font-extrabold leading-none">Adaptive</p><p className="mt-1 font-mono text-[9px] text-muted-foreground">YOUR DAY, WITH YOU</p></div></div>;
 }
 
-function DesktopSidebar({ active, onNavigate, voiceOn, unreadCount }: { active: ViewId; onNavigate: (id: ViewId) => void; voiceOn: boolean; unreadCount?: number }) {
+function DesktopSidebar({
+  active,
+  onNavigate,
+  voiceOn: _voiceOn,
+  unreadCount,
+  collapsed,
+  onToggleCollapse,
+}: {
+  active: ViewId;
+  onNavigate: (id: ViewId) => void;
+  voiceOn: boolean;
+  unreadCount?: number;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+}) {
   return (
-    <aside className="sticky top-5 hidden h-[calc(100vh-2.5rem)] w-56 shrink-0 flex-col justify-between md:flex">
+    <aside
+      className={`sticky top-4 sm:top-5 self-start hidden h-[calc(100vh-2rem)] shrink-0 flex-col justify-between transition-all duration-300 ease-in-out md:flex z-30 ${
+        collapsed ? "w-18" : "w-56"
+      }`}
+    >
       <div>
-        <Brand />
-        <NavItems active={active} onNavigate={onNavigate} unreadCount={unreadCount} className="mt-8" />
+        <div className={`flex items-center justify-between gap-2 ${collapsed ? "flex-col items-center" : ""}`}>
+          {!collapsed ? (
+            <Brand />
+          ) : (
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              title="Mở rộng menu"
+              className="grid size-9 place-items-center rounded-xl bg-primary font-display text-sm font-extrabold text-primary-foreground transition-transform hover:scale-105"
+            >
+              A
+            </button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleCollapse}
+            className="size-8 rounded-xl text-muted-foreground hover:bg-card/80 hover:text-foreground"
+            title={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
+            aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
+          >
+            <Menu className="size-4" />
+          </Button>
+        </div>
+
+        <NavItems
+          active={active}
+          onNavigate={onNavigate}
+          unreadCount={unreadCount}
+          collapsed={collapsed}
+          className={collapsed ? "mt-6 space-y-2" : "mt-8"}
+        />
       </div>
+
       <div>
         <button
           type="button"
           onClick={() => onNavigate("profile")}
-          className={`flex w-full items-center gap-2.5 rounded-2xl border p-2.5 text-left transition-colors ${
+          title="Thai · Hồ sơ cá nhân"
+          className={`flex w-full items-center gap-2.5 rounded-2xl border text-left transition-all ${
             active === "profile" ? "border-primary/30 bg-primary/10" : "border-border/70 bg-card/45 hover:bg-card/70"
-          }`}
+          } ${collapsed ? "justify-center p-1.5" : "p-2.5"}`}
         >
-          <img src={avatarImage} alt="Thai" width={512} height={512} className="size-9 rounded-xl object-cover" />
-          <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-bold leading-none text-foreground truncate">Thai</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">My Profile</p>
-          </div>
+          <img src={avatarImage} alt="Thai" width={512} height={512} className="size-9 rounded-xl object-cover shrink-0" />
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-bold leading-none text-foreground truncate">Thai</p>
+              <p className="mt-1 text-[11px] text-muted-foreground">My Profile</p>
+            </div>
+          )}
         </button>
       </div>
     </aside>
   );
 }
 
-function NavItems({ active, onNavigate, unreadCount, className = "" }: { active: ViewId; onNavigate: (id: ViewId) => void; unreadCount?: number; className?: string }) {
+function NavItems({
+  active,
+  onNavigate,
+  unreadCount,
+  collapsed = false,
+  className = "",
+}: {
+  active: ViewId;
+  onNavigate: (id: ViewId) => void;
+  unreadCount?: number;
+  collapsed?: boolean;
+  className?: string;
+}) {
   return (
     <nav className={`space-y-1.5 ${className}`}>
       {navigation.map((item) => {
         const badgeCount = item.id === "notifications" ? unreadCount : undefined;
+        const isActive = active === item.id;
         return (
           <button
             key={item.id}
             type="button"
             onClick={() => onNavigate(item.id)}
-            className={`flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all ${
-              active === item.id
+            title={item.label}
+            className={`relative flex items-center transition-all ${
+              collapsed
+                ? "size-10 justify-center rounded-xl mx-auto"
+                : "w-full gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold"
+            } ${
+              isActive
                 ? "bg-primary text-primary-foreground shadow-xs font-bold"
                 : "text-muted-foreground hover:bg-card/70 hover:text-foreground"
             }`}
           >
             <item.icon className="size-4 shrink-0" />
-            <span>{item.label}</span>
+            {!collapsed && <span>{item.label}</span>}
             {badgeCount && badgeCount > 0 ? (
-              <span className="ml-auto grid min-w-5 h-5 px-1.5 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                {badgeCount > 99 ? "99+" : badgeCount}
-              </span>
+              collapsed ? (
+                <span className="absolute -top-1 -right-1 size-2 rounded-full bg-primary ring-2 ring-background" />
+              ) : (
+                <span className="ml-auto grid min-w-5 h-5 px-1.5 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  {badgeCount > 99 ? "99+" : badgeCount}
+                </span>
+              )
             ) : null}
           </button>
         );
@@ -2012,16 +2137,6 @@ function FreeTimeCard(props: {
   );
 }
 
-function formatDateVietnamese(dateStr: string) {
-  try {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
-    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-    return `${days[date.getDay()]}, ${d} thg ${m}, ${y}`;
-  } catch {
-    return dateStr;
-  }
-}
 
 function TodayView(props: {
   blocks: TimeBlock[];
@@ -2115,12 +2230,6 @@ function TodayView(props: {
 
   return (
     <div className="space-y-6">
-    {/* Demanding Day Warning Banner */}
-    <DemandingDayBanner
-      assessment={props.workloadAssessment}
-      onReviewSchedule={() => props.onOpenQuickRebalance?.()}
-    />
-
     <div className={`grid gap-6 ${resolvedConfig.hideSecondaryWidgets ? "max-w-4xl mx-auto" : "xl:grid-cols-[minmax(0,1fr)_380px]"}`}>
       <section className="min-w-0 space-y-4">
         {/* Date Navigator Bar */}
@@ -2133,21 +2242,16 @@ function TodayView(props: {
             >
               <ChevronRight className="size-4 rotate-180" />
             </button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-foreground">
-                  {formatDateVietnamese(props.selectedDate)}
-                </h3>
-                {isSelectedToday ? (
-                  <span className="px-1.5 py-0.5 rounded-md bg-primary/15 text-primary text-[10px] font-bold">
-                    HÔM NAY
-                  </span>
-                ) : (
-                  <span className="px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground text-[10px] font-mono font-medium">
-                    {props.selectedDate}
-                  </span>
-                )}
-              </div>
+            <div className="flex items-center gap-2">
+              {isSelectedToday ? (
+                <span className="px-2 py-1 rounded-lg bg-primary/15 text-primary text-xs font-bold">
+                  HÔM NAY
+                </span>
+              ) : (
+                <span className="px-2 py-1 rounded-lg bg-muted text-muted-foreground text-xs font-mono font-medium">
+                  {props.selectedDate}
+                </span>
+              )}
             </div>
             <button
               onClick={() => props.onNavigateDate(1)}
